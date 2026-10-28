@@ -20,7 +20,8 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
     if not isinstance(data, dict):
         return [{"code": "inventory.type", "path": "$", "message": "Inventory must be a JSON object."}]
 
-    if data.get("schema_version") != 1:
+    version = data.get("schema_version")
+    if isinstance(version, bool) or version != 1 or not isinstance(version, int):
         add("inventory.schema_version", "$.schema_version", "schema_version must be the integer 1.")
 
     devices = data.get("devices")
@@ -63,7 +64,7 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
             add("device.management_port", f"{path}.management_port", "management_port must be an integer from 1 to 65535.")
 
         role = device.get("role")
-        if role not in _ROLES:
+        if not isinstance(role, str) or role not in _ROLES:
             add("device.role", f"{path}.role", f"role must be one of: {', '.join(sorted(_ROLES))}.")
 
     parsed_networks: list[tuple[str, ipaddress.IPv4Network | ipaddress.IPv6Network]] = []
