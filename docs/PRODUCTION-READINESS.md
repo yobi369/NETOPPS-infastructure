@@ -47,7 +47,7 @@ This gate applies only if device access is added.
 - [x] Connectivity mode is read-only and requires explicit operator opt-in.
 - [x] Connection timeouts and bounded concurrency are enforced.
 - [x] Per-run target count, concurrency, and timeout limits are enforced; repeated-run pacing is the operator/orchestrator's responsibility for this one-shot CLI.
-- [ ] Validate connectivity checks against an authorized real-network lab before operational reliance.
+- [ ] Complete the [authorized network lab acceptance checklist](LAB-ACCEPTANCE.md) before relying on connectivity results operationally.
 - [x] Mocked socket tests cover success, timeout, refusal, and partial scope; loopback integration test verifies a real local TCP handshake.
 - [ ] Real-network lab validation remains outstanding; no device-specific protocols or firmware adapters are implemented.
 - [ ] Not applicable until write-capable configuration features are introduced; approval and rollback gates are mandatory before then.
