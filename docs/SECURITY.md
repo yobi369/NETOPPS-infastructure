@@ -17,7 +17,7 @@ The current tool validates a local JSON file. It does not connect to devices, sc
 2. Use synthetic/documentation IP ranges in examples.
 3. Treat invalid input as failure; do not silently coerce or guess.
 4. Keep CI permissions read-only unless a workflow has a reviewed, narrowly scoped reason otherwise.
-5. Pin and review third-party GitHub Actions before using them in sensitive release workflows.
+5. Pin GitHub Actions to immutable upstream commit SHAs; update pins through reviewed pull requests and rerun CI. The workflow currently uses official GitHub actions only.
 6. Keep future device integrations read-only by default and enforce explicit allowlists.
 7. Redact secrets from logs and error messages.
 8. For write operations, require plan review, explicit operator approval, change-window awareness, timeout, post-change verification, and rollback instructions.
