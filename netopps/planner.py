@@ -36,7 +36,11 @@ def allocate_subnets(
     if not isinstance(raw_networks, list):
         raise TypeError("inventory networks must be an array")
 
-    occupied: list[ipaddress.IPv4Network | ipaddress.IPv6Network] = []
+    pool_start = int(pool.network_address)
+    pool_end = int(pool.broadcast_address)
+    candidate_size = 1 << (pool.max_prefixlen - new_prefix)
+    blocked_ranges: list[tuple[int, int]] = []
+
     for index, item in enumerate(raw_networks):
         if not isinstance(item, dict) or not isinstance(item.get("cidr"), str):
             raise TypeError(f"inventory network at index {index} has no valid cidr field")
@@ -44,15 +48,35 @@ def allocate_subnets(
             network = ipaddress.ip_network(item["cidr"], strict=True)
         except ValueError as exc:
             raise ValueError(f"inventory network at index {index} has an invalid cidr: {exc}") from exc
-        if network.version == pool.version and network.overlaps(pool):
-            occupied.append(network)
 
-    allocated: list[str] = []
-    for candidate in pool.subnets(new_prefix=new_prefix):
-        if any(candidate.overlaps(existing) for existing in occupied):
+        if network.version != pool.version or not network.overlaps(pool):
             continue
-        allocated.append(str(candidate))
-        occupied.append(candidate)
+
+        first_address = max(pool_start, int(network.network_address))
+        last_address = min(pool_end, int(network.broadcast_address))
+        first_index = (first_address - pool_start) // candidate_size
+        last_index = (last_address - pool_start) // candidate_size
+        blocked_ranges.append((first_index, last_index))
+
+    merged_ranges: list[list[int]] = []
+    for start, end in sorted(blocked_ranges):
+        if merged_ranges and start <= merged_ranges[-1][1] + 1:
+            merged_ranges[-1][1] = max(merged_ranges[-1][1], end)
+        else:
+            merged_ranges.append([start, end])
+
+    network_class = ipaddress.IPv4Network if pool.version == 4 else ipaddress.IPv6Network
+    allocated: list[str] = []
+    range_index = 0
+    for candidate_index in range(candidate_count):
+        while range_index < len(merged_ranges) and candidate_index > merged_ranges[range_index][1]:
+            range_index += 1
+        if range_index < len(merged_ranges):
+            start, end = merged_ranges[range_index]
+            if start <= candidate_index <= end:
+                continue
+        address = pool_start + candidate_index * candidate_size
+        allocated.append(str(network_class((address, new_prefix))))
         if len(allocated) == count:
             break
     return allocated
