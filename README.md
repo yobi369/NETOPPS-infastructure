@@ -59,6 +59,8 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 - `docs/OPERATIONS.md` — repeatable local workflow and incident discipline.
 - `docs/ROADMAP.md` — staged delivery with verifiable acceptance criteria.
 - `docs/PRODUCTION-READINESS.md` — release gates and current gaps.
+- `docs/RELEASE.md` — controlled release and rollback process.
+- `CHANGELOG.md` — implemented changes and limitations.
 - `docs/DECISIONS.md` — engineering decision records.
 
 ## Safety boundaries
