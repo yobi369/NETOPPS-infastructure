@@ -24,11 +24,10 @@ Network changes fail in expensive ways when inventory is inconsistent, addressin
 
 - Validate JSON infrastructure inventory structure.
 - Check IPv4/IPv6 CIDR syntax and detect overlapping networks.
-- Detect duplicate device identifiers and invalid management ports.
-- Produce deterministic machine-readable findings with non-zero exit status on invalid input.
-- Run automated unit tests and CI checks on supported Python versions.
-
-These are the scope of the foundation implementation, not claims of live device monitoring or production deployment.
+- Detect duplicate device identifiers, duplicate management IP addresses, invalid roles, and invalid management ports.
+- Reject ambiguous duplicate JSON keys, malformed UTF-8, and input files larger than 5 MiB.
+- Produce deterministic machine-readable findings with documented exit codes.
+- Exercise CLI and validator behavior with automated tests.
 
 ## Quick start
 
@@ -39,54 +38,41 @@ python -m netopps validate examples/inventory.json
 python -m unittest discover -s tests -v
 ```
 
+Exit codes: `0` means checks passed, `1` means inventory validation findings exist, and `2` means the input could not be safely read or parsed.
+
 To validate your own inventory, copy `examples/inventory.json` and update it with non-sensitive lab data. Do not commit credentials, private keys, SNMP communities, or real production topology details.
 
-## Inventory format
+## Inventory contract
 
-```json
-{
-  "schema_version": 1,
-  "devices": [
-    {
-      "id": "lab-router-01",
-      "hostname": "router-01.example.test",
-      "management_ip": "192.0.2.10",
-      "management_port": 22,
-      "role": "router",
-      "site": "lab"
-    }
-  ],
-  "networks": [
-    {"id": "lab-users", "cidr": "192.0.2.0/27", "site": "lab"}
-  ]
-}
-```
-
-The example uses documentation-only address space. Network overlap checks compare network ranges regardless of address family; different IPv4/IPv6 families do not overlap.
+The versioned interchange schema is in [schemas/inventory.schema.json](schemas/inventory.schema.json). The schema defines the data shape; the Python validator additionally checks semantic conditions such as overlapping networks and duplicate management addresses.
 
 ## Repository map
 
 - `netopps/` — core validation package and CLI.
-- `tests/` — deterministic tests for valid and invalid input.
+- `tests/` — validator and CLI regression tests.
 - `examples/` — safe, synthetic inventory.
+- `schemas/` — versioned inventory schema.
 - `docs/ARCHITECTURE.md` — boundaries and extension points.
 - `docs/SECURITY.md` — threat model and safe-use rules.
 - `docs/OPERATIONS.md` — repeatable local workflow and incident discipline.
 - `docs/ROADMAP.md` — staged delivery with verifiable acceptance criteria.
-- `docs/DECISIONS.md` — engineering decision record.
+- `docs/PRODUCTION-READINESS.md` — release gates and current gaps.
+- `docs/DECISIONS.md` — engineering decision records.
 
 ## Safety boundaries
 
 The current implementation parses local JSON only. It does not connect to routers, switches, firewalls, cloud accounts, or external hosts. Do not use this repository to test networks you do not own or have explicit permission to assess. Any future discovery or configuration feature must be opt-in, scoped, rate-limited, auditable, and documented before implementation.
 
-## Development
+## Development and CI
 
 ```bash
+python -m compileall -q netopps tests
+python -m json.tool schemas/inventory.schema.json > /dev/null
 python -m unittest discover -s tests -v
 python -m netopps validate examples/inventory.json
 ```
 
-See [Architecture](docs/ARCHITECTURE.md), [Security](docs/SECURITY.md), [Operations](docs/OPERATIONS.md), and [Roadmap](docs/ROADMAP.md).
+GitHub Actions runs these checks on Python 3.11, 3.12, and 3.13. A successful run verifies this local validator scope only; it does not verify live devices or production deployment.
 
 ## Contribution quality bar
 
