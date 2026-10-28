@@ -49,6 +49,10 @@ class ConnectivityTests(unittest.TestCase):
         self.assertTrue(report["scope_truncated"])
         create_connection.assert_called_once()
 
+    def test_empty_inventory_is_rejected(self) -> None:
+        with self.assertRaisesRegex(ValueError, "no devices to check"):
+            check_connectivity({"devices": []})
+
     def test_invalid_limit_and_timeout_are_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "limit must"):
             check_connectivity(self.inventory, limit=101)
