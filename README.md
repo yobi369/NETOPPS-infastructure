@@ -33,7 +33,13 @@ Network changes fail in expensive ways when inventory is inconsistent, addressin
 
 ## Quick start
 
-Requires Python 3.11 or newer.
+Requires Python 3.11 or newer. Install the CLI from the repository root:
+
+```bash
+python -m pip install .
+```
+
+Then run:
 
 ```bash
 python -m netopps validate examples/inventory.json
@@ -43,7 +49,7 @@ netopps check-connectivity examples/inventory.json --allow-network --limit 20 --
 python -m unittest discover -s tests -v
 ```
 
-Exit codes: `0` means checks passed, `1` means inventory validation findings exist, and `2` means the input could not be safely read or parsed.
+Exit codes: `0` means the requested checks passed; `1` means inventory findings, an incomplete subnet plan, an unreachable endpoint, or a truncated connectivity scope; `2` means input/arguments could not be safely processed.
 
 To validate your own inventory, copy `examples/inventory.json` and update it with non-sensitive lab data. Do not commit credentials, private keys, SNMP communities, or real production topology details.
 
@@ -71,7 +77,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 
 ## Safety boundaries
 
-The current implementation parses local JSON only. It does not connect to routers, switches, firewalls, cloud accounts, or external hosts. Do not use this repository to test networks you do not own or have explicit permission to assess. Any future discovery or configuration feature must be opt-in, scoped, rate-limited, auditable, and documented before implementation.
+Inventory validation and subnet planning parse local JSON and do not open network connections. The optional `check-connectivity` command opens TCP connections only to management endpoints listed in the supplied inventory and only when `--allow-network` is present; it sends no application payload and performs no discovery or configuration changes. Do not use it on networks you do not own or have explicit permission to assess. Any future discovery or configuration feature must be opt-in, scoped, rate-limited, auditable, and documented before implementation.
 
 ## Development and CI
 
@@ -82,7 +88,7 @@ python -m unittest discover -s tests -v
 python -m netopps validate examples/inventory.json
 ```
 
-GitHub Actions runs these checks on Python 3.11, 3.12, and 3.13. A successful run verifies this local validator scope only; it does not verify live devices or production deployment.
+GitHub Actions runs these checks on Python 3.11, 3.12, and 3.13. A successful run verifies the CLI, mocked connectivity cases, and local loopback TCP behavior; it does not verify customer devices, a production network, or a hosted deployment.
 
 ## Contribution quality bar
 
