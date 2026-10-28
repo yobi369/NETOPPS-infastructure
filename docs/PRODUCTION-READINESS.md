@@ -18,15 +18,17 @@ This document is a release checklist, not a claim that the project has passed it
 
 ## Gate B — Security and supply chain
 
-- [ ] Add and review dependency/action pinning policy.
-- [ ] Add static analysis and secret scanning; triage all findings.
+- [ ] Pin GitHub Actions to immutable commit SHAs and document reviewed updates.
+- [x] Run Bandit static analysis in CI.
+- [ ] Add secret scanning and triage all findings.
 - [ ] Add threat-model review for each network integration.
 - [ ] Define supported Python versions and security update policy.
 - [ ] Complete independent review before privileged live integrations.
 
 ## Gate C — Operational safety
 
-- [ ] Define a stable inventory schema and compatibility policy.
+- [x] Publish a versioned inventory JSON Schema and validate it in automated tests.
+- [ ] Define a schema compatibility and migration policy.
 - [ ] Establish versioned machine-readable output and backward-compatibility tests.
 - [ ] Add structured logs without secrets or sensitive topology leakage.
 - [ ] Define safe handling of customer inventory, retention, access, and deletion.
