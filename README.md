@@ -81,7 +81,7 @@ Inventory validation and subnet planning parse local JSON and do not open networ
 ## Development and CI
 
 ```bash
-python -m pip install ".[test]"
+python -m pip install -e ".[test]"
 python -m compileall -q netopps tests
 ruff check netopps tests
 bandit -q -r netopps
