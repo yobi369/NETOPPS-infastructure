@@ -8,6 +8,8 @@ Use Python 3.11+.
 python -m unittest discover -s tests -v
 python -m netopps validate examples/inventory.json
 python -m netopps plan-subnets examples/inventory.json --pool 10.20.0.0/16 --prefix 24 --count 4
+# Requires explicit consent and only checks inventory-listed management endpoints.
+python -m netopps check-connectivity examples/inventory.json --allow-network --limit 20 --timeout 1.0
 ```
 
 See [CLI Output Contract](OUTPUT-SCHEMA.md) for the versioned JSON response shapes and compatibility rules.
@@ -55,3 +57,13 @@ netopps plan-subnets examples/inventory.json --pool 10.20.0.0/16 --prefix 24 --c
 - A partial result returns exit code 1 and `complete: false`; invalid arguments return exit code 2.
 
 Review every plan against organizational reservations, routing design, DHCP scopes, and change records before using it operationally.
+
+## Read-only connectivity checks
+
+`check-connectivity` opens a TCP connection to the management IP and port for each selected inventory device, sends no application payload, and closes the connection. It is not a port scanner and never discovers targets. The command refuses to run unless `--allow-network` is supplied explicitly.
+
+- `--limit` is 1–100 devices (default 20); the report indicates if the inventory scope was truncated.
+- `--timeout` is 0.1–3.0 seconds per connection (default 1.0).
+- Concurrency is capped at eight connections.
+- Only run it against infrastructure you own or are authorized to assess. A TCP handshake confirms reachability of that port at that moment; it does not establish application health, authentication success, or correct device configuration.
+- Tests mock sockets and never connect to external infrastructure.
