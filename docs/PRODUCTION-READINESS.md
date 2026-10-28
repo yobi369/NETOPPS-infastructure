@@ -43,9 +43,10 @@ This document is a release checklist, not a claim that the project has passed it
 
 This gate applies only if device access is added.
 
-- [ ] Explicit target allowlists and least-privilege credentials.
-- [ ] Read-only adapter mode by default.
-- [ ] Connection and command timeouts, bounded concurrency, and rate limits.
+- [x] Explicit target scope is limited to inventory-listed endpoints.
+- [x] Connectivity mode is read-only and requires explicit operator opt-in.
+- [x] Connection timeouts and bounded concurrency are enforced.
+- [ ] Rate-limit policy for repeated runs and live lab validation remain to be verified.
 - [ ] Simulator and contract tests, including partial failures and device timeouts.
 - [ ] Lab validation against representative supported devices and firmware.
 - [ ] Change plan, separate approval/apply step, post-change verification, and rollback before any write capability.
