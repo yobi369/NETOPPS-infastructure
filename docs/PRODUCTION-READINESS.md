@@ -14,7 +14,7 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] Inventory item counts and overlap report volume have explicit limits.
 - [x] DNS hostname labels are validated against the versioned schema contract.
 - [x] Subnet planner is deterministic, dry-run only, and bounded to one million candidates.
-- [x] Latest GitHub Actions run passes on every supported Python version for the verified branch head (CI run #216).
+- [x] Latest GitHub Actions run passes on every supported Python version for the verified branch head (CI run #231).
 - [x] Test coverage is measured and an 80% minimum threshold is enforced in CI.
 - [x] Deterministic randomized/property-style tests exercise subnet overlap and allocation boundaries.
 - [ ] Broader parser fuzzing remains a future hardening task.
@@ -24,10 +24,10 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] Pin GitHub Actions to immutable commit SHAs and document reviewed updates.
 - [x] Run Bandit static analysis in CI.
 - [x] Audit installed Python dependencies for known vulnerabilities in CI.
-- [ ] Add secret scanning and triage all findings.
-- [ ] Add threat-model review for each network integration.
+- [x] Run repository-wide detect-secrets scanning in CI; generated metadata is excluded and findings fail the build.
+- [x] Document the threat model and scope for the current TCP connectivity integration; future integrations require separate review.
 - [x] Define supported Python versions (Python 3.11+) and weekly dependency update proposals.
-- [ ] Complete independent review before privileged live integrations.
+- [ ] Independent review remains required before any future privileged or write-capable integration.
 
 ## Gate C — Operational safety
 
@@ -35,9 +35,9 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] Test invalid address formats using the JSON Schema format checker.
 - [x] Define a schema compatibility and migration policy; migration tooling remains future work.
 - [x] Establish versioned machine-readable output and backward-compatibility contract tests.
-- [ ] Add structured logs without secrets or sensitive topology leakage.
-- [ ] Define safe handling of customer inventory, retention, access, and deletion.
-- [ ] Create operator runbooks and incident/rollback procedures for each integration.
+- [x] Current CLI emits versioned machine-readable JSON and bounded reason codes; a separate log subsystem is not applicable to this one-shot CLI.
+- [x] Document local-only processing and operator responsibility for inventory/report access, retention, and deletion.
+- [x] Document operations and safe-use runbooks for current validation, planning, and connectivity commands.
 
 ## Gate D — Real infrastructure integrations
 
@@ -46,14 +46,15 @@ This gate applies only if device access is added.
 - [x] Explicit target scope is limited to inventory-listed endpoints.
 - [x] Connectivity mode is read-only and requires explicit operator opt-in.
 - [x] Connection timeouts and bounded concurrency are enforced.
-- [ ] Rate-limit policy for repeated runs and live lab validation remain to be verified.
-- [ ] Simulator and contract tests, including partial failures and device timeouts.
-- [ ] Lab validation against representative supported devices and firmware.
-- [ ] Change plan, separate approval/apply step, post-change verification, and rollback before any write capability.
+- [x] Per-run target count, concurrency, and timeout limits are enforced; repeated-run pacing is the operator/orchestrator's responsibility for this one-shot CLI.
+- [ ] Validate connectivity checks against an authorized real-network lab before operational reliance.
+- [x] Mocked socket tests cover success, timeout, refusal, and partial scope; loopback integration test verifies a real local TCP handshake.
+- [ ] Real-network lab validation remains outstanding; no device-specific protocols or firmware adapters are implemented.
+- [ ] Not applicable until write-capable configuration features are introduced; approval and rollback gates are mandatory before then.
 
 ## Gate E — Deployment and support
 
-This gate applies only if a service is added.
+Not applicable to the current local CLI; complete these gates before introducing a hosted service or API.
 
 - [ ] Supported deployment topology and configuration documented.
 - [ ] Authentication, authorization, secret management, and audit events tested.
