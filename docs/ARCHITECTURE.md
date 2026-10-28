@@ -1,0 +1,36 @@
+# Architecture
+
+## Current implementation
+
+The foundation is a local Python CLI with no network-side effects:
+
+1. `python -m netopps validate <file>` reads a local JSON document.
+2. JSON decoding errors are reported to stderr and return exit code 2.
+3. Structural and semantic checks produce stable findings with `code`, `path`, and `message`.
+4. Valid input exits 0; invalid inventory exits 1.
+5. The validator never opens sockets or changes device state.
+
+## Boundaries
+
+- Input: operator-supplied JSON files.
+- Core: Python standard library, including `ipaddress`.
+- Output: human-readable JSON to stdout.
+- Persistence: none.
+- Authentication: not applicable; no service/API exists.
+- Device adapters, metrics collection, web UI, and automated remediation: not implemented.
+
+## Extension strategy
+
+Prefer pure functions and explicit interfaces. Keep parsing separate from policy checks; keep policy checks separate from integrations. An integration should have a simulator and contract tests before a live adapter. All write-capable operations must generate a reviewable plan first and require a separate explicit apply step.
+
+## Future target architecture
+
+- Inventory adapters with schema-versioned normalization.
+- Plan engine that computes intended changes without applying them.
+- Policy checks for CIDR overlaps, naming, ownership, and approved maintenance windows.
+- Read-only device adapters with timeouts, bounded concurrency, and redacted logs.
+- Evidence store for check results and change events.
+- Approval gate and rollback strategy for any configuration write.
+- Optional dashboard only after stable API and authorization boundaries exist.
+
+These are design directions, not current features.
