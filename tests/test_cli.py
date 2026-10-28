@@ -13,13 +13,13 @@ from netopps.__main__ import main
 
 
 class CliTests(unittest.TestCase):
-    def run_cli(self, payload: bytes, *, exists: bool = True) -> tuple[int, str, str]:
+    def run_cli(self, payload: bytes, *, exists: bool = True, extra_args: list[str] | None = None) -> tuple[int, str, str]:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "inventory.json"
             if exists:
                 path.write_bytes(payload)
             stdout, stderr = io.StringIO(), io.StringIO()
-            with patch.object(sys, "argv", ["netopps", "validate", str(path)]):
+            with patch.object(sys, "argv", ["netopps", *(extra_args or ["validate"]), str(path)]):
                 with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
                     code = main()
             return code, stdout.getvalue(), stderr.getvalue()
@@ -64,6 +64,31 @@ class CliTests(unittest.TestCase):
         code, _, stderr = self.run_cli(b"", exists=False)
         self.assertEqual(2, code)
         self.assertIn("cannot read", stderr)
+
+    def test_plan_subnets_is_read_only_and_deterministic(self) -> None:
+        payload = json.dumps({
+            "schema_version": 1,
+            "devices": [],
+            "networks": [{"id": "used", "cidr": "10.0.0.0/24"}],
+        }).encode()
+        code, stdout, stderr = self.run_cli(
+            payload,
+            extra_args=["plan-subnets", "--pool", "10.0.0.0/16", "--prefix", "24", "--count", "2"],
+        )
+        result = json.loads(stdout)
+        self.assertEqual(0, code)
+        self.assertEqual(["10.0.1.0/24", "10.0.2.0/24"], result["allocated"])
+        self.assertFalse(result["applied"])
+        self.assertEqual("", stderr)
+
+    def test_plan_subnets_rejects_invalid_pool(self) -> None:
+        payload = json.dumps({"schema_version": 1, "devices": [], "networks": []}).encode()
+        code, stdout, _ = self.run_cli(
+            payload,
+            extra_args=["plan-subnets", "--pool", "not-a-cidr", "--prefix", "24", "--count", "1"],
+        )
+        self.assertEqual(2, code)
+        self.assertFalse(json.loads(stdout)["valid"])
 
 
 if __name__ == "__main__":
