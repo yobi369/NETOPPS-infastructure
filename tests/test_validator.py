@@ -47,6 +47,13 @@ class InventoryValidatorTests(unittest.TestCase):
         data = {**self.valid, "devices": self.valid["devices"] * 2}
         self.assertIn("device.duplicate_id", {f["code"] for f in validate_inventory(data)})
 
+    def test_invalid_dns_hostname_is_rejected(self) -> None:
+        for hostname in ("bad..host", "-bad.example.test", "bad_label.example.test", "a" * 64 + ".example.test"):
+            with self.subTest(hostname=hostname):
+                device = {**self.valid["devices"][0], "hostname": hostname}
+                data = {**self.valid, "devices": [device]}
+                self.assertIn("device.hostname", {f["code"] for f in validate_inventory(data)})
+
     def test_duplicate_hostnames_are_rejected_case_insensitively(self) -> None:
         second = {**self.valid["devices"][0], "id": "router-02", "hostname": "ROUTER-01.EXAMPLE.TEST."}
         data = {**self.valid, "devices": [self.valid["devices"][0], second]}
