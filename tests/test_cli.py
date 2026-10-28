@@ -53,6 +53,12 @@ class CliTests(unittest.TestCase):
         self.assertEqual(2, code)
         self.assertIn("duplicate JSON object key", stderr)
 
+    def test_excessively_nested_json_returns_two(self) -> None:
+        payload = b"[" * 1500 + b"0" + b"]" * 1500
+        code, _, stderr = self.run_cli(payload)
+        self.assertEqual(2, code)
+        self.assertIn("nesting exceeds", stderr)
+
     def test_non_utf8_input_returns_two(self) -> None:
         code, _, stderr = self.run_cli(b'\xff\xfe')
         self.assertEqual(2, code)
