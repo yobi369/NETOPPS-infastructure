@@ -16,7 +16,7 @@
         "required": ["id", "hostname", "management_ip", "role"],
         "properties": {
           "id": { "$ref": "#/$defs/id" },
-          "hostname": { "type": "string", "minLength": 1, "pattern": "^\\\\S+$" },
+          "hostname": { "type": "string", "minLength": 1, "pattern": "^\\S+$" },
           "management_ip": {
             "oneOf": [
               { "type": "string", "format": "ipv4" },
