@@ -65,5 +65,6 @@ Review every plan against organizational reservations, routing design, DHCP scop
 - `--limit` is 1–100 devices (default 20); the report indicates if the inventory scope was truncated.
 - `--timeout` is 0.1–3.0 seconds per connection (default 1.0).
 - Concurrency is capped at eight connections.
+- If the device limit truncates the inventory, the command returns exit code 1 even if every checked endpoint is reachable; increase the limit or explicitly accept the partial result.
 - Only run it against infrastructure you own or are authorized to assess. A TCP handshake confirms reachability of that port at that moment; it does not establish application health, authentication success, or correct device configuration.
 - Tests mock sockets and never connect to external infrastructure.
