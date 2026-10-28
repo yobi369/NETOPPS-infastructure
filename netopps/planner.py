@@ -15,6 +15,8 @@ def allocate_subnets(
     max_candidates: int = 1_000_000,
 ) -> list[str]:
     """Return the first available subnets from a pool without modifying inventory."""
+    if not isinstance(inventory, dict):
+        raise TypeError("inventory must be a JSON object")
     pool = ipaddress.ip_network(pool_cidr, strict=True)
     if isinstance(new_prefix, bool) or not isinstance(new_prefix, int):
         raise TypeError("prefix must be an integer")
