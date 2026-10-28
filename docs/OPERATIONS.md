@@ -10,6 +10,8 @@ python -m netopps validate examples/inventory.json
 python -m netopps plan-subnets examples/inventory.json --pool 10.20.0.0/16 --prefix 24 --count 4
 ```
 
+See [CLI Output Contract](OUTPUT-SCHEMA.md) for the versioned JSON response shapes and compatibility rules.
+
 ## Exit codes
 
 - `0`: inventory passed all implemented checks.
