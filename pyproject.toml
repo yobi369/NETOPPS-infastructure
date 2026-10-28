@@ -21,7 +21,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-test = ["coverage>=7.6,<8"]
+test = ["coverage>=7.6,<8", "ruff>=0.11,<1"]
 
 [project.scripts]
 netopps = "netopps.__main__:main"
