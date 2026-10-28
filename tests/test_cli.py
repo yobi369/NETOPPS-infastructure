@@ -19,9 +19,12 @@ class CliTests(unittest.TestCase):
             if exists:
                 path.write_bytes(payload)
             stdout, stderr = io.StringIO(), io.StringIO()
-            with patch.object(sys, "argv", ["netopps", *(extra_args or ["validate"]), str(path)]):
-                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-                    code = main()
+            with (
+                patch.object(sys, "argv", ["netopps", *(extra_args or ["validate"]), str(path)]),
+                contextlib.redirect_stdout(stdout),
+                contextlib.redirect_stderr(stderr),
+            ):
+                code = main()
             return code, stdout.getvalue(), stderr.getvalue()
 
     def test_valid_inventory_returns_zero_and_json(self) -> None:
