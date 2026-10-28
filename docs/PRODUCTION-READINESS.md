@@ -16,7 +16,8 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] Subnet planner is deterministic, dry-run only, and bounded to one million candidates.
 - [ ] Latest GitHub Actions run passes on every supported Python version for the current branch head.
 - [x] Test coverage is measured and an 80% minimum threshold is enforced in CI.
-- [ ] Fuzz/property tests exercise parser and CIDR boundary behavior.
+- [x] Deterministic randomized/property-style tests exercise subnet overlap and allocation boundaries.
+- [ ] Broader parser fuzzing remains a future hardening task.
 
 ## Gate B — Security and supply chain
 
