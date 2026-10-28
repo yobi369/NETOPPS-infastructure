@@ -32,6 +32,8 @@ def check_connectivity(
     devices = inventory.get("devices")
     if not isinstance(devices, list):
         raise TypeError("inventory devices must be an array")
+    if not devices:
+        raise ValueError("inventory contains no devices to check")
     selected = devices[:limit]
 
     def check(device: dict[str, Any]) -> dict[str, Any]:
