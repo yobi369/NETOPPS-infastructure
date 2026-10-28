@@ -9,6 +9,7 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Duplicate device/network identifiers, duplicate hostnames and management IP checks.
 - IPv4/IPv6 CIDR validation and bounded overlap reporting.
 - Read-only IPv4/IPv6 subnet allocation planning.
+- Explicitly opted-in TCP reachability checks limited to inventory-listed management endpoints.
 - Input-size, UTF-8, duplicate JSON-key, and excessive-nesting safeguards.
 - Versioned inventory JSON Schema, schema validation tests, and a versioned CLI output contract.
 - Python package metadata and `netopps` console entry point.
