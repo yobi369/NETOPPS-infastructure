@@ -17,7 +17,7 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] CI run #231 passed on the implementation commit; the final documentation head must also pass CI before merge.
 - [x] Test coverage is measured and an 80% minimum threshold is enforced in CI.
 - [x] Deterministic randomized/property-style tests exercise subnet overlap and allocation boundaries.
-- [ ] Broader parser fuzzing remains a future hardening task.
+- [x] Deterministic malformed-input smoke fuzzing exercises 250 byte sequences; deeper property-based parser fuzzing remains future hardening.
 
 ## Gate B — Security and supply chain
 
