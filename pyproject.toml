@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=84.1.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netopps-infrastructure"
+version = "0.1.0"
+description = "Safety-first local network inventory validation tools."
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: System Administrators",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: System :: Networking",
+]
+
+[project.optional-dependencies]
+test = ["coverage>=7.6,<8", "ruff>=0.11,<1", "bandit>=1.8,<2", "jsonschema>=4.23,<5", "pip-audit>=2.7,<3", "setuptools>=84.1.0", "detect-secrets>=1.5,<2"]
+
+[project.scripts]
+netopps = "netopps.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["netopps*"]
