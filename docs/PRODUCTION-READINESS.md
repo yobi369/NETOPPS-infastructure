@@ -28,6 +28,7 @@ This document is a release checklist, not a claim that the project has passed it
 ## Gate C — Operational safety
 
 - [x] Publish a versioned inventory JSON Schema and validate it in automated tests.
+- [x] Test invalid address formats using the JSON Schema format checker.
 - [ ] Define a schema compatibility and migration policy.
 - [ ] Establish versioned machine-readable output and backward-compatibility tests.
 - [ ] Add structured logs without secrets or sensitive topology leakage.
