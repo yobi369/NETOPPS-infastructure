@@ -53,4 +53,4 @@ jobs:
       - name: Validate example inventory through module
         run: python -m netopps validate examples/inventory.json
       - name: Validate example inventory through installed command
-        run: netopps validate examples/inventory.json
+        run: cd /tmp && netopps validate "$GITHUB_WORKSPACE/examples/inventory.json"
