@@ -35,6 +35,7 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
 
     seen_device_ids: set[str] = set()
     seen_management_ips: dict[str, str] = {}
+    seen_hostnames: dict[str, str] = {}
     for index, device in enumerate(devices):
         path = f"$.devices[{index}]"
         if not isinstance(device, dict):
@@ -51,6 +52,16 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
         hostname = device.get("hostname")
         if not isinstance(hostname, str) or not hostname.strip() or any(ch.isspace() for ch in hostname):
             add("device.hostname", f"{path}.hostname", "hostname must be a non-empty string without whitespace.")
+        else:
+            normalized_hostname = hostname.rstrip(".").casefold()
+            if normalized_hostname in seen_hostnames:
+                add(
+                    "device.duplicate_hostname",
+                    f"{path}.hostname",
+                    f"Hostname {hostname!r} duplicates device {seen_hostnames[normalized_hostname]!r} (case-insensitive).",
+                )
+            else:
+                seen_hostnames[normalized_hostname] = str(device.get("id"))
 
         address = device.get("management_ip")
         try:
