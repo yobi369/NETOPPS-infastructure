@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "devices": [
+    {
+      "id": "lab-router-01",
+      "hostname": "router-01.example.test",
+      "management_ip": "192.0.2.10",
+      "management_port": 22,
+      "role": "router",
+      "site": "lab"
+    },
+    {
+      "id": "lab-switch-01",
+      "hostname": "switch-01.example.test",
+      "management_ip": "192.0.2.11",
+      "management_port": 22,
+      "role": "switch",
+      "site": "lab"
+    }
+  ],
+  "networks": [
+    {"id": "lab-users", "cidr": "198.51.100.0/25", "site": "lab"},
+    {"id": "lab-services", "cidr": "203.0.113.0/26", "site": "lab"}
+  ]
+}
