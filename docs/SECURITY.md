@@ -8,6 +8,7 @@ The current tool validates a local JSON file. It does not connect to devices, sc
 
 - Inventory files may reveal topology, hostnames, management addresses, and operational structure.
 - Malformed input may cause incorrect conclusions if errors are ignored.
+- Oversized, deeply nested, or overlap-heavy input could consume excessive resources if limits are absent.
 - Future integrations could turn a local validation tool into a privileged control plane if boundaries are not explicit.
 
 ## Required controls
