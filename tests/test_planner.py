@@ -19,6 +19,10 @@ class SubnetPlannerTests(unittest.TestCase):
         result = allocate_subnets({"networks": []}, "2001:db8::/48", 64, 2)
         self.assertEqual(["2001:db8::/64", "2001:db8:0:1::/64"], result)
 
+    def test_rejects_non_object_inventory(self) -> None:
+        with self.assertRaisesRegex(TypeError, "inventory must be a JSON object"):
+            allocate_subnets([], "10.0.0.0/16", 24, 1)  # type: ignore[arg-type]
+
     def test_rejects_prefix_smaller_than_pool(self) -> None:
         with self.assertRaisesRegex(ValueError, "prefix must be between"):
             allocate_subnets({"networks": []}, "10.0.0.0/24", 16, 1)
