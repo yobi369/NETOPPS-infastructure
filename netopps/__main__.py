@@ -6,7 +6,9 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
+from netopps.planner import allocate_subnets
 from netopps.validator import validate_inventory
 
 _MAX_INPUT_BYTES = 5 * 1024 * 1024
@@ -25,44 +27,82 @@ def _unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
     return result
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        prog="netopps",
-        description="Validate a local JSON network inventory without contacting devices.",
-    )
-    subparsers = parser.add_subparsers(dest="command", required=True)
-    validate_parser = subparsers.add_parser("validate", help="validate inventory and network ranges")
-    validate_parser.add_argument("file", type=Path, help="path to inventory JSON file")
-    args = parser.parse_args()
-
+def _read_inventory(path: Path) -> tuple[Any | None, int]:
     try:
-        raw = args.file.read_bytes()
+        raw = path.read_bytes()
     except OSError as exc:
-        print(f"error: cannot read {args.file}: {exc}", file=sys.stderr)
-        return 2
+        print(f"error: cannot read {path}: {exc}", file=sys.stderr)
+        return None, 2
 
     if len(raw) > _MAX_INPUT_BYTES:
         print(f"error: input exceeds the {_MAX_INPUT_BYTES}-byte safety limit", file=sys.stderr)
-        return 2
+        return None, 2
 
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError as exc:
         print(f"error: input must be UTF-8 text (byte offset {exc.start})", file=sys.stderr)
-        return 2
+        return None, 2
 
     try:
-        inventory = json.loads(text, object_pairs_hook=_unique_object)
+        return json.loads(text, object_pairs_hook=_unique_object), 0
     except json.JSONDecodeError as exc:
         print(f"error: invalid JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}", file=sys.stderr)
-        return 2
+        return None, 2
     except DuplicateJSONKeyError as exc:
         print(f"error: {exc}", file=sys.stderr)
-        return 2
+        return None, 2
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="netopps",
+        description="Validate local network inventory and create read-only subnet plans.",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    validate_parser = subparsers.add_parser("validate", help="validate inventory and network ranges")
+    validate_parser.add_argument("file", type=Path, help="path to inventory JSON file")
+
+    plan_parser = subparsers.add_parser("plan-subnets", help="plan free subnets without changing infrastructure")
+    plan_parser.add_argument("file", type=Path, help="path to a valid inventory JSON file")
+    plan_parser.add_argument("--pool", required=True, help="parent CIDR pool, for example 10.20.0.0/16")
+    plan_parser.add_argument("--prefix", required=True, type=int, help="desired subnet prefix, for example 24")
+    plan_parser.add_argument("--count", required=True, type=int, help="number of subnets to plan (1-256)")
+    args = parser.parse_args()
+
+    inventory, read_status = _read_inventory(args.file)
+    if read_status:
+        return read_status
 
     findings = validate_inventory(inventory)
-    print(json.dumps({"valid": not findings, "finding_count": len(findings), "findings": findings}, indent=2))
-    return 0 if not findings else 1
+    if findings:
+        print(json.dumps({"valid": False, "finding_count": len(findings), "findings": findings}, indent=2))
+        return 1
+
+    if args.command == "validate":
+        print(json.dumps({"valid": True, "finding_count": 0, "findings": []}, indent=2))
+        return 0
+
+    try:
+        allocated = allocate_subnets(inventory, args.pool, args.prefix, args.count)
+    except (ValueError, TypeError) as exc:
+        print(json.dumps({"valid": False, "error": str(exc), "allocated": []}, indent=2))
+        return 2
+
+    complete = len(allocated) == args.count
+    print(json.dumps({
+        "valid": complete,
+        "mode": "plan-only",
+        "pool": args.pool,
+        "prefix": args.prefix,
+        "requested": args.count,
+        "allocated_count": len(allocated),
+        "allocated": allocated,
+        "complete": complete,
+        "applied": False,
+    }, indent=2))
+    return 0 if complete else 1
 
 
 if __name__ == "__main__":
