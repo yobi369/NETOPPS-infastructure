@@ -20,6 +20,10 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
     if not isinstance(data, dict):
         return [{"code": "inventory.type", "path": "$", "message": "Inventory must be a JSON object."}]
 
+    allowed_root_keys = {"schema_version", "devices", "networks"}
+    for key in sorted(set(data) - allowed_root_keys, key=str):
+        add("inventory.unknown_property", "$", f"Unknown top-level property: {key!r}.")
+
     version = data.get("schema_version")
     if isinstance(version, bool) or not isinstance(version, int) or version != 1:
         add("inventory.schema_version", "$.schema_version", "schema_version must be the integer 1.")
@@ -84,6 +88,9 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
         if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
             add("device.management_port", f"{path}.management_port", "management_port must be an integer from 1 to 65535.")
 
+        if "site" in device and (not isinstance(device["site"], str) or not device["site"].strip()):
+            add("device.site", f"{path}.site", "site must be a non-empty string when provided.")
+
         role = device.get("role")
         if not isinstance(role, str) or role not in _ROLES:
             add("device.role", f"{path}.role", f"role must be one of: {', '.join(sorted(_ROLES))}.")
@@ -102,6 +109,9 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
             add("network.duplicate_id", f"{path}.id", f"Duplicate network id: {identifier}.")
         else:
             seen_network_ids.add(identifier)
+
+        if "site" in network and (not isinstance(network["site"], str) or not network["site"].strip()):
+            add("network.site", f"{path}.site", "site must be a non-empty string when provided.")
 
         cidr = network.get("cidr")
         try:
