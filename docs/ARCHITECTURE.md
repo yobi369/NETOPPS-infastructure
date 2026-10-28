@@ -8,7 +8,8 @@ The foundation is a local Python CLI with no network-side effects:
 2. JSON decoding errors are reported to stderr and return exit code 2.
 3. Structural and semantic checks produce stable findings with `code`, `path`, and `message`.
 4. Valid input exits 0; invalid inventory exits 1.
-5. The validator never opens sockets or changes device state.
+5. The validator and subnet planner never open sockets or change device state.
+6. The subnet planner emits deterministic candidate CIDRs and explicitly labels plans as not applied.
 
 ## Boundaries
 
