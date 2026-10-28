@@ -14,7 +14,7 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] Inventory item counts and overlap report volume have explicit limits.
 - [x] Subnet planner is deterministic, dry-run only, and bounded to one million candidates.
 - [ ] Latest GitHub Actions run passes on every supported Python version after the latest changes.
-- [ ] Test coverage is measured and a justified threshold is enforced.
+- [x] Test coverage is measured and an 80% minimum threshold is enforced in CI.
 - [ ] Fuzz/property tests exercise parser and CIDR boundary behavior.
 
 ## Gate B — Security and supply chain
