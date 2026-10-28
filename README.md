@@ -65,6 +65,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 - `docs/RELEASE.md` — controlled release and rollback process.
 - `docs/SCHEMA-COMPATIBILITY.md` — schema versioning and migration rules.
 - `docs/OUTPUT-SCHEMA.md` — versioned CLI JSON response contract.
+- `docs/LAB-ACCEPTANCE.md` — authorized lab acceptance checklist before operational reliance.
 - `CHANGELOG.md` — implemented changes and limitations.
 - `docs/DECISIONS.md` — engineering decision records.
 
