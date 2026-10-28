@@ -11,7 +11,8 @@ This roadmap records intent. A milestone is complete only when its acceptance cr
 - [x] Synthetic example inventory and unit tests.
 - [x] CI workflow for Python 3.11–3.13.
 - [x] Security, architecture, operations, and production-readiness documentation.
-- [x] CLI input-size limit, UTF-8 validation, and duplicate JSON-key rejection.
+- [x] CLI input-size limit, UTF-8 validation, duplicate JSON-key rejection, and nesting-depth limit.
+- [x] Deterministic malformed-input smoke fuzz test.
 - [x] Installable Python package with a console entry point.
 - [ ] Observe successful GitHub Actions runs on the latest branch head after the most recent changes.
 
