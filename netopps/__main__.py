@@ -141,9 +141,9 @@ def main() -> int:
             print(json.dumps({"output_schema_version": 1, "valid": False, "error": str(exc)}, indent=2))
             return 2
         report["output_schema_version"] = 1
-        report["valid"] = report["all_reachable"]
+        report["valid"] = report["all_reachable"] and not report["scope_truncated"]
         print(json.dumps(report, indent=2))
-        return 0 if report["all_reachable"] else 1
+        return 0 if report["valid"] else 1
 
     try:
         allocated = allocate_subnets(inventory, args.pool, args.prefix, args.count)
