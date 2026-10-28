@@ -14,7 +14,7 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] Inventory item counts and overlap report volume have explicit limits.
 - [x] DNS hostname labels are validated against the versioned schema contract.
 - [x] Subnet planner is deterministic, dry-run only, and bounded to one million candidates.
-- [ ] Latest GitHub Actions run passes on every supported Python version after the latest changes.
+- [x] Latest GitHub Actions run passes on every supported Python version for the verified branch head.
 - [x] Test coverage is measured and an 80% minimum threshold is enforced in CI.
 - [ ] Fuzz/property tests exercise parser and CIDR boundary behavior.
 
@@ -31,7 +31,7 @@ This document is a release checklist, not a claim that the project has passed it
 
 - [x] Publish a versioned inventory JSON Schema and validate it in automated tests.
 - [x] Test invalid address formats using the JSON Schema format checker.
-- [ ] Define a schema compatibility and migration policy.
+- [x] Define a schema compatibility and migration policy; migration tooling remains future work.
 - [ ] Establish versioned machine-readable output and backward-compatibility tests.
 - [ ] Add structured logs without secrets or sensitive topology leakage.
 - [ ] Define safe handling of customer inventory, retention, access, and deletion.
