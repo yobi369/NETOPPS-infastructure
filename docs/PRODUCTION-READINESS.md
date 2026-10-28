@@ -24,7 +24,7 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] Run Bandit static analysis in CI.
 - [ ] Add secret scanning and triage all findings.
 - [ ] Add threat-model review for each network integration.
-- [ ] Define supported Python versions and security update policy.
+- [x] Define supported Python versions (Python 3.11+) and weekly dependency update proposals.
 - [ ] Complete independent review before privileged live integrations.
 
 ## Gate C — Operational safety
@@ -32,7 +32,7 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] Publish a versioned inventory JSON Schema and validate it in automated tests.
 - [x] Test invalid address formats using the JSON Schema format checker.
 - [x] Define a schema compatibility and migration policy; migration tooling remains future work.
-- [ ] Establish versioned machine-readable output and backward-compatibility tests.
+- [x] Establish versioned machine-readable output and backward-compatibility contract tests.
 - [ ] Add structured logs without secrets or sensitive topology leakage.
 - [ ] Define safe handling of customer inventory, retention, access, and deletion.
 - [ ] Create operator runbooks and incident/rollback procedures for each integration.
