@@ -22,6 +22,10 @@ The tool validates local JSON and creates subnet plans without network I/O. An o
 7. Redact secrets from logs and error messages.
 8. For write operations, require plan review, explicit operator approval, change-window awareness, timeout, post-change verification, and rollback instructions.
 
+## Data handling
+
+The CLI reads inventory files locally and prints reports to standard output. It does not persist inventory or reports, upload files, or send telemetry. The opt-in connectivity command sends only TCP connection attempts to inventory-listed IP/port pairs and sends no application payload. Inventory and report files may reveal sensitive topology; operators are responsible for access control, retention, secure storage, and deletion of those files and any redirected output.
+
 ## Responsible use
 
 Only inventory and administer systems you own or are explicitly authorized to manage. Any future active checks must document scope, rate limits, and operational impact.
