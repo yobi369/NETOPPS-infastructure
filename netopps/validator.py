@@ -21,7 +21,7 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
         return [{"code": "inventory.type", "path": "$", "message": "Inventory must be a JSON object."}]
 
     version = data.get("schema_version")
-    if isinstance(version, bool) or version != 1 or not isinstance(version, int):
+    if isinstance(version, bool) or not isinstance(version, int) or version != 1:
         add("inventory.schema_version", "$.schema_version", "schema_version must be the integer 1.")
 
     devices = data.get("devices")
@@ -34,6 +34,7 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
         networks = []
 
     seen_device_ids: set[str] = set()
+    seen_management_ips: dict[str, str] = {}
     for index, device in enumerate(devices):
         path = f"$.devices[{index}]"
         if not isinstance(device, dict):
@@ -55,7 +56,16 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
         try:
             if not isinstance(address, str):
                 raise ValueError
-            ipaddress.ip_address(address)
+            parsed_address = ipaddress.ip_address(address)
+            canonical_address = str(parsed_address)
+            if canonical_address in seen_management_ips:
+                add(
+                    "device.duplicate_management_ip",
+                    f"{path}.management_ip",
+                    f"Management IP {canonical_address} is also assigned to device {seen_management_ips[canonical_address]!r}.",
+                )
+            else:
+                seen_management_ips[canonical_address] = str(identifier)
         except ValueError:
             add("device.management_ip", f"{path}.management_ip", "management_ip must be a valid IPv4 or IPv6 address.")
 
