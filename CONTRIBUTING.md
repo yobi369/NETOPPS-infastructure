@@ -17,6 +17,7 @@ Use Python 3.11 or newer:
 ```bash
 python -m pip install ".[test]"
 ruff check netopps tests
+bandit -q -r netopps
 coverage run --branch --source=netopps -m unittest discover -s tests -v
 coverage report --fail-under=80
 python -m json.tool schemas/inventory.schema.json > /dev/null
