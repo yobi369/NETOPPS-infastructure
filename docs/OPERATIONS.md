@@ -7,6 +7,7 @@ Use Python 3.11+.
 ```bash
 python -m unittest discover -s tests -v
 python -m netopps validate examples/inventory.json
+python -m netopps plan-subnets examples/inventory.json --pool 10.20.0.0/16 --prefix 24 --count 4
 ```
 
 ## Exit codes
@@ -34,3 +35,20 @@ python -m netopps validate examples/inventory.json
 ## Incident/change discipline
 
 Before future automation is allowed to change a device, require a reviewed plan, named approver, scope, pre-change snapshot where supported, timeout, post-change checks, and documented rollback. Do not apply generated configuration directly to production from an unreviewed CI job.
+
+## Subnet allocation planning
+
+`plan-subnets` is a dry-run planner. It reads the inventory, refuses to proceed when the inventory has validation findings, and returns the first available CIDRs in deterministic order. It does not reserve or apply addresses anywhere.
+
+```bash
+netopps plan-subnets examples/inventory.json --pool 10.20.0.0/16 --prefix 24 --count 4
+```
+
+- `--pool`: parent network in CIDR notation.
+- `--prefix`: desired subnet prefix; it must be at least as specific as the parent pool.
+- `--count`: requested number of subnets, from 1 to 256.
+- Output includes `mode: plan-only` and `applied: false`.
+- The planner refuses pools with more than one million candidate subnets to avoid unbounded work.
+- A partial result returns exit code 1 and `complete: false`; invalid arguments return exit code 2.
+
+Review every plan against organizational reservations, routing design, DHCP scopes, and change records before using it operationally.
