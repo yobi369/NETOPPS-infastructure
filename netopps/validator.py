@@ -8,6 +8,9 @@ from typing import Any
 
 _ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$")
 _ROLES = {"router", "switch", "firewall", "server", "access_point", "load_balancer", "other"}
+_MAX_DEVICES = 10_000
+_MAX_NETWORKS = 10_000
+_MAX_OVERLAP_FINDINGS = 10_000
 
 
 def validate_inventory(data: Any) -> list[dict[str, str]]:
@@ -36,6 +39,12 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
     if not isinstance(networks, list):
         add("networks.type", "$.networks", "networks must be an array.")
         networks = []
+    if len(devices) > _MAX_DEVICES:
+        add("devices.limit", "$.devices", f"devices exceeds the {_MAX_DEVICES:,}-item safety limit.")
+        devices = devices[:_MAX_DEVICES]
+    if len(networks) > _MAX_NETWORKS:
+        add("networks.limit", "$.networks", f"networks exceeds the {_MAX_NETWORKS:,}-item safety limit.")
+        networks = networks[:_MAX_NETWORKS]
 
     seen_device_ids: set[str] = set()
     seen_management_ips: dict[str, str] = {}
@@ -122,13 +131,44 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
         except (ValueError, TypeError):
             add("network.cidr", f"{path}.cidr", "cidr must be a valid network address with its correct prefix boundary.")
 
-    for index, (left_id, left) in enumerate(parsed_networks):
-        for right_id, right in parsed_networks[index + 1 :]:
-            if left.version == right.version and left.overlaps(right):
-                add(
-                    "network.overlap",
-                    "$.networks",
-                    f"Networks {left_id!r} ({left}) and {right_id!r} ({right}) overlap.",
-                )
+    ordered_networks = sorted(
+        parsed_networks,
+        key=lambda item: (
+            item[1].version,
+            int(item[1].network_address),
+            int(item[1].broadcast_address),
+            item[0],
+        ),
+    )
+    active: list[tuple[str, ipaddress.IPv4Network | ipaddress.IPv6Network]] = []
+    active_version: int | None = None
+    overlap_count = 0
+    overlap_limit_reached = False
+    for right_id, right in ordered_networks:
+        if active_version != right.version:
+            active = []
+            active_version = right.version
+        right_start = int(right.network_address)
+        active = [(left_id, left) for left_id, left in active if int(left.broadcast_address) >= right_start]
+        for left_id, left in active:
+            if overlap_count >= _MAX_OVERLAP_FINDINGS:
+                overlap_limit_reached = True
+                break
+            add(
+                "network.overlap",
+                "$.networks",
+                f"Networks {left_id!r} ({left}) and {right_id!r} ({right}) overlap.",
+            )
+            overlap_count += 1
+        if overlap_limit_reached:
+            break
+        active.append((right_id, right))
+
+    if overlap_limit_reached:
+        add(
+            "network.overlap_limit",
+            "$.networks",
+            f"Additional overlap findings were suppressed after {_MAX_OVERLAP_FINDINGS:,} pairs.",
+        )
 
     return sorted(findings, key=lambda item: (item["path"], item["code"], item["message"]))
