@@ -20,6 +20,10 @@ See [CLI Output Contract](OUTPUT-SCHEMA.md) for the versioned JSON response shap
 - `1`: inventory was parsed but failed validation.
 - `2`: input file could not be read or was not valid JSON.
 
+## Data handling
+
+NETOPPS does not store inventory or reports and does not upload them. JSON results are written to standard output; redirecting output to a file makes that file the operator's responsibility. Protect input and output files as sensitive network documentation, and follow your organization's retention and deletion policy.
+
 ## Safe workflow
 
 1. Make a copy of the sample inventory.
