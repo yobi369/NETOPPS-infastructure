@@ -19,7 +19,7 @@ This roadmap records intent. A milestone is complete only when its acceptance cr
 
 - [x] Publish a versioned JSON Schema contract for inventory structure.
 - [x] Detect duplicate management IP addresses and case-insensitive duplicate hostnames.
-- [ ] Add schema-driven compatibility tests and version migration rules.
+- [x] Add schema-driven compatibility tests and document version migration rules.
 - [ ] Add safe CSV import/export with round-trip tests.
 - [ ] Add site consistency checks.
 - [ ] Add report summaries that distinguish errors from warnings.
