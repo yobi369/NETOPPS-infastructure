@@ -22,6 +22,7 @@ This document is a release checklist, not a claim that the project has passed it
 
 - [x] Pin GitHub Actions to immutable commit SHAs and document reviewed updates.
 - [x] Run Bandit static analysis in CI.
+- [x] Audit installed Python dependencies for known vulnerabilities in CI.
 - [ ] Add secret scanning and triage all findings.
 - [ ] Add threat-model review for each network integration.
 - [x] Define supported Python versions (Python 3.11+) and weekly dependency update proposals.
