@@ -28,8 +28,8 @@ Acceptance: fixtures cover valid/invalid cases; import/export preserves data; sc
 
 ## Phase 3 — Network planning
 
-- Add explicit subnet allocation planning and utilization summaries.
-- Add deterministic plans and before/after diffs.
+- [x] Add deterministic read-only subnet allocation planning.
+- Add subnet utilization summaries and before/after inventory diffs.
 - Add property-based or fuzz-style tests for address boundaries.
 
 Acceptance: no plan is applied to a device; edge cases and IPv4/IPv6 are tested.
