@@ -113,21 +113,22 @@ def main() -> int:
 
     findings = validate_inventory(inventory)
     if findings:
-        print(json.dumps({"valid": False, "finding_count": len(findings), "findings": findings}, indent=2))
+        print(json.dumps({"output_schema_version": 1, "valid": False, "finding_count": len(findings), "findings": findings}, indent=2))
         return 1
 
     if args.command == "validate":
-        print(json.dumps({"valid": True, "finding_count": 0, "findings": []}, indent=2))
+        print(json.dumps({"output_schema_version": 1, "valid": True, "finding_count": 0, "findings": []}, indent=2))
         return 0
 
     try:
         allocated = allocate_subnets(inventory, args.pool, args.prefix, args.count)
     except (ValueError, TypeError) as exc:
-        print(json.dumps({"valid": False, "error": str(exc), "allocated": []}, indent=2))
+        print(json.dumps({"output_schema_version": 1, "valid": False, "error": str(exc), "allocated": []}, indent=2))
         return 2
 
     complete = len(allocated) == args.count
     print(json.dumps({
+        "output_schema_version": 1,
         "valid": complete,
         "mode": "plan-only",
         "pool": args.pool,
