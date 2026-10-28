@@ -15,7 +15,7 @@ Thanks for helping improve NETOPPS. The current scope is a local-only inventory 
 Use Python 3.11 or newer:
 
 ```bash
-python -m pip install ".[test]"
+python -m pip install -e ".[test]"
 ruff check netopps tests
 bandit -q -r netopps
 detect-secrets scan --all-files
