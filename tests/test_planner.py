@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import random
 import ipaddress
+import random
 import unittest
 
 from netopps.planner import allocate_subnets
