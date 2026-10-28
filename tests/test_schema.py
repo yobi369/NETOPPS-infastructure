@@ -22,6 +22,20 @@ class InventorySchemaTests(unittest.TestCase):
     def test_missing_required_root_property_is_rejected(self) -> None:
         self.assertTrue(list(self.validator.iter_errors({"schema_version": 1, "devices": []})))
 
+    def test_invalid_hostname_is_rejected(self) -> None:
+        data = {
+            "schema_version": 1,
+            "devices": [{
+                "id": "router-01",
+                "hostname": "bad..hostname",
+                "management_ip": "192.0.2.10",
+                "role": "router",
+            }],
+            "networks": [],
+        }
+        errors = list(self.validator.iter_errors(data))
+        self.assertTrue(any(error.json_path.endswith("hostname") for error in errors))
+
     def test_invalid_management_ip_is_rejected(self) -> None:
         data = {
             "schema_version": 1,
