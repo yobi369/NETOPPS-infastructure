@@ -14,7 +14,7 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] Inventory item counts and overlap report volume have explicit limits.
 - [x] DNS hostname labels are validated against the versioned schema contract.
 - [x] Subnet planner is deterministic, dry-run only, and bounded to one million candidates.
-- [ ] Latest GitHub Actions run passes on every supported Python version for the current branch head.
+- [x] Latest GitHub Actions run passes on every supported Python version for the current branch head (CI run #209).
 - [x] Test coverage is measured and an 80% minimum threshold is enforced in CI.
 - [x] Deterministic randomized/property-style tests exercise subnet overlap and allocation boundaries.
 - [ ] Broader parser fuzzing remains a future hardening task.
