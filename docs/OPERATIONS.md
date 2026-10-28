@@ -28,6 +28,7 @@ python -m netopps plan-subnets examples/inventory.json --pool 10.20.0.0/16 --pre
 ## Troubleshooting
 
 - `inventory.schema_version`: set the supported schema version to integer `1`.
+- `device.hostname`: use an ASCII DNS hostname with valid labels (letters/digits at the ends, letters/digits/hyphens inside); a single trailing root dot is accepted.
 - `device.management_ip`: use a literal IPv4 or IPv6 address, not a hostname.
 - `network.cidr`: use a canonical network address and prefix, for example `192.0.2.0/24`.
 - `network.overlap`: review whether overlapping ranges are intentional; this validator reports overlap but cannot infer business intent.
