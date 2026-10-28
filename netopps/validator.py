@@ -7,10 +7,20 @@ import re
 from typing import Any
 
 _ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$")
+_HOST_LABEL_PATTERN = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$")
 _ROLES = {"router", "switch", "firewall", "server", "access_point", "load_balancer", "other"}
 _MAX_DEVICES = 10_000
 _MAX_NETWORKS = 10_000
 _MAX_OVERLAP_FINDINGS = 10_000
+
+
+def _valid_hostname(value: str) -> bool:
+    """Accept ASCII DNS hostnames, including a single trailing root dot."""
+    normalized = value[:-1] if value.endswith(".") else value
+    if not normalized or len(normalized) > 253:
+        return False
+    labels = normalized.split(".")
+    return all(_HOST_LABEL_PATTERN.fullmatch(label) for label in labels)
 
 
 def validate_inventory(data: Any) -> list[dict[str, str]]:
@@ -63,7 +73,7 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
             seen_device_ids.add(identifier)
 
         hostname = device.get("hostname")
-        if not isinstance(hostname, str) or not hostname.strip() or any(ch.isspace() for ch in hostname):
+        if not isinstance(hostname, str) or not hostname.strip() or any(ch.isspace() for ch in hostname) or not _valid_hostname(hostname):
             add("device.hostname", f"{path}.hostname", "hostname must be a non-empty string without whitespace.")
         else:
             normalized_hostname = hostname.rstrip(".").casefold()
