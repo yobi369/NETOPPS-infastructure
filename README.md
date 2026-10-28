@@ -25,7 +25,7 @@ Network changes fail in expensive ways when inventory is inconsistent, addressin
 - Validate JSON infrastructure inventory structure.
 - Generate deterministic, read-only subnet allocation plans from a specified IPv4 or IPv6 pool.
 - Check IPv4/IPv6 CIDR syntax and detect overlapping networks.
-- Detect duplicate device identifiers, duplicate management IP addresses, invalid roles, and invalid management ports.
+- Detect duplicate device identifiers, duplicate hostnames, duplicate management IP addresses, invalid roles, and invalid management ports.
 - Reject ambiguous duplicate JSON keys, malformed UTF-8, and input files larger than 5 MiB.
 - Produce deterministic machine-readable findings with documented exit codes.
 - Exercise CLI and validator behavior with automated tests.
