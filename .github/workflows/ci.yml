@@ -37,13 +37,13 @@ jobs:
           python -m json.tool schemas/inventory.schema.json > /dev/null
           python -m json.tool examples/inventory.json > /dev/null
       - name: Install package
-        run: python -m pip install ".[test]"
+        run: python -m pip install -e ".[test]"
       - name: Lint Python source
         run: ruff check netopps tests
       - name: Static security analysis
         run: bandit -q -r netopps
       - name: Audit installed Python dependencies
-        run: pip-audit
+        run: pip-audit --skip-editable
       - name: Build wheel and install artifact
         run: |
           python -m pip wheel --no-deps --wheel-dir dist .
