@@ -12,10 +12,41 @@ from netopps.planner import allocate_subnets
 from netopps.validator import validate_inventory
 
 _MAX_INPUT_BYTES = 5 * 1024 * 1024
+_MAX_JSON_DEPTH = 100
 
 
 class DuplicateJSONKeyError(ValueError):
     """Raised when a JSON object repeats a key."""
+
+
+class JSONNestingLimitError(ValueError):
+    """Raised when JSON nesting exceeds the supported safety limit."""
+
+
+def _check_json_nesting(text: str) -> None:
+    """Bound structural nesting without counting braces inside JSON strings."""
+    depth = 0
+    in_string = False
+    escaped = False
+    for character in text:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif character == chr(92):
+                escaped = True
+            elif character == '"':
+                in_string = False
+            continue
+        if character == '"':
+            in_string = True
+        elif character in "[{":
+            depth += 1
+            if depth > _MAX_JSON_DEPTH:
+                raise JSONNestingLimitError(
+                    f"JSON nesting exceeds the {_MAX_JSON_DEPTH}-level safety limit"
+                )
+        elif character in "]}":
+            depth -= 1
 
 
 def _unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
@@ -46,11 +77,12 @@ def _read_inventory(path: Path) -> tuple[Any | None, int]:
         return None, 2
 
     try:
+        _check_json_nesting(text)
         return json.loads(text, object_pairs_hook=_unique_object), 0
     except json.JSONDecodeError as exc:
         print(f"error: invalid JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}", file=sys.stderr)
         return None, 2
-    except DuplicateJSONKeyError as exc:
+    except (DuplicateJSONKeyError, JSONNestingLimitError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return None, 2
     except RecursionError:
