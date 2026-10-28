@@ -23,6 +23,7 @@ Network changes fail in expensive ways when inventory is inconsistent, addressin
 ## Current capabilities
 
 - Validate JSON infrastructure inventory structure.
+- Generate deterministic, read-only subnet allocation plans from a specified IPv4 or IPv6 pool.
 - Check IPv4/IPv6 CIDR syntax and detect overlapping networks.
 - Detect duplicate device identifiers, duplicate management IP addresses, invalid roles, and invalid management ports.
 - Reject ambiguous duplicate JSON keys, malformed UTF-8, and input files larger than 5 MiB.
@@ -35,6 +36,7 @@ Requires Python 3.11 or newer.
 
 ```bash
 python -m netopps validate examples/inventory.json
+netopps plan-subnets examples/inventory.json --pool 10.20.0.0/16 --prefix 24 --count 4
 python -m unittest discover -s tests -v
 ```
 
@@ -48,7 +50,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 
 ## Repository map
 
-- `netopps/` — core validation package and CLI.
+- `netopps/` — core validation, subnet planning package, and CLI.
 - `tests/` — validator and CLI regression tests.
 - `examples/` — safe, synthetic inventory.
 - `schemas/` — versioned inventory schema.
