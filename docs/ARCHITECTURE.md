@@ -2,7 +2,7 @@
 
 ## Current implementation
 
-The foundation is a local Python CLI with no network-side effects:
+The foundation is a Python CLI. Inventory validation and subnet planning are local-only; the optional connectivity command can open bounded TCP connections to explicitly listed management endpoints only when the operator supplies `--allow-network`.
 
 1. `python -m netopps validate <file>` reads a local JSON document.
 2. JSON decoding errors are reported to stderr and return exit code 2.
@@ -10,7 +10,9 @@ The foundation is a local Python CLI with no network-side effects:
 4. Valid input exits 0; invalid inventory exits 1.
 5. The validator and subnet planner never open sockets or change device state.
 6. The subnet planner emits deterministic candidate CIDRs and explicitly labels plans as not applied.
-7. Allocation checks merge occupied address ranges before searching, bounding the work by inventory sorting plus the configured candidate limit.
+7. The connectivity checker opens TCP sockets only to inventory-listed management endpoints, sends no application payload, and closes each connection.
+8. Allocation checks merge occupied address ranges before searching, bounding the work by inventory sorting plus the configured candidate limit.
+9. Connectivity concurrency is capped at eight workers and per-connection timeout at three seconds.
 8. Connectivity checks target only inventory-listed management IPs, require an explicit CLI opt-in, use bounded concurrency/timeouts, and send no application data.
 
 ## Boundaries
