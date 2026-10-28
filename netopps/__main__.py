@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from netopps.health import check_connectivity
 from netopps.planner import allocate_subnets
 from netopps.validator import validate_inventory
 
@@ -105,7 +106,20 @@ def main() -> int:
     plan_parser.add_argument("--pool", required=True, help="parent CIDR pool, for example 10.20.0.0/16")
     plan_parser.add_argument("--prefix", required=True, type=int, help="desired subnet prefix, for example 24")
     plan_parser.add_argument("--count", required=True, type=int, help="number of subnets to plan (1-256)")
+
+    health_parser = subparsers.add_parser(
+        "check-connectivity",
+        help="check TCP reachability only for explicitly listed management endpoints",
+    )
+    health_parser.add_argument("file", type=Path, help="path to a valid inventory JSON file")
+    health_parser.add_argument("--allow-network", action="store_true", help="explicitly permit TCP connection attempts")
+    health_parser.add_argument("--limit", type=int, default=20, help="maximum devices to check (1-100; default 20)")
+    health_parser.add_argument("--timeout", type=float, default=1.0, help="per-connection timeout in seconds (0.1-3.0)")
     args = parser.parse_args()
+
+    if args.command == "check-connectivity" and not args.allow_network:
+        print("error: check-connectivity requires explicit --allow-network consent", file=sys.stderr)
+        return 2
 
     inventory, read_status = _read_inventory(args.file)
     if read_status:
@@ -119,6 +133,17 @@ def main() -> int:
     if args.command == "validate":
         print(json.dumps({"output_schema_version": 1, "valid": True, "finding_count": 0, "findings": []}, indent=2))
         return 0
+
+    if args.command == "check-connectivity":
+        try:
+            report = check_connectivity(inventory, limit=args.limit, timeout=args.timeout)
+        except (ValueError, TypeError) as exc:
+            print(json.dumps({"output_schema_version": 1, "valid": False, "error": str(exc)}, indent=2))
+            return 2
+        report["output_schema_version"] = 1
+        report["valid"] = report["all_reachable"]
+        print(json.dumps(report, indent=2))
+        return 0 if report["all_reachable"] else 1
 
     try:
         allocated = allocate_subnets(inventory, args.pool, args.prefix, args.count)
