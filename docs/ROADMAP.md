@@ -10,15 +10,19 @@ This roadmap records intent. A milestone is complete only when its acceptance cr
 - [x] Deterministic JSON findings and exit codes.
 - [x] Synthetic example inventory and unit tests.
 - [x] CI workflow for Python 3.11–3.13.
-- [x] Security, architecture, and operations documentation.
-- [ ] Observe successful GitHub Actions runs on the branch.
+- [x] Security, architecture, operations, and production-readiness documentation.
+- [x] CLI input-size limit, UTF-8 validation, and duplicate JSON-key rejection.
+- [x] Installable Python package with a console entry point.
+- [ ] Observe successful GitHub Actions runs on the latest branch head after the most recent changes.
 
 ## Phase 2 — Inventory quality
 
-- Add a formal JSON Schema and version migration rules.
-- Add safe CSV import/export with round-trip tests.
-- Add duplicate management-IP and site consistency checks.
-- Add report summaries that distinguish errors from warnings.
+- [x] Publish a versioned JSON Schema contract for inventory structure.
+- [x] Detect duplicate management IP addresses.
+- [ ] Add schema-driven compatibility tests and version migration rules.
+- [ ] Add safe CSV import/export with round-trip tests.
+- [ ] Add site consistency checks.
+- [ ] Add report summaries that distinguish errors from warnings.
 
 Acceptance: fixtures cover valid/invalid cases; import/export preserves data; schema compatibility is documented.
 
