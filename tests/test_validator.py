@@ -25,6 +25,15 @@ class InventoryValidatorTests(unittest.TestCase):
         example = json.loads(Path("examples/inventory.json").read_text(encoding="utf-8"))
         self.assertEqual([], validate_inventory(example))
 
+    def test_unknown_top_level_property_is_rejected(self) -> None:
+        data = {**self.valid, "unexpected": True}
+        self.assertIn("inventory.unknown_property", {f["code"] for f in validate_inventory(data)})
+
+    def test_invalid_site_is_rejected(self) -> None:
+        device = {**self.valid["devices"][0], "site": ""}
+        data = {**self.valid, "devices": [device]}
+        self.assertIn("device.site", {f["code"] for f in validate_inventory(data)})
+
     def test_non_object_is_rejected(self) -> None:
         self.assertEqual("inventory.type", validate_inventory([])[0]["code"])
 
