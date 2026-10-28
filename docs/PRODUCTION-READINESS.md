@@ -20,7 +20,7 @@ This document is a release checklist, not a claim that the project has passed it
 
 ## Gate B — Security and supply chain
 
-- [ ] Pin GitHub Actions to immutable commit SHAs and document reviewed updates.
+- [x] Pin GitHub Actions to immutable commit SHAs and document reviewed updates.
 - [x] Run Bandit static analysis in CI.
 - [ ] Add secret scanning and triage all findings.
 - [ ] Add threat-model review for each network integration.
