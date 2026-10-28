@@ -10,6 +10,7 @@ The foundation is a local Python CLI with no network-side effects:
 4. Valid input exits 0; invalid inventory exits 1.
 5. The validator and subnet planner never open sockets or change device state.
 6. The subnet planner emits deterministic candidate CIDRs and explicitly labels plans as not applied.
+7. Allocation checks merge occupied address ranges before searching, bounding the work by inventory sorting plus the configured candidate limit.
 
 ## Boundaries
 
