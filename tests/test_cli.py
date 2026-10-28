@@ -35,13 +35,17 @@ class CliTests(unittest.TestCase):
         }).encode()
         code, stdout, stderr = self.run_cli(payload)
         self.assertEqual(0, code)
-        self.assertTrue(json.loads(stdout)["valid"])
+        result = json.loads(stdout)
+        self.assertTrue(result["valid"])
+        self.assertEqual(1, result["output_schema_version"])
         self.assertEqual("", stderr)
 
     def test_invalid_inventory_returns_one(self) -> None:
         code, stdout, _ = self.run_cli(b'{"schema_version": 1, "devices": "bad", "networks": []}')
         self.assertEqual(1, code)
-        self.assertFalse(json.loads(stdout)["valid"])
+        result = json.loads(stdout)
+        self.assertFalse(result["valid"])
+        self.assertEqual(1, result["output_schema_version"])
 
     def test_malformed_json_returns_two(self) -> None:
         code, _, stderr = self.run_cli(b'{"schema_version":')
@@ -91,6 +95,7 @@ class CliTests(unittest.TestCase):
         self.assertEqual(0, code)
         self.assertEqual(["10.0.1.0/24", "10.0.2.0/24"], result["allocated"])
         self.assertFalse(result["applied"])
+        self.assertEqual(1, result["output_schema_version"])
         self.assertEqual("", stderr)
 
     def test_plan_subnets_reports_incomplete_plan(self) -> None:
@@ -115,7 +120,9 @@ class CliTests(unittest.TestCase):
             extra_args=["plan-subnets", "--pool", "not-a-cidr", "--prefix", "24", "--count", "1"],
         )
         self.assertEqual(2, code)
-        self.assertFalse(json.loads(stdout)["valid"])
+        result = json.loads(stdout)
+        self.assertFalse(result["valid"])
+        self.assertEqual(1, result["output_schema_version"])
 
 
 if __name__ == "__main__":
