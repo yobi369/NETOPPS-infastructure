@@ -46,7 +46,6 @@ python -m netopps validate examples/inventory.json
 netopps plan-subnets examples/inventory.json --pool 10.20.0.0/16 --prefix 24 --count 4
 # Only run on networks you are authorized to check; this opens TCP connections.
 netopps check-connectivity examples/inventory.json --allow-network --limit 20 --timeout 1.0
-python -m unittest discover -s tests -v
 ```
 
 Exit codes: `0` means the requested checks passed; `1` means inventory findings, an incomplete subnet plan, an unreachable endpoint, or a truncated connectivity scope; `2` means input/arguments could not be safely processed.
@@ -82,9 +81,15 @@ Inventory validation and subnet planning parse local JSON and do not open networ
 ## Development and CI
 
 ```bash
+python -m pip install ".[test]"
 python -m compileall -q netopps tests
+ruff check netopps tests
+bandit -q -r netopps
+detect-secrets scan --all-files --exclude-files '(^|/)(\\.git|\\.ruff_cache|htmlcov|dist|build)/'
+pip-audit --skip-editable
+coverage run --branch --source=netopps -m unittest discover -s tests -v
+coverage report --fail-under=80
 python -m json.tool schemas/inventory.schema.json > /dev/null
-python -m unittest discover -s tests -v
 python -m netopps validate examples/inventory.json
 ```
 
