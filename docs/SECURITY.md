@@ -2,7 +2,7 @@
 
 ## Scope today
 
-The current tool validates a local JSON file. It does not connect to devices, scan hosts, invoke shell commands, or modify infrastructure.
+The tool validates local JSON and creates subnet plans without network I/O. An optional connectivity command can open TCP connections only to management endpoints explicitly listed in the inventory, and only when the operator supplies `--allow-network`. It sends no application payload and never scans or discovers targets.
 
 ## Assets and risks
 
@@ -18,7 +18,7 @@ The current tool validates a local JSON file. It does not connect to devices, sc
 3. Treat invalid input as failure; do not silently coerce or guess.
 4. Keep CI permissions read-only unless a workflow has a reviewed, narrowly scoped reason otherwise.
 5. Pin GitHub Actions to immutable upstream commit SHAs; update pins through reviewed pull requests and rerun CI. The workflow currently uses official GitHub actions only.
-6. Keep future device integrations read-only by default and enforce explicit allowlists.
+6. Keep network checks scoped to inventory-listed targets, opt-in, read-only, timeout-bounded, and concurrency-limited. Future device integrations must enforce explicit allowlists.
 7. Redact secrets from logs and error messages.
 8. For write operations, require plan review, explicit operator approval, change-window awareness, timeout, post-change verification, and rollback instructions.
 
