@@ -10,7 +10,7 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - IPv4/IPv6 CIDR validation and bounded overlap reporting.
 - Read-only IPv4/IPv6 subnet allocation planning.
 - Input-size, UTF-8, duplicate JSON-key, and excessive-nesting safeguards.
-- Versioned inventory JSON Schema and schema validation tests.
+- Versioned inventory JSON Schema, schema validation tests, and a versioned CLI output contract.
 - Python package metadata and `netopps` console entry point.
 - CI across Python 3.11, 3.12, and 3.13 with linting, static security analysis, coverage, schema checks, and wheel installation verification.
 - Security, contributor, operations, architecture, roadmap, and production-readiness documentation.
