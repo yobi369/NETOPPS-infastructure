@@ -29,12 +29,19 @@ class InventoryValidatorTests(unittest.TestCase):
         self.assertEqual("inventory.type", validate_inventory([])[0]["code"])
 
     def test_wrong_schema_version_is_rejected(self) -> None:
-        data = {**self.valid, "schema_version": "1"}
-        self.assertIn("inventory.schema_version", {f["code"] for f in validate_inventory(data)})
+        for version in ("1", True, 1.0, None):
+            with self.subTest(version=version):
+                data = {**self.valid, "schema_version": version}
+                self.assertIn("inventory.schema_version", {f["code"] for f in validate_inventory(data)})
 
     def test_duplicate_device_ids_are_rejected(self) -> None:
         data = {**self.valid, "devices": self.valid["devices"] * 2}
         self.assertIn("device.duplicate_id", {f["code"] for f in validate_inventory(data)})
+
+    def test_duplicate_management_ips_are_rejected(self) -> None:
+        second = {**self.valid["devices"][0], "id": "router-02"}
+        data = {**self.valid, "devices": [self.valid["devices"][0], second]}
+        self.assertIn("device.duplicate_management_ip", {f["code"] for f in validate_inventory(data)})
 
     def test_invalid_ip_and_port_are_rejected(self) -> None:
         device = {**self.valid["devices"][0], "management_ip": "999.1.1.1", "management_port": True}
@@ -43,9 +50,21 @@ class InventoryValidatorTests(unittest.TestCase):
         self.assertIn("device.management_ip", codes)
         self.assertIn("device.management_port", codes)
 
+    def test_invalid_role_type_is_rejected(self) -> None:
+        device = {**self.valid["devices"][0], "role": ["router"]}
+        data = {**self.valid, "devices": [device]}
+        self.assertIn("device.role", {f["code"] for f in validate_inventory(data)})
+
     def test_invalid_cidr_boundary_is_rejected(self) -> None:
         data = {**self.valid, "networks": [{"id": "bad", "cidr": "198.51.100.1/24"}]}
         self.assertIn("network.cidr", {f["code"] for f in validate_inventory(data)})
+
+    def test_duplicate_network_ids_are_rejected(self) -> None:
+        data = {**self.valid, "networks": [
+            {"id": "users", "cidr": "198.51.100.0/24"},
+            {"id": "users", "cidr": "203.0.113.0/24"},
+        ]}
+        self.assertIn("network.duplicate_id", {f["code"] for f in validate_inventory(data)})
 
     def test_overlapping_networks_are_reported(self) -> None:
         data = {**self.valid, "networks": [
