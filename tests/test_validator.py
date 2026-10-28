@@ -80,6 +80,22 @@ class InventoryValidatorTests(unittest.TestCase):
         ]}
         self.assertIn("network.duplicate_id", {f["code"] for f in validate_inventory(data)})
 
+    def test_excessive_overlap_findings_are_bounded(self) -> None:
+        data = {**self.valid, "networks": [
+            {"id": f"net-{index}", "cidr": "10.0.0.0/24"} for index in range(200)
+        ]}
+        findings = validate_inventory(data)
+        codes = [finding["code"] for finding in findings]
+        self.assertIn("network.overlap_limit", codes)
+        self.assertEqual(10_000, codes.count("network.overlap"))
+
+    def test_excessive_network_count_is_rejected(self) -> None:
+        data = {**self.valid, "networks": [
+            {"id": f"net-{index}", "cidr": f"10.{index // 256}.{index % 256}.0/24"}
+            for index in range(10_001)
+        ]}
+        self.assertIn("networks.limit", {finding["code"] for finding in validate_inventory(data)})
+
     def test_overlapping_networks_are_reported(self) -> None:
         data = {**self.valid, "networks": [
             {"id": "parent", "cidr": "10.0.0.0/16"},
