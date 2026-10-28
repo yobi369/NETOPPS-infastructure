@@ -29,7 +29,8 @@ def _unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
 
 def _read_inventory(path: Path) -> tuple[Any | None, int]:
     try:
-        raw = path.read_bytes()
+        with path.open("rb") as handle:
+            raw = handle.read(_MAX_INPUT_BYTES + 1)
     except OSError as exc:
         print(f"error: cannot read {path}: {exc}", file=sys.stderr)
         return None, 2
