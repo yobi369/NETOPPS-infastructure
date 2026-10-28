@@ -55,7 +55,7 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
         address = device.get("management_ip")
         try:
             if not isinstance(address, str):
-                raise ValueError
+                raise TypeError("management_ip must be a string")
             parsed_address = ipaddress.ip_address(address)
             canonical_address = str(parsed_address)
             if canonical_address in seen_management_ips:
@@ -66,7 +66,7 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
                 )
             else:
                 seen_management_ips[canonical_address] = str(identifier)
-        except ValueError:
+        except (ValueError, TypeError):
             add("device.management_ip", f"{path}.management_ip", "management_ip must be a valid IPv4 or IPv6 address.")
 
         port = device.get("management_port", 22)
@@ -95,10 +95,10 @@ def validate_inventory(data: Any) -> list[dict[str, str]]:
         cidr = network.get("cidr")
         try:
             if not isinstance(cidr, str):
-                raise ValueError
+                raise TypeError("cidr must be a string")
             parsed = ipaddress.ip_network(cidr, strict=True)
             parsed_networks.append((str(identifier), parsed))
-        except ValueError:
+        except (ValueError, TypeError):
             add("network.cidr", f"{path}.cidr", "cidr must be a valid network address with its correct prefix boundary.")
 
     for index, (left_id, left) in enumerate(parsed_networks):
