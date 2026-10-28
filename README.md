@@ -2,13 +2,13 @@
 
 **A safety-first, observable, automation-ready network infrastructure toolkit.**
 
-NETOPPS is being shaped into a practical NetOps engineering workspace: inventory validation, network-plan checks, operational runbooks, reproducible tests, and eventually carefully gated automation. The first principle is simple: **inspect and validate before changing live infrastructure**.
+NETOPPS is a practical NetOps engineering workspace for inventory validation, network-plan checks, operational runbooks, and carefully scoped connectivity checks. The first principle is simple: **inspect and validate before changing live infrastructure**.
 
-> Status: foundation phase. This repository is not yet a live network controller. The validator described below is the initial reference implementation; device integrations and live monitoring remain future work.
+> Status: production candidate for the documented local CLI scope. Authorized real-network lab acceptance remains required before relying on connectivity results operationally. NETOPPS is not a live network controller.
 
 ## Why this project
 
-Network changes fail in expensive ways when inventory is inconsistent, addressing plans overlap, assumptions are undocumented, or automation has no safe rollback. NETOPPS aims to make those risks visible early, using small composable tools, machine-readable inputs, evidence-backed reports, and explicit operator approval.
+Network changes fail in expensive ways when inventory is inconsistent, addressing plans overlap, assumptions are undocumented, or automation has no safe rollback. NETOPPS aims to make those risks visible early, using small composable tools, machine-readable inputs, reproducible reports, and explicit operator approval.
 
 ## Design principles
 
@@ -101,4 +101,4 @@ Every feature should include tests, a clear failure mode, updated documentation,
 
 ## License
 
-No license has been selected yet. Until a license is added, do not assume the repository grants permission to redistribute or reuse its contents.
+This project is licensed under the [MIT License](LICENSE). The license permits reuse, modification, and redistribution subject to its notice requirements and disclaims warranties. It does not grant permission to access any network or device; operators remain responsible for authorization and safe use.

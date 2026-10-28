@@ -1,10 +1,12 @@
 # Production Readiness Gates
 
-This document is a release checklist, not a claim that the project has passed it. Mark a gate complete only when its evidence is linked or recorded.
+This document is a release checklist, not a claim that the project has passed every gate. Mark a gate complete only when its evidence is linked or recorded.
 
 ## Current release posture
 
 **Status: production candidate for the documented local CLI scope; live-network acceptance remains pending.** Inventory validation and subnet planning are local-only. The optional TCP check is read-only and opt-in, but must pass the authorized lab acceptance procedure before its results are used for operational decisions. The project is not a live network controller and has no device configuration adapters, continuous monitoring, service/API, authentication, persistence, deployment target, or independent security assessment.
+
+The repository is licensed under the MIT License; see [LICENSE](../LICENSE). This is a reuse license, not a security or operational certification.
 
 ## Gate A — Core correctness
 
@@ -65,4 +67,4 @@ Not applicable to the current local CLI; complete these gates before introducing
 
 ## Release decision
 
-A release can be called production-ready only for a clearly stated scope and environment after all applicable gates are evidenced. The current local CLI is a production candidate for inventory validation and subnet planning. The opt-in TCP check still requires the authorized lab acceptance checklist before operational reliance. No license has been selected; do not distribute the package for third-party reuse until the owner makes that decision. Passing CI does not establish that a live network controller or future hosted service is production-ready.
+A release can be called production-ready only for a clearly stated scope and environment after all applicable gates are evidenced. The current local CLI is a production candidate for inventory validation and subnet planning. The opt-in TCP check still requires the authorized lab acceptance checklist before operational reliance. The MIT License is in place. Passing CI does not establish that a live network controller or future hosted service is production-ready.

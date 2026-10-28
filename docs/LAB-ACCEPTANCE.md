@@ -1,6 +1,21 @@
 # Authorized Network Lab Acceptance
 
-Use this checklist before relying on NETOPPS connectivity results for operational decisions. This is an operator-run acceptance procedure; CI does not contact external or production devices.
+Use this checklist before relying on NETOPPS connectivity results for operational decisions. CI does not contact external or production devices. This checklist must be completed by an operator with explicit authorization to test the chosen lab endpoints.
+
+## What can be verified without your lab
+
+The repository CI already exercises mocked success, refusal, timeout, and partial-scope cases, plus a real local loopback TCP handshake. These verify code paths and local socket behavior, but **do not** prove reachability, routing, firewall behavior, or device compatibility in your environment.
+
+## Inputs needed to finish environment-specific acceptance
+
+Before a real-network test can be run, the operator must identify and authorize:
+- The lab environment and test window.
+- One or more specific inventory-listed management IP/port pairs.
+- Which endpoint/port is expected to accept TCP, and a separate known-closed port or controlled timeout case if available.
+- Written authorization or change/ticket reference and any rate-limit/alerting constraints.
+- The machine/OS/Python version from which the check will run.
+
+Do not put sensitive IPs, hostnames, credentials, or topology in a public GitHub issue. Share only what is safe to disclose, or run the checklist locally and keep the acceptance record private.
 
 ## Safety preconditions
 
@@ -35,7 +50,6 @@ Use this checklist before relying on NETOPPS connectivity results for operationa
 ## Acceptance record
 
 Record the following outside the public repository if it contains sensitive topology:
-
 - Commit SHA and release version
 - Test date and operator
 - Lab environment and authorization/change reference
