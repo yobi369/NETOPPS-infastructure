@@ -110,6 +110,25 @@ class CliTests(unittest.TestCase):
         self.assertFalse(result["configuration_changed"])
         connect.assert_called_once_with(("192.0.2.10", 22), timeout=0.5)
 
+    def test_connectivity_cli_marks_truncated_scope_incomplete(self) -> None:
+        payload = json.dumps({
+            "schema_version": 1,
+            "devices": [
+                {"id": "router-01", "hostname": "router-01.example.test", "management_ip": "192.0.2.10", "role": "router"},
+                {"id": "router-02", "hostname": "router-02.example.test", "management_ip": "192.0.2.11", "role": "router"},
+            ],
+            "networks": [],
+        }).encode()
+        with patch("netopps.health.socket.create_connection", return_value=Mock()):
+            code, stdout, _ = self.run_cli(
+                payload,
+                extra_args=["check-connectivity", "--allow-network", "--limit", "1"],
+            )
+        result = json.loads(stdout)
+        self.assertEqual(1, code)
+        self.assertFalse(result["valid"])
+        self.assertTrue(result["scope_truncated"])
+
     def test_plan_subnets_is_read_only_and_deterministic(self) -> None:
         payload = json.dumps({
             "schema_version": 1,
