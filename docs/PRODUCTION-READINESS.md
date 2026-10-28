@@ -11,6 +11,7 @@ This document is a release checklist, not a claim that the project has passed it
 - [x] Unit tests cover core inventory checks.
 - [x] CLI returns documented exit codes for valid, invalid, and unreadable input.
 - [x] CLI rejects malformed JSON, duplicate JSON keys, non-UTF-8 input, and inputs over 5 MiB.
+- [x] Subnet planner is deterministic, dry-run only, and bounded to one million candidates.
 - [ ] Latest GitHub Actions run passes on every supported Python version after the latest changes.
 - [ ] Test coverage is measured and a justified threshold is enforced.
 - [ ] Fuzz/property tests exercise parser and CIDR boundary behavior.
