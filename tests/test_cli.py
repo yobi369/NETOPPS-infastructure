@@ -7,7 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from netopps.__main__ import _check_json_nesting, main
 
@@ -80,6 +80,35 @@ class CliTests(unittest.TestCase):
         code, _, stderr = self.run_cli(b"", exists=False)
         self.assertEqual(2, code)
         self.assertIn("cannot read", stderr)
+
+    def test_connectivity_requires_explicit_network_consent(self) -> None:
+        payload = json.dumps({"schema_version": 1, "devices": [], "networks": []}).encode()
+        code, _, stderr = self.run_cli(payload, extra_args=["check-connectivity"])
+        self.assertEqual(2, code)
+        self.assertIn("requires explicit --allow-network", stderr)
+
+    def test_connectivity_cli_uses_mocked_socket_and_versions_output(self) -> None:
+        payload = json.dumps({
+            "schema_version": 1,
+            "devices": [{
+                "id": "router-01",
+                "hostname": "router-01.example.test",
+                "management_ip": "192.0.2.10",
+                "role": "router",
+            }],
+            "networks": [],
+        }).encode()
+        with patch("netopps.health.socket.create_connection", return_value=Mock()) as connect:
+            code, stdout, _ = self.run_cli(
+                payload,
+                extra_args=["check-connectivity", "--allow-network", "--limit", "1", "--timeout", "0.5"],
+            )
+        result = json.loads(stdout)
+        self.assertEqual(0, code)
+        self.assertEqual(1, result["output_schema_version"])
+        self.assertEqual("read-only-tcp-check", result["mode"])
+        self.assertFalse(result["configuration_changed"])
+        connect.assert_called_once_with(("192.0.2.10", 22), timeout=0.5)
 
     def test_plan_subnets_is_read_only_and_deterministic(self) -> None:
         payload = json.dumps({
