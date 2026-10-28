@@ -19,7 +19,7 @@ A validation failure returns the same top-level shape with `valid: false`, a pos
 
 ## Subnet plan response
 
-`plan-subnets` returns `output_schema_version`, `valid`, `mode: "plan-only"`, `pool`, `prefix`, `requested`, `allocated_count`, `allocated`, `complete`, and `applied: false`. A partial allocation is a validly formed response but returns exit code 1 and `complete: false`.
+`plan-subnets` returns `output_schema_version`, `valid`, `mode: "plan-only"`, `pool`, `prefix`, `requested`, `allocated_count`, `allocated`, `complete`, and `applied: false`. A partial allocation is a validly formed response but returns exit code 1 and `complete: false`. The connectivity response includes `scope_truncated`; the CLI returns exit code 1 if the inventory was truncated, even when all checked endpoints were reachable.
 
 Expected planner argument errors return `output_schema_version`, `valid: false`, `error`, and an empty `allocated` list, with exit code 2. File/JSON parsing errors are written to stderr and return exit code 2 because no reliable JSON result can be constructed.
 
