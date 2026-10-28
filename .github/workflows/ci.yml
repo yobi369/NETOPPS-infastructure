@@ -44,7 +44,7 @@ jobs:
         run: bandit -q -r netopps
       - name: Scan repository for secrets
         run: |
-          detect-secrets scan --all-files --exclude-files '(^|/)(\\.git|\\.ruff_cache|htmlcov|dist|build)/' > /tmp/netopps-secrets.json
+          detect-secrets scan --all-files --exclude-files '(^|/)(\.git|\.ruff_cache|htmlcov|dist|build)/' > /tmp/netopps-secrets.json
           python -c 'import json, sys; results = json.load(open("/tmp/netopps-secrets.json", encoding="utf-8")).get("results", {}); findings = [(path, entries) for path, entries in results.items() if entries]; print(f"Secret scan findings: {sum(len(entries) for _, entries in findings)}"); [print(path, len(entries)) for path, entries in findings]; sys.exit(bool(findings))'
       - name: Audit installed Python dependencies
         run: pip-audit --skip-editable
