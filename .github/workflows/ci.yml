@@ -25,6 +25,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Compile source
         run: python -m compileall -q netopps tests
+      - name: Parse JSON schema and example
+        run: |
+          python -m json.tool schemas/inventory.schema.json > /dev/null
+          python -m json.tool examples/inventory.json > /dev/null
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
       - name: Validate example inventory
