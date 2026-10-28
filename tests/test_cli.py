@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from netopps.__main__ import main
+from netopps.__main__ import _check_json_nesting, main
 
 
 class CliTests(unittest.TestCase):
@@ -52,6 +52,9 @@ class CliTests(unittest.TestCase):
         code, _, stderr = self.run_cli(b'{"schema_version": 1, "schema_version": 1}')
         self.assertEqual(2, code)
         self.assertIn("duplicate JSON object key", stderr)
+
+    def test_json_nesting_scanner_ignores_delimiters_inside_strings(self) -> None:
+        _check_json_nesting('{"note":"' + "[" * 150 + '" }')
 
     def test_excessively_nested_json_returns_two(self) -> None:
         payload = b"[" * 1500 + b"0" + b"]" * 1500
