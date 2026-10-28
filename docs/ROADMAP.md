@@ -36,7 +36,8 @@ Acceptance: no plan is applied to a device; edge cases and IPv4/IPv6 are tested.
 
 ## Phase 4 — Read-only observability
 
-- Add opt-in, explicitly scoped checks with timeouts and bounded concurrency.
+- [x] Add opt-in TCP connectivity checks for inventory-listed endpoints with timeouts and bounded concurrency.
+- [x] Test connectivity behavior using mocked sockets and no external network access.
 - Support simulation mode with deterministic fake devices.
 - Redact sensitive data and provide structured event output.
 
