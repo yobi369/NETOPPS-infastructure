@@ -4,7 +4,7 @@ This document is a release checklist, not a claim that the project has passed it
 
 ## Current release posture
 
-**Status: early foundation / not production-ready.** The current tool validates local JSON inventory only. It has no device adapters, live monitoring, service/API, authentication, persistence, deployment target, or independent security assessment.
+**Status: not yet production-ready for operational reliance.** The tool validates local JSON inventory, plans subnets, and can perform explicitly opted-in TCP reachability checks against listed management endpoints. It has no device configuration adapters, continuous monitoring, service/API, authentication, persistence, deployment target, or independent security assessment.
 
 ## Gate A — Core correctness
 
