@@ -18,6 +18,7 @@ Use Python 3.11 or newer:
 python -m pip install ".[test]"
 ruff check netopps tests
 bandit -q -r netopps
+detect-secrets scan --all-files
 pip-audit --skip-editable
 coverage run --branch --source=netopps -m unittest discover -s tests -v
 coverage report --fail-under=80
