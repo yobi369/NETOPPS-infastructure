@@ -16,7 +16,7 @@ _MAX_OVERLAP_FINDINGS = 10_000
 
 def _valid_hostname(value: str) -> bool:
     """Accept ASCII DNS hostnames, including a single trailing root dot."""
-    normalized = value[:-1] if value.endswith(".") else value
+    normalized = value.removesuffix(".")
     if not normalized or len(normalized) > 253:
         return False
     labels = normalized.split(".")
