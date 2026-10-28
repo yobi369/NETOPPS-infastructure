@@ -81,6 +81,21 @@ class CliTests(unittest.TestCase):
         self.assertFalse(result["applied"])
         self.assertEqual("", stderr)
 
+    def test_plan_subnets_reports_incomplete_plan(self) -> None:
+        payload = json.dumps({
+            "schema_version": 1,
+            "devices": [],
+            "networks": [{"id": "reserved", "cidr": "10.0.0.0/24"}],
+        }).encode()
+        code, stdout, _ = self.run_cli(
+            payload,
+            extra_args=["plan-subnets", "--pool", "10.0.0.0/24", "--prefix", "24", "--count", "1"],
+        )
+        result = json.loads(stdout)
+        self.assertEqual(1, code)
+        self.assertFalse(result["complete"])
+        self.assertEqual([], result["allocated"])
+
     def test_plan_subnets_rejects_invalid_pool(self) -> None:
         payload = json.dumps({"schema_version": 1, "devices": [], "networks": []}).encode()
         code, stdout, _ = self.run_cli(
