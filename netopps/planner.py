@@ -17,7 +17,7 @@ def allocate_subnets(
     """Return the first available subnets from a pool without modifying inventory."""
     pool = ipaddress.ip_network(pool_cidr, strict=True)
     if isinstance(new_prefix, bool) or not isinstance(new_prefix, int):
-        raise ValueError("prefix must be an integer")
+        raise TypeError("prefix must be an integer")
     if not pool.prefixlen <= new_prefix <= pool.max_prefixlen:
         raise ValueError(f"prefix must be between {pool.prefixlen} and {pool.max_prefixlen} for pool {pool}")
     if isinstance(count, bool) or not isinstance(count, int) or not 1 <= count <= 256:
@@ -34,12 +34,12 @@ def allocate_subnets(
 
     raw_networks = inventory.get("networks", [])
     if not isinstance(raw_networks, list):
-        raise ValueError("inventory networks must be an array")
+        raise TypeError("inventory networks must be an array")
 
     occupied: list[ipaddress.IPv4Network | ipaddress.IPv6Network] = []
     for index, item in enumerate(raw_networks):
         if not isinstance(item, dict) or not isinstance(item.get("cidr"), str):
-            raise ValueError(f"inventory network at index {index} has no valid cidr field")
+            raise TypeError(f"inventory network at index {index} has no valid cidr field")
         try:
             network = ipaddress.ip_network(item["cidr"], strict=True)
         except ValueError as exc:
