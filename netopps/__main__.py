@@ -53,6 +53,9 @@ def _read_inventory(path: Path) -> tuple[Any | None, int]:
     except DuplicateJSONKeyError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return None, 2
+    except RecursionError:
+        print("error: JSON nesting exceeds parser safety limits", file=sys.stderr)
+        return None, 2
 
 
 def main() -> int:
