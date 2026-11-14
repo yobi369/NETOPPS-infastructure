@@ -37,3 +37,10 @@ Declared capacity and latency are scenario inputs, not measurements. Reports and
 **Status:** Accepted
 
 Traffic demand is supplied as a separate, versioned scenario and assigned deterministically to one lowest-latency path. The model aggregates rates on shared links and compares them with declared capacities. It must clearly disclose its single-path assumptions and must not present estimates as measured utilization or generate live traffic.
+
+
+## ADR-006: Keep structural risk scoring explainable and deterministic
+
+**Status:** Accepted
+
+NETOPPS uses a transparent rule-based score derived only from the supplied topology graph. The score reports separate evidence for fragmentation, articulation nodes, bridge links, and isolated nodes. It is a prioritization heuristic, not an outage probability or a substitute for operational risk assessment. Factor weights and severity bands are versioned and documented.
