@@ -65,3 +65,13 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Failure scenarios now report available, degraded, and unavailable services, including cascading required dependencies and optional dependency degradation.
 - Added CLI integration, strict reference/cycle validation, synthetic dependency examples, and documented simulation-only boundaries.
 - Corrected service dependency evaluation so links incident to failed nodes/sites are unavailable to dependent services; added regression tests for node, site, and pre-disabled link cases.
+
+
+## Unreleased — Institutional dependency-impact intelligence
+
+- Added paired institution identity metadata to service dependency records.
+- Added deterministic infrastructure-to-service failure paths and direct/transitive impact classification.
+- Added distinct additional-path counts while retaining per-dependency causal evidence.
+- Added institution-level aggregation and ranking using unique affected service priority weights.
+- Preserved required/optional dependency state semantics and the existing scenario CLI contract.
+- Added regression coverage for recursive propagation, multiple causal paths, institutional ranking, identity validation, non-mutation, and optional-dependency degradation.

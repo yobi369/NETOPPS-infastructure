@@ -107,3 +107,40 @@ Criticality and dependency weights are retained as prioritization metadata;
 they do not change dependency-state rules. This remains a deterministic
 simulation, not application monitoring, live dependency discovery, SLA
 verification, or proof that a service is operational.
+
+## Institutional dependency-impact reports
+
+The service dependency document may add `institution_id` and
+`institution_name` to each service. Supply both or neither; services sharing
+an institution ID must use the same institution name. This is operator-declared
+ownership metadata, not an inferred organizational relationship.
+
+For every affected service, the report includes:
+- `impact_scope`: `direct` when its own infrastructure dependency failed,
+  or `transitive` when impact arrived through a supporting service.
+- `failure_path`: one deterministic, shortest trace from the failed node,
+  link, or site to the affected service.
+- `additional_failure_path_count`: the number of other distinct causal paths
+  found for that service. Direct dependency evidence remains in
+  `failed_dependencies`.
+- `status`: `unavailable` when a required dependency is unavailable,
+  `degraded` when only optional dependencies or degraded supporting services
+  are affected, otherwise `available`.
+
+The report also returns `affected_institutions`, ranked by the sum of each
+unique affected service's declared priority weight
+(`criticality multiplier × dependency_weight). Services are counted once per
+institution even when multiple dependency paths reach them. Institution
+summaries include unavailable/degraded counts and affected service IDs. Services
+without institution metadata remain in the service report but are not assigned
+to an institution. A missing dependency or an unverified application-health
+signal is not silently treated as degraded; this model reports only states
+supported by the declared graph and simulated failure.
+
+Run with the existing scenario command:
+
+    netopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json --dependency-file examples/service-dependencies.json
+
+This remains a local, deterministic simulation. The primary path is an
+explanation of modeled dependency causality, not proof of a live incident path,
+application health, recovery time, SLA breach, or business loss.

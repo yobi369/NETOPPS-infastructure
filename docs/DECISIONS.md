@@ -99,3 +99,26 @@ is unavailable when the link is explicitly failed, disabled in the baseline,
 or incident to a failed node. The graph is operator-declared and simulation-only;
 no dependency discovery, service health checks, SLA claims, or live network
 operations are implied.
+
+
+## ADR-011: Explain recursive institutional dependency impact
+
+**Status:** Accepted
+
+**Context:** A service graph can show cascading states, but operators and
+institutional stakeholders also need a traceable root-cause path and a stable
+way to prioritize the organizations affected by a modeled infrastructure
+failure.
+
+**Decision:** Extend the existing version-1 service records with optional,
+paired institution ID/name metadata. For every affected service, expose a
+deterministic causal path from a failed infrastructure object through any
+supporting services to the affected service. Report additional distinct causal
+path counts, direct versus transitive scope, and institution summaries ranked
+by the sum of unique affected service priority weights. Preserve the existing
+available/degraded/unavailable state rules and existing CLI integration.
+
+**Consequences:** Institution-level summaries are only as reliable as supplied
+ownership, criticality, dependency and topology declarations. The primary path
+is a deterministic explanation, not a live route or health observation.
+Services without institution metadata remain reportable but unassigned.

@@ -476,3 +476,90 @@ class NetworkTopologyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InstitutionalDependencyImpactTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [{"id": "core"}, {"id": "app"}],
+            "links": [{"id": "core-app", "source": "core", "target": "app",
+                       "latency_ms": 1, "capacity_mbps": 100}],
+        })
+
+    def test_recursive_failure_paths_and_institution_ranking(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        graph = {
+            "schema_version": 1,
+            "services": [
+                {"id": "identity", "name": "Identity", "criticality": "high",
+                 "institution_id": "bank-a", "institution_name": "Bank A"},
+                {"id": "payments", "name": "Payments", "criticality": "mission_critical",
+                 "dependency_weight": 2, "institution_id": "bank-a", "institution_name": "Bank A"},
+                {"id": "records", "name": "Records", "criticality": "standard",
+                 "institution_id": "hospital-b", "institution_name": "Hospital B"},
+            ],
+            "dependencies": [
+                {"service_id": "identity", "depends_on_type": "node", "depends_on_id": "core"},
+                {"service_id": "payments", "depends_on_type": "service", "depends_on_id": "identity"},
+                {"service_id": "payments", "depends_on_type": "node", "depends_on_id": "app"},
+                {"service_id": "records", "depends_on_type": "service", "depends_on_id": "payments"},
+            ],
+        }
+        before = self.topology.report()
+        result = analyze_service_dependencies(self.topology, graph, failed_nodes={"core", "app"})
+        services = {item["id"]: item for item in result["services"]}
+        self.assertEqual("unavailable", services["identity"]["status"])
+        self.assertEqual("unavailable", services["payments"]["status"])
+        self.assertEqual("unavailable", services["records"]["status"])
+        self.assertEqual("direct", services["identity"]["impact_scope"])
+        self.assertEqual("transitive", services["records"]["impact_scope"])
+        self.assertEqual(
+            [{"type": "node", "id": "app"}, {"type": "service", "id": "payments"},
+             {"type": "service", "id": "records"}],
+            services["records"]["failure_path"],
+        )
+        self.assertEqual(1, services["payments"]["additional_failure_path_count"])
+        self.assertEqual("bank-a", result["affected_institutions"][0]["institution_id"])
+        self.assertEqual(10.5, result["affected_institutions"][0]["weighted_impact"])
+        self.assertEqual(before, self.topology.report())
+        self.assertFalse(result["topology_mutated"])
+
+    def test_optional_dependency_degrades_and_required_dependency_unavailable(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        graph = {
+            "schema_version": 1,
+            "services": [{"id": "optional", "name": "Optional service"},
+                         {"id": "consumer", "name": "Consumer"}],
+            "dependencies": [
+                {"service_id": "optional", "depends_on_type": "node", "depends_on_id": "core",
+                 "required": False},
+                {"service_id": "consumer", "depends_on_type": "service", "depends_on_id": "optional"},
+            ],
+        }
+        result = analyze_service_dependencies(self.topology, graph, failed_nodes={"core"})
+        statuses = {item["id"]: item["status"] for item in result["services"]}
+        self.assertEqual("degraded", statuses["optional"])
+        self.assertEqual("degraded", statuses["consumer"])
+        self.assertEqual("node", result["affected_services"][0]["failure_path"][0]["type"])
+
+    def test_institution_identity_must_be_complete_and_consistent(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        incomplete = {"schema_version": 1, "services": [
+            {"id": "a", "name": "A", "institution_id": "org-a"}
+        ], "dependencies": []}
+        with self.assertRaisesRegex(TopologyError, "together"):
+            analyze_service_dependencies(self.topology, incomplete)
+
+        conflicting = {"schema_version": 1, "services": [
+            {"id": "a", "name": "A", "institution_id": "org-a", "institution_name": "Org A"},
+            {"id": "b", "name": "B", "institution_id": "org-a", "institution_name": "Other name"},
+        ], "dependencies": [
+            {"service_id": "a", "depends_on_type": "node", "depends_on_id": "core"},
+            {"service_id": "b", "depends_on_type": "node", "depends_on_id": "core"},
+        ]}
+        with self.assertRaisesRegex(TopologyError, "conflicting names"):
+            analyze_service_dependencies(self.topology, conflicting, failed_nodes={"core"})
