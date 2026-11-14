@@ -1,7 +1,22 @@
 from __future__ import annotations
-import hashlib, json, tempfile, unittest, zipfile
+import hashlib
+import json
+import tempfile
+import unittest
+import zipfile
 from pathlib import Path
-from netopps.governance import PilotError, audit_append, audit_verify, approve, keygen, package, provenance, register_reviewer, verify_approval
+
+from netopps.governance import (
+    PilotError,
+    approve,
+    audit_append,
+    audit_verify,
+    keygen,
+    package,
+    provenance,
+    register_reviewer,
+    verify_approval,
+)
 from netopps.pilot import init_workspace
 
 class GovernanceTests(unittest.TestCase):
