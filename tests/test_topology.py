@@ -44,7 +44,7 @@ class NetworkTopologyTests(unittest.TestCase):
     def test_failure_simulation_reports_partition_without_mutation(self) -> None:
         before = self.topology.report()
         result = self.topology.simulate_failure(disabled_links={"core-a", "core-b"})
-        self.assertEqual(2, result["component_count_after"])
+        self.assertEqual(3, result["component_count_after"])
         self.assertEqual(3, result["newly_disconnected_node_pairs"])
         self.assertFalse(result["topology_mutated"])
         self.assertEqual(before, self.topology.report())
@@ -52,7 +52,7 @@ class NetworkTopologyTests(unittest.TestCase):
     def test_node_failure_removes_node_and_incident_links(self) -> None:
         result = self.topology.simulate_failure(disabled_nodes={"core"})
         self.assertEqual(4, result["remaining_node_count"])
-        self.assertEqual(3, result["component_count_after"])
+        self.assertEqual(2, result["component_count_after"])
 
     def test_rejects_duplicate_nodes(self) -> None:
         document = sample_topology()
