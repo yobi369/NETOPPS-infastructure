@@ -201,6 +201,83 @@ class NetworkTopology:
         return {"nodes": list(reversed(path_nodes)), "links": list(reversed(path_links)),
                 "latency_ms": round(distances[target], 6)}
 
+
+    def simulate_traffic(self, demands: Any) -> dict[str, Any]:
+        """Route modeled traffic demands and estimate declared-link capacity pressure."""
+        if not isinstance(demands, list):
+            raise TopologyError("traffic demands must be an array")
+        seen_ids: set[str] = set()
+        loads = {link.id: 0.0 for link in self._ordered_links}
+        demand_results: list[dict[str, Any]] = []
+        total_requested = 0.0
+        total_routed = 0.0
+
+        for index, demand in enumerate(demands):
+            if not isinstance(demand, dict):
+                raise TopologyError(f"demands[{index}] must be an object")
+            unknown = set(demand) - {"id", "source", "target", "demand_mbps"}
+            if unknown:
+                raise TopologyError(f"demands[{index}] has unknown properties")
+            identifier = demand.get("id")
+            source, target = demand.get("source"), demand.get("target")
+            rate = demand.get("demand_mbps")
+            if not isinstance(identifier, str) or not identifier.strip():
+                raise TopologyError(f"demands[{index}].id must be a non-empty string")
+            if identifier in seen_ids:
+                raise TopologyError(f"duplicate traffic demand id: {identifier}")
+            if not isinstance(source, str) or source not in self._nodes:
+                raise TopologyError(f"demands[{index}].source references an unknown node")
+            if not isinstance(target, str) or target not in self._nodes:
+                raise TopologyError(f"demands[{index}].target references an unknown node")
+            if (isinstance(rate, bool) or not isinstance(rate, (int, float))
+                    or not math.isfinite(rate) or rate <= 0):
+                raise TopologyError(f"demands[{index}].demand_mbps must be a finite positive number")
+            seen_ids.add(identifier)
+            total_requested += float(rate)
+            route = self.shortest_path(source, target)
+            if route is None:
+                demand_results.append({
+                    "id": identifier, "status": "unroutable",
+                    "source": source, "target": target, "demand_mbps": float(rate),
+                })
+                continue
+            total_routed += float(rate)
+            for link_id in route["links"]:
+                loads[link_id] += float(rate)
+            demand_results.append({
+                "id": identifier, "status": "routed", "source": source,
+                "target": target, "demand_mbps": float(rate), "path": route,
+            })
+
+        link_results = []
+        for link in self._ordered_links:
+            carried = loads[link.id]
+            utilization = carried / link.capacity_mbps * 100 if link.enabled else 0.0
+            overloaded = max(0.0, carried - link.capacity_mbps) if link.enabled else 0.0
+            link_results.append({
+                "id": link.id, "enabled": link.enabled,
+                "carried_mbps": round(carried, 6),
+                "capacity_mbps": link.capacity_mbps,
+                "utilization_pct": round(utilization, 3),
+                "overloaded_mbps": round(overloaded, 6),
+                "status": "disabled" if not link.enabled else (
+                    "congested" if overloaded > 0 else "within_capacity"
+                ),
+            })
+
+        return {
+            "mode": "simulation-only",
+            "routing_policy": "lowest-latency single path per demand",
+            "demand_count": len(demand_results),
+            "total_requested_mbps": round(total_requested, 6),
+            "total_routed_mbps": round(total_routed, 6),
+            "unroutable_demand_count": sum(item["status"] == "unroutable" for item in demand_results),
+            "congested_link_count": sum(item["status"] == "congested" for item in link_results),
+            "demands": sorted(demand_results, key=lambda item: item["id"]),
+            "links": link_results,
+            "topology_mutated": False,
+        }
+
     def simulate_failure(self, *, disabled_nodes: set[str] | None = None,
                          disabled_links: set[str] | None = None) -> dict[str, Any]:
         """Compare baseline and failure-state connectivity without mutating the twin."""
