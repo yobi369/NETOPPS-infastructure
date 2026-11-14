@@ -26,13 +26,14 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
 
     services: dict[str, dict[str, Any]] = {}
     for index, item in enumerate(raw_services):
-        allowed = {"id", "name", "criticality", "dependency_weight", "institution_id", "institution_name", "required_capacity_mbps"}
+        allowed = {"id", "name", "criticality", "dependency_weight", "institution_id", "institution_name", "required_capacity_mbps", "rto_minutes", "rpo_minutes"}
         if not isinstance(item, dict) or set(item) - allowed:
             raise TopologyError(f"services[{index}] has invalid properties")
         identifier, name = item.get("id"), item.get("name")
         criticality, weight = item.get("criticality", "standard"), item.get("dependency_weight", 1.0)
         institution_id, institution_name = item.get("institution_id"), item.get("institution_name")
         required_capacity = item.get("required_capacity_mbps")
+        rto_minutes, rpo_minutes = item.get("rto_minutes"), item.get("rpo_minutes")
         if not isinstance(identifier, str) or not identifier.strip():
             raise TopologyError(f"services[{index}].id must be a non-empty string")
         if identifier in services:
@@ -45,6 +46,10 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
             raise TopologyError(f"services[{index}].dependency_weight must be a finite number from 0.1 to 10.0")
         if required_capacity is not None and (isinstance(required_capacity, bool) or not isinstance(required_capacity, (int, float)) or not math.isfinite(required_capacity) or required_capacity <= 0):
             raise TopologyError(f"services[{index}].required_capacity_mbps must be a finite positive number")
+        if rto_minutes is not None and (isinstance(rto_minutes, bool) or not isinstance(rto_minutes, (int, float)) or not math.isfinite(rto_minutes) or rto_minutes <= 0):
+            raise TopologyError(f"services[{index}].rto_minutes must be a finite positive number")
+        if rpo_minutes is not None and (isinstance(rpo_minutes, bool) or not isinstance(rpo_minutes, (int, float)) or not math.isfinite(rpo_minutes) or rpo_minutes < 0):
+            raise TopologyError(f"services[{index}].rpo_minutes must be a finite non-negative number")
         if (institution_id is None) != (institution_name is None):
             raise TopologyError(f"services[{index}] must provide institution_id and institution_name together")
         if institution_id is not None and (
@@ -57,6 +62,8 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
             "dependency_weight": float(weight),
             "institution_id": institution_id, "institution_name": institution_name,
             "required_capacity_mbps": float(required_capacity) if required_capacity is not None else None,
+            "rto_minutes": float(rto_minutes) if rto_minutes is not None else None,
+            "rpo_minutes": float(rpo_minutes) if rpo_minutes is not None else None,
         }
 
     sites = {node.site for node in topology._nodes.values() if node.site}
@@ -64,11 +71,13 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
     service_edges: dict[str, set[str]] = {identifier: set() for identifier in services}
     seen: set[tuple[str, str, str]] = set()
     for index, item in enumerate(raw_dependencies):
-        if not isinstance(item, dict) or set(item) - {"service_id", "depends_on_type", "depends_on_id", "required", "redundancy_group", "capacity_mbps"}:
+        if not isinstance(item, dict) or set(item) - {"service_id", "depends_on_type", "depends_on_id", "required", "redundancy_group", "capacity_mbps", "failure_domains", "diversity_evidence"}:
             raise TopologyError(f"dependencies[{index}] has invalid properties")
         owner, kind, target = item.get("service_id"), item.get("depends_on_type"), item.get("depends_on_id")
         required = item.get("required", True)
         redundancy_group, capacity = item.get("redundancy_group"), item.get("capacity_mbps")
+        failure_domains = item.get("failure_domains", [])
+        diversity_evidence = item.get("diversity_evidence")
         if not isinstance(owner, str) or owner not in services:
             raise TopologyError(f"dependencies[{index}].service_id references an unknown service")
         if not isinstance(kind, str) or kind not in {"service", "node", "link", "site"}:
@@ -81,6 +90,25 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
             raise TopologyError(f"dependencies[{index}].redundancy_group must be a non-empty string")
         if capacity is not None and (isinstance(capacity, bool) or not isinstance(capacity, (int, float)) or not math.isfinite(capacity) or capacity <= 0):
             raise TopologyError(f"dependencies[{index}].capacity_mbps must be a finite positive number")
+        if not isinstance(failure_domains, list) or any(not isinstance(value, str) or not value.strip() for value in failure_domains) or len(failure_domains) != len(set(failure_domains)):
+            raise TopologyError(f"dependencies[{index}].failure_domains must be an array of unique non-empty strings")
+        if failure_domains and kind == "service":
+            raise TopologyError(f"dependencies[{index}].failure_domains can only annotate infrastructure dependencies")
+        if diversity_evidence is not None:
+            evidence_fields = {"evidence_ref", "evidence_type", "verification_status", "verified_at", "verified_by"}
+            if not isinstance(diversity_evidence, dict) or set(diversity_evidence) - evidence_fields:
+                raise TopologyError(f"dependencies[{index}].diversity_evidence has invalid properties")
+            if diversity_evidence.get("verification_status") not in {"unverified", "documented", "independently_verified"}:
+                raise TopologyError(f"dependencies[{index}].diversity_evidence.verification_status is invalid")
+            if diversity_evidence.get("evidence_type") not in {"site_survey", "carrier_attestation", "route_trace", "power_audit", "failover_test", "other"}:
+                raise TopologyError(f"dependencies[{index}].diversity_evidence.evidence_type is invalid")
+            if not isinstance(diversity_evidence.get("evidence_ref"), str) or not diversity_evidence["evidence_ref"].strip():
+                raise TopologyError(f"dependencies[{index}].diversity_evidence.evidence_ref must be non-empty")
+            if diversity_evidence["verification_status"] == "independently_verified" and any(
+                not isinstance(diversity_evidence.get(field), str) or not diversity_evidence[field].strip()
+                for field in ("verified_at", "verified_by")
+            ):
+                raise TopologyError(f"dependencies[{index}] independently verified diversity evidence requires verified_at and verified_by")
         if kind == "service" and target not in services:
             raise TopologyError(f"dependencies[{index}] references an unknown service")
         if kind == "node" and target not in topology._nodes:
@@ -95,7 +123,9 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
         seen.add(key)
         adjacency[owner].append({"type": kind, "id": target, "required": required,
                                  "redundancy_group": redundancy_group,
-                                 "capacity_mbps": float(capacity) if capacity is not None else None})
+                                 "capacity_mbps": float(capacity) if capacity is not None else None,
+                                 "failure_domains": sorted(failure_domains),
+                                 "diversity_evidence": diversity_evidence})
         if kind == "service":
             service_edges[owner].add(target)
 
