@@ -75,5 +75,6 @@ Acceptance: no write operation runs without an explicit approved apply action; f
 - [x] Rank weakest institutional dependency failure domains and conditional redundancy recommendations.
 - [x] Assess declared failover capacity under modeled single-dependency failures and rank recovery priorities.
 - [x] Produce machine-readable executive resilience assessments through the CLI.
+- [x] Compare baseline and proposed dependency models with before/after service impact and capacity-gap deltas.
 
 Acceptance: simulations are deterministic, non-mutating, have no network I/O, and distinguish declared scenario inputs from observed telemetry.
