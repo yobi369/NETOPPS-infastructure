@@ -26,12 +26,13 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
 
     services: dict[str, dict[str, Any]] = {}
     for index, item in enumerate(raw_services):
-        allowed = {"id", "name", "criticality", "dependency_weight", "institution_id", "institution_name"}
+        allowed = {"id", "name", "criticality", "dependency_weight", "institution_id", "institution_name", "required_capacity_mbps"}
         if not isinstance(item, dict) or set(item) - allowed:
             raise TopologyError(f"services[{index}] has invalid properties")
         identifier, name = item.get("id"), item.get("name")
         criticality, weight = item.get("criticality", "standard"), item.get("dependency_weight", 1.0)
         institution_id, institution_name = item.get("institution_id"), item.get("institution_name")
+        required_capacity = item.get("required_capacity_mbps")
         if not isinstance(identifier, str) or not identifier.strip():
             raise TopologyError(f"services[{index}].id must be a non-empty string")
         if identifier in services:
@@ -42,6 +43,8 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
             raise TopologyError(f"services[{index}].criticality must be low, standard, high, or mission_critical")
         if isinstance(weight, bool) or not isinstance(weight, (int, float)) or not math.isfinite(weight) or not 0.1 <= weight <= 10.0:
             raise TopologyError(f"services[{index}].dependency_weight must be a finite number from 0.1 to 10.0")
+        if required_capacity is not None and (isinstance(required_capacity, bool) or not isinstance(required_capacity, (int, float)) or not math.isfinite(required_capacity) or required_capacity <= 0):
+            raise TopologyError(f"services[{index}].required_capacity_mbps must be a finite positive number")
         if (institution_id is None) != (institution_name is None):
             raise TopologyError(f"services[{index}] must provide institution_id and institution_name together")
         if institution_id is not None and (
@@ -53,6 +56,7 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
             "id": identifier, "name": name, "criticality": criticality,
             "dependency_weight": float(weight),
             "institution_id": institution_id, "institution_name": institution_name,
+            "required_capacity_mbps": float(required_capacity) if required_capacity is not None else None,
         }
 
     sites = {node.site for node in topology._nodes.values() if node.site}
@@ -60,10 +64,11 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
     service_edges: dict[str, set[str]] = {identifier: set() for identifier in services}
     seen: set[tuple[str, str, str]] = set()
     for index, item in enumerate(raw_dependencies):
-        if not isinstance(item, dict) or set(item) - {"service_id", "depends_on_type", "depends_on_id", "required"}:
+        if not isinstance(item, dict) or set(item) - {"service_id", "depends_on_type", "depends_on_id", "required", "redundancy_group", "capacity_mbps"}:
             raise TopologyError(f"dependencies[{index}] has invalid properties")
         owner, kind, target = item.get("service_id"), item.get("depends_on_type"), item.get("depends_on_id")
         required = item.get("required", True)
+        redundancy_group, capacity = item.get("redundancy_group"), item.get("capacity_mbps")
         if not isinstance(owner, str) or owner not in services:
             raise TopologyError(f"dependencies[{index}].service_id references an unknown service")
         if not isinstance(kind, str) or kind not in {"service", "node", "link", "site"}:
@@ -72,6 +77,10 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
             raise TopologyError(f"dependencies[{index}].depends_on_id must be a non-empty string")
         if not isinstance(required, bool):
             raise TopologyError(f"dependencies[{index}].required must be a boolean")
+        if redundancy_group is not None and (not isinstance(redundancy_group, str) or not redundancy_group.strip()):
+            raise TopologyError(f"dependencies[{index}].redundancy_group must be a non-empty string")
+        if capacity is not None and (isinstance(capacity, bool) or not isinstance(capacity, (int, float)) or not math.isfinite(capacity) or capacity <= 0):
+            raise TopologyError(f"dependencies[{index}].capacity_mbps must be a finite positive number")
         if kind == "service" and target not in services:
             raise TopologyError(f"dependencies[{index}] references an unknown service")
         if kind == "node" and target not in topology._nodes:
@@ -84,7 +93,9 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
         if key in seen:
             raise TopologyError(f"duplicate dependency: {owner} -> {kind}:{target}")
         seen.add(key)
-        adjacency[owner].append({"type": kind, "id": target, "required": required})
+        adjacency[owner].append({"type": kind, "id": target, "required": required,
+                                 "redundancy_group": redundancy_group,
+                                 "capacity_mbps": float(capacity) if capacity is not None else None})
         if kind == "service":
             service_edges[owner].add(target)
 
@@ -122,39 +133,89 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
         unavailable = False
         degraded = False
         candidate_paths: set[tuple[tuple[str, str], ...]] = set()
-        for dependency in sorted(adjacency[owner], key=lambda value: (value["type"], value["id"])):
-            kind, target, required = dependency["type"], dependency["id"], dependency["required"]
-            target_status, reason = "available", ""
-            if kind == "node" and target in nodes_down:
-                target_status, reason = "unavailable", "node_failed"
-            elif kind == "link" and target in links_down:
-                target_status, reason = "unavailable", (
-                    "link_endpoint_failed" if target in endpoint_failed_links else "link_failed"
-                )
-            elif kind == "site" and target in sites_down:
-                target_status, reason = "unavailable", "site_failed"
-            elif kind == "service":
-                target_status = statuses[target]["status"]
-                if target_status != "available":
-                    reason = "supporting_service_" + target_status
-            if target_status == "available":
-                continue
+        groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
+        for offset, dependency in enumerate(adjacency[owner]):
+            group_id = dependency["redundancy_group"]
+            key = ("redundancy", group_id) if group_id is not None else ("single", str(offset))
+            groups.setdefault(key, []).append(dependency)
 
-            failed.append({
-                "depends_on_type": kind, "depends_on_id": target, "required": required,
-                "status": target_status, "reason": reason,
-            })
-            if required and target_status == "unavailable":
-                unavailable = True
-            else:
+        redundancy_results: list[dict[str, Any]] = []
+        for group_key, members in sorted(groups.items()):
+            evaluated: list[dict[str, Any]] = []
+            for dependency in sorted(members, key=lambda value: (value["type"], value["id"])):
+                kind, target, required = dependency["type"], dependency["id"], dependency["required"]
+                target_status, reason = "available", ""
+                if kind == "node" and target in nodes_down:
+                    target_status, reason = "unavailable", "node_failed"
+                elif kind == "link" and target in links_down:
+                    target_status, reason = "unavailable", (
+                        "link_endpoint_failed" if target in endpoint_failed_links else "link_failed"
+                    )
+                elif kind == "site" and target in sites_down:
+                    target_status, reason = "unavailable", "site_failed"
+                elif kind == "service":
+                    target_status = statuses[target]["status"]
+                    if target_status != "available":
+                        reason = "supporting_service_" + target_status
+                evaluated.append({**dependency, "status": target_status, "reason": reason})
+            failed_members = [item for item in evaluated if item["status"] != "available"]
+            operational = [item for item in evaluated if item["status"] != "unavailable"]
+            is_group = group_key[0] == "redundancy"
+            group_required = members[0]["required"]
+            if is_group and any(item["required"] != group_required for item in members):
+                raise TopologyError(f"redundancy group {group_key[1]!r} on service {owner!r} mixes required and optional members")
+            for item in failed_members:
+                failed.append({
+                    "depends_on_type": item["type"], "depends_on_id": item["id"],
+                    "required": item["required"], "status": item["status"],
+                    "reason": item["reason"],
+                    **({"redundancy_group": group_key[1]} if is_group else {}),
+                })
+                if item["type"] == "service":
+                    inherited = statuses[item["id"]].get("_failure_paths", [])
+                    for path in inherited:
+                        candidate_paths.add((*path, ("service", owner)))
+                else:
+                    candidate_paths.add(((item["type"], item["id"]), ("service", owner)))
+
+            active_capacity = (
+                round(sum(item["capacity_mbps"] for item in operational), 6)
+                if operational and all(item["capacity_mbps"] is not None for item in evaluated)
+                else None
+            )
+            capacity_requirement = services[owner]["required_capacity_mbps"] if is_group else None
+            capacity_shortfall = (
+                capacity_requirement is not None and active_capacity is not None
+                and active_capacity < capacity_requirement
+            )
+            if not operational:
+                if group_required:
+                    unavailable = True
+                else:
+                    degraded = True
+            elif failed_members:
+                # A surviving alternative preserves service, but redundancy has been consumed.
                 degraded = True
-
-            if kind == "service":
-                inherited = statuses[target].get("_failure_paths", [])
-                for path in inherited:
-                    candidate_paths.add((*path, ("service", owner)))
-            else:
-                candidate_paths.add(((kind, target), ("service", owner)))
+            if capacity_shortfall:
+                if active_capacity == 0:
+                    unavailable = unavailable or group_required
+                    degraded = degraded or not group_required
+                else:
+                    degraded = True
+            redundancy_results.append({
+                "group": group_key[1] if is_group else None,
+                "required": group_required,
+                "member_count": len(evaluated),
+                "operational_member_count": len(operational),
+                "failed_member_count": len(failed_members),
+                "failover_active": bool(is_group and failed_members and operational),
+                "remaining_capacity_mbps": active_capacity,
+                "required_capacity_mbps": capacity_requirement,
+                "capacity_adequate": (
+                    active_capacity >= capacity_requirement
+                    if active_capacity is not None and capacity_requirement is not None else None
+                ),
+            })
 
         state = "unavailable" if unavailable else "degraded" if degraded else "available"
         metadata = services[owner]
@@ -166,6 +227,7 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
         ]
         statuses[owner] = {
             **metadata, "status": state, "failed_dependencies": failed,
+            "redundancy": redundancy_results,
             "priority_weight": priority,
             "_failure_paths": paths,
             "failure_path": public_paths[0] if public_paths else [],

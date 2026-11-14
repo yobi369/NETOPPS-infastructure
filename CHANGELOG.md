@@ -75,3 +75,13 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Added institution-level aggregation and ranking using unique affected service priority weights.
 - Preserved required/optional dependency state semantics and the existing scenario CLI contract.
 - Added regression coverage for recursive propagation, multiple causal paths, institutional ranking, identity validation, non-mutation, and optional-dependency degradation.
+
+
+## Unreleased — Institutional resilience and redundancy intelligence
+
+- Added explicit OR-semantics redundancy groups for alternative service dependencies while preserving existing ungrouped dependency behavior.
+- Added failover activation and remaining declared capacity reporting.
+- Added optional service capacity requirements and explicit capacity-adequacy/unknown reporting.
+- Added validation for mixed required/optional members in a redundancy group.
+- Added regression tests for successful failover, capacity shortfall, total redundancy exhaustion, optional groups, and invalid group contracts.
+- Extended the synthetic institutional example and documented the simulation-only limits of declared redundancy and capacity.

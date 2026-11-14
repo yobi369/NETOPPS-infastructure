@@ -122,3 +122,28 @@ available/degraded/unavailable state rules and existing CLI integration.
 ownership, criticality, dependency and topology declarations. The primary path
 is a deterministic explanation, not a live route or health observation.
 Services without institution metadata remain reportable but unassigned.
+
+
+## ADR-012: Model service redundancy and failover capacity
+
+**Status:** Accepted
+
+**Context:** A dependency graph that treats every edge independently cannot
+represent alternative providers or distinguish a surviving failover path from
+a service whose only dependency has failed. Institutional resilience analysis
+must make redundancy assumptions explicit and auditable.
+
+**Decision:** Allow dependencies to declare a `redundancy_group` whose members
+are alternatives (OR semantics), while ungrouped dependencies retain their
+existing independent required/optional behavior. All members in a group must
+agree on required/optional status. Optional per-member declared capacity and an
+optional service-level required capacity threshold support transparent
+remaining-capacity estimates. A surviving alternative after a member failure
+preserves service operation but marks it degraded because redundancy has been
+consumed.
+
+**Consequences:** Reports expose active failover, surviving member counts and
+remaining declared capacity. Capacity adequacy is unknown when capacity inputs
+are incomplete. This is a deterministic model only: it does not validate
+physical diversity, provider independence, live failover, measured throughput,
+recovery time, or SLA compliance.
