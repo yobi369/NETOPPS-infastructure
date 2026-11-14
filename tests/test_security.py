@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from netopps.governance import keygen, register_reviewer, approve, package, verify_approval
+from netopps.governance import keygen, register_reviewer, approve, package, verify_approval, audit_append, provenance
 from netopps.pilot import init_workspace
 from netopps.security import create_checkpoint, verify_checkpoint, verify_approval_policy, verify_package, revoke_reviewer, rotate_reviewer, verify_trust_change
 
@@ -87,11 +87,15 @@ class SecurityTests(unittest.TestCase):
             verify_approval_policy(self.root, self.registry, policy, [])
 
     def test_external_package_verifier(self):
+        audit_append(self.root, self.registry, self.reviewer_private, "reviewer-passphrase-2026", "pilot.reviewed", {"test": True})
+        provenance(self.root, "assessment-01", self.root / "provenance/assessment.json")
         archive = self.base / "evidence.zip"
         package(self.root, archive)
         result = verify_package(archive)
         self.assertTrue(result["valid"])
         self.assertEqual(3, result["artifacts_verified"])
+        self.assertEqual(1, result["audit_entries_verified"])
+        self.assertEqual(1, result["provenance_records_verified"])
 
 
 if __name__ == "__main__":
