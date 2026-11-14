@@ -1,7 +1,16 @@
 from __future__ import annotations
-import hashlib, json, tempfile, unittest, zipfile
+import hashlib
+import json
+import tempfile
+import unittest
+import zipfile
 from pathlib import Path
-from netopps.pilot import PilotError, init_workspace, package_workspace, validate_workspace
+from netopps.pilot import (
+    PilotError,
+    init_workspace,
+    package_workspace,
+    validate_workspace,
+)
 
 class PilotWorkspaceTests(unittest.TestCase):
     def setUp(self):
