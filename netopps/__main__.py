@@ -143,6 +143,7 @@ def main() -> int:
     )
     scenarios_parser.add_argument("topology", type=Path, help="topology JSON file")
     scenarios_parser.add_argument("scenarios", type=Path, help="scenario-pack JSON file")
+    scenarios_parser.add_argument("--traffic-file", type=Path, help="optional versioned JSON traffic-demand scenario")
     args = parser.parse_args()
 
     if args.command == "check-connectivity" and not args.allow_network:
@@ -210,7 +211,20 @@ def main() -> int:
                     or not isinstance(scenarios_document.get("scenarios"), list)):
                 raise TopologyError("scenario pack must contain schema_version 1 and a scenarios array")
             topology = NetworkTopology.from_dict(topology_document)
-            print(json.dumps(topology.analyze_scenarios(scenarios_document["scenarios"]), indent=2))
+            traffic_demands = None
+            if args.traffic_file:
+                traffic_document, traffic_status = _read_inventory(args.traffic_file)
+                if traffic_status:
+                    return traffic_status
+                if (not isinstance(traffic_document, dict)
+                        or isinstance(traffic_document.get("schema_version"), bool)
+                        or traffic_document.get("schema_version") != 1
+                        or not isinstance(traffic_document.get("demands"), list)):
+                    raise TopologyError("traffic file must contain schema_version 1 and a demands array")
+                traffic_demands = traffic_document["demands"]
+            print(json.dumps(topology.analyze_scenarios(
+                scenarios_document["scenarios"], traffic_demands=traffic_demands
+            ), indent=2))
             return 0
         except (TopologyError, ValueError, TypeError) as exc:
             print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
