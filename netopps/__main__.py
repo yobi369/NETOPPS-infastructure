@@ -152,6 +152,7 @@ def main() -> int:
     )
     resilience_parser.add_argument("topology", type=Path, help="operator-supplied topology JSON file")
     resilience_parser.add_argument("dependencies", type=Path, help="version-1 service dependency JSON file")
+    resilience_parser.add_argument("--candidate-dependencies", type=Path, help="optional proposed version-1 dependency model for before/after comparison")
 
     args = parser.parse_args()
 
@@ -255,7 +256,12 @@ def main() -> int:
             return dependency_status
         try:
             topology = NetworkTopology.from_dict(topology_document)
-            print(json.dumps(analyze_resilience(topology, dependency_document), indent=2))
+            candidate_document = None
+            if args.candidate_dependencies:
+                candidate_document, candidate_status = _read_inventory(args.candidate_dependencies)
+                if candidate_status:
+                    return candidate_status
+            print(json.dumps(analyze_resilience(topology, dependency_document, candidate_document), indent=2))
             return 0
         except (TopologyError, ValueError, TypeError) as exc:
             print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
