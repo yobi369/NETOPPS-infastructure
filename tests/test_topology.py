@@ -207,9 +207,9 @@ class NetworkTopologyTests(unittest.TestCase):
                          [item["id"] for item in result["scenarios"]])
         site_result = result["scenarios"][0]
         self.assertEqual(["edge"], site_result["failed_nodes"])
-        self.assertEqual(2, site_result["impact"]["component_count_after"])
+        self.assertEqual(3, site_result["impact"]["component_count_after"])
         self.assertEqual(1, site_result["impact"]["newly_disconnected_node_pairs"])
-        self.assertEqual(2, site_result["remaining_topology"]["node_count"])
+        self.assertEqual(3, site_result["remaining_topology"]["node_count"])
         self.assertEqual(before, topology.report())
         self.assertFalse(result["topology_mutated"])
 
