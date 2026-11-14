@@ -98,3 +98,16 @@ Acceptance: simulations are deterministic, non-mutating, have no network I/O, an
 - [ ] Define actual commercial pricing, support scope, deployment limits, and any SLA before making customer offers.
 
 Acceptance: no external contribution is treated as commercially relicensable without a signed rights grant; no customer receives commercial rights, warranty, SLA, or support commitment until a complete agreement is signed by authorized parties.
+
+
+## Phase 8 — Institutional go-to-market enablement
+
+- [x] Prepare a sector-aware institutional product overview for government, universities, telecom operators, and enterprise infrastructure teams.
+- [x] Document community and separately negotiated commercial licensing paths without inventing prices or implying unimplemented features.
+- [x] Add a customer-specific proposal template with scope, deliverables, acceptance, fees, licensing, support, data, assumptions, and exclusions.
+- [x] Add a discovery and bounded-pilot guide with qualification questions and stop/re-scope conditions.
+- [ ] Validate positioning and procurement requirements with prospective institutional stakeholders.
+- [ ] Confirm rights-holder identity, ownership chain, legal review, and third-party notices before issuing commercial offers.
+- [ ] Establish approved pricing, delivery capacity, support process, and customer reference/acceptance workflow.
+
+Acceptance: customer-facing material accurately reflects the current local CLI and simulation-only capabilities; no unsupported hosting, integration, SLA, certification, or live-control claim is made.
