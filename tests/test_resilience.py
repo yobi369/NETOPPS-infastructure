@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class ResilienceTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.topology_doc = json.loads((ROOT / "examples/topology.json").read_text())
+        self.topology_doc = json.loads((ROOT / "examples/multi-site-topology.json").read_text())
         self.dependency_doc = json.loads((ROOT / "examples/service-dependencies.json").read_text())
         self.topology = NetworkTopology.from_dict(self.topology_doc)
 
