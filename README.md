@@ -37,6 +37,8 @@ Requires Python 3.11 or newer. Install the CLI from the repository root:
 
 ```bash
 python -m pip install .
+# Local institutional pilot case/evidence workspace
+netopps-pilot --help
 ```
 
 Then run:
@@ -63,6 +65,10 @@ netopps resilience-report examples/multi-site-topology.json examples/service-dep
 Exit codes: `0` means the requested checks passed; `1` means inventory findings, an incomplete subnet plan, an unreachable endpoint, or a truncated connectivity scope; `2` means input/arguments could not be safely processed.
 
 To validate your own inventory, copy `examples/inventory.json` and update it with non-sensitive lab data. Do not commit credentials, private keys, SNMP communities, or real production topology details.
+
+## Institutional pilot workspace
+
+Create a local evidence-linked pilot case with `netopps-pilot init`, validate artifact hashes and evidence references with `netopps-pilot validate`, and create a reproducibility package with `netopps-pilot package`. See [Institutional Pilot Workspace](docs/INSTITUTIONAL-PILOT-WORKSPACE.md). The workspace is local-only and does not provide hosted storage, encryption, authentication, role enforcement or tamper-proof audit logging.
 
 ## Telecom evaluation demonstration
 
