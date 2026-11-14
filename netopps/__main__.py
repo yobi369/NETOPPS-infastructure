@@ -10,6 +10,7 @@ from typing import Any
 
 from netopps.health import check_connectivity
 from netopps.planner import allocate_subnets
+from netopps.resilience import analyze_resilience
 from netopps.topology import NetworkTopology, TopologyError
 from netopps.validator import validate_inventory
 
@@ -145,7 +146,7 @@ def main() -> int:
     scenarios_parser.add_argument("scenarios", type=Path, help="scenario-pack JSON file")
     scenarios_parser.add_argument("--traffic-file", type=Path, help="optional versioned JSON traffic-demand scenario")
     scenarios_parser.add_argument("--dependency-file", type=Path, help="optional versioned service dependency graph")
-    args = parser.parse_args()
+    resilience_parser = subparsers.add_parser(\n        "resilience-report", help="rank institutional dependencies, resilience options, capacity gaps, and recovery priorities"\n    )\n    resilience_parser.add_argument("topology", type=Path, help="operator-supplied topology JSON file")\n    resilience_parser.add_argument("dependencies", type=Path, help="version-1 service dependency JSON file")\n\n    args = parser.parse_args()
 
     if args.command == "check-connectivity" and not args.allow_network:
         print("error: check-connectivity requires explicit --allow-network consent", file=sys.stderr)
@@ -238,7 +239,7 @@ def main() -> int:
             print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
             return 2
 
-    if args.command == "topology-risk":
+    if args.command == "resilience-report":\n        topology_document, topology_status = _read_inventory(args.topology)\n        if topology_status:\n            return topology_status\n        dependency_document, dependency_status = _read_inventory(args.dependencies)\n        if dependency_status:\n            return dependency_status\n        try:\n            topology = NetworkTopology.from_dict(topology_document)\n            print(json.dumps(analyze_resilience(topology, dependency_document), indent=2))\n            return 0\n        except (TopologyError, ValueError, TypeError) as exc:\n            print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))\n            return 2\n\n    if args.command == "topology-risk":
         document, read_status = _read_inventory(args.file)
         if read_status:
             return read_status
