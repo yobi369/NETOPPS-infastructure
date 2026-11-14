@@ -5,6 +5,9 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 ## Unreleased
 
 ### Added
+- Self-contained offline HTML executive resilience briefing export with escaped model values and no external assets or scripts.
+
+### Added
 - Correlated multi-asset failure scenarios driven by shared operator-declared failure-domain labels.
 - Redundancy-group physical-diversity assessments with traceable evidence references and explicit non-authentication semantics.
 - Optional service-level RTO/RPO targets surfaced in recovery plans and used for deterministic recovery-priority tie-breaking.
