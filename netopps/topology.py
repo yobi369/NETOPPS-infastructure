@@ -472,7 +472,7 @@ class NetworkTopology:
                 raise TopologyError(f"duplicate scenario id: {identifier}")
             if not isinstance(name, str):
                 raise TopologyError(f"scenarios[{index}].name must be a string")
-            if failure_type not in {"node", "link", "site"}:
+            if not isinstance(failure_type, str) or failure_type not in {"node", "link", "site"}:
                 raise TopologyError(f"scenarios[{index}].failure_type must be node, link, or site")
             if not isinstance(target, str) or not target.strip():
                 raise TopologyError(f"scenarios[{index}].target must be a non-empty string")
