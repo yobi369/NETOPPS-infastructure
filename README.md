@@ -74,6 +74,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 - `docs/TRAFFIC-SIMULATION.md` — traffic demand assumptions and congestion estimates.
 - `docs/TOPOLOGY-RISK.md` — topology diff semantics and explainable risk scoring.
 - `docs/SCENARIO-PACKS.md` — repeatable node, link, and site outage scenarios.
+- `docs/RESILIENCE-PLANNING.md` — ranked institutional resilience options, capacity assessment, and recovery priorities.
 - `docs/SECURITY.md` — threat model and safe-use rules.
 - `docs/OPERATIONS.md` — repeatable local workflow and incident discipline.
 - `docs/ROADMAP.md` — staged delivery with verifiable acceptance criteria.
