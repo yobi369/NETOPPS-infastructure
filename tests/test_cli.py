@@ -129,6 +129,30 @@ class CliTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertTrue(result["scope_truncated"])
 
+
+    def test_topology_report_cli_analyzes_path_and_failure_without_network_io(self) -> None:
+        payload = json.dumps({
+            "schema_version": 1,
+            "nodes": [{"id": "a"}, {"id": "b"}, {"id": "c"}],
+            "links": [
+                {"id": "ab", "source": "a", "target": "b", "latency_ms": 1, "capacity_mbps": 100},
+                {"id": "bc", "source": "b", "target": "c", "latency_ms": 2, "capacity_mbps": 100},
+            ],
+        }).encode()
+        with patch("socket.socket") as socket_factory:
+            code, stdout, stderr = self.run_cli(
+                payload,
+                extra_args=["topology-report", "--path-from", "a", "--path-to", "c", "--disable-link", "ab"],
+            )
+        result = json.loads(stdout)
+        self.assertEqual(0, code)
+        self.assertEqual("simulation-only", result["mode"])
+        self.assertEqual(["a", "b", "c"], result["path_analysis"]["nodes"])
+        self.assertEqual(2, result["failure_simulation"]["component_count_after"])
+        self.assertFalse(result["failure_simulation"]["topology_mutated"])
+        socket_factory.assert_not_called()
+        self.assertEqual("", stderr)
+
     def test_plan_subnets_is_read_only_and_deterministic(self) -> None:
         payload = json.dumps({
             "schema_version": 1,

@@ -46,6 +46,8 @@ python -m netopps validate examples/inventory.json
 netopps plan-subnets examples/inventory.json --pool 10.20.0.0/16 --prefix 24 --count 4
 # Only run on networks you are authorized to check; this opens TCP connections.
 netopps check-connectivity examples/inventory.json --allow-network --limit 20 --timeout 1.0
+netopps topology-report examples/topology.json --path-from core-router --path-to app-server
+netopps topology-report examples/topology.json --disable-link core-to-a
 ```
 
 Exit codes: `0` means the requested checks passed; `1` means inventory findings, an incomplete subnet plan, an unreachable endpoint, or a truncated connectivity scope; `2` means input/arguments could not be safely processed.
@@ -58,11 +60,12 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 
 ## Repository map
 
-- `netopps/` — inventory validation, subnet planning, opt-in connectivity checks, and CLI.
+- `netopps/` — inventory validation, subnet planning, opt-in connectivity checks, topology simulation, and CLI.
 - `tests/` — validator and CLI regression tests.
 - `examples/` — safe, synthetic inventory.
 - `schemas/` — versioned inventory schema.
 - `docs/ARCHITECTURE.md` — boundaries and extension points.
+- `docs/NETWORK-DIGITAL-TWIN.md` — simulation model, examples, limitations, and research path.
 - `docs/SECURITY.md` — threat model and safe-use rules.
 - `docs/OPERATIONS.md` — repeatable local workflow and incident discipline.
 - `docs/ROADMAP.md` — staged delivery with verifiable acceptance criteria.
@@ -73,6 +76,10 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 - `docs/LAB-ACCEPTANCE.md` — authorized lab acceptance checklist before operational reliance.
 - `CHANGELOG.md` — implemented changes and limitations.
 - `docs/DECISIONS.md` — engineering decision records.
+
+## Network digital twin (simulation-only)
+
+NETOPPS now includes a deterministic graph model for operator-supplied topology scenarios. It can summarize connectivity components, identify isolated nodes, calculate lowest-latency paths, and simulate hypothetical node or link failures. The model is local-only and does not discover devices, collect telemetry, open sockets, or change infrastructure. Declared latency and capacity are scenario inputs, not live measurements. See [Network Digital Twin](docs/NETWORK-DIGITAL-TWIN.md) and [the synthetic topology example](examples/topology.json).
 
 ## Safety boundaries
 

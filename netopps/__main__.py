@@ -10,6 +10,7 @@ from typing import Any
 
 from netopps.health import check_connectivity
 from netopps.planner import allocate_subnets
+from netopps.topology import NetworkTopology, TopologyError
 from netopps.validator import validate_inventory
 
 _MAX_INPUT_BYTES = 5 * 1024 * 1024
@@ -115,11 +116,41 @@ def main() -> int:
     health_parser.add_argument("--allow-network", action="store_true", help="explicitly permit TCP connection attempts")
     health_parser.add_argument("--limit", type=int, default=20, help="maximum devices to check (1-100; default 20)")
     health_parser.add_argument("--timeout", type=float, default=1.0, help="per-connection timeout in seconds (0.1-3.0)")
+
+    topology_parser = subparsers.add_parser(
+        "topology-report", help="analyze an operator-supplied topology without network access"
+    )
+    topology_parser.add_argument("file", type=Path, help="path to a topology JSON file")
+    topology_parser.add_argument("--disable-node", action="append", default=[], help="simulate a failed node (repeatable)")
+    topology_parser.add_argument("--disable-link", action="append", default=[], help="simulate a failed link (repeatable)")
+    topology_parser.add_argument("--path-from", help="optional source node for lowest-latency path analysis")
+    topology_parser.add_argument("--path-to", help="optional target node for lowest-latency path analysis")
     args = parser.parse_args()
 
     if args.command == "check-connectivity" and not args.allow_network:
         print("error: check-connectivity requires explicit --allow-network consent", file=sys.stderr)
         return 2
+
+    if args.command == "topology-report":
+        document, read_status = _read_inventory(args.file)
+        if read_status:
+            return read_status
+        try:
+            topology = NetworkTopology.from_dict(document)
+            report = topology.report()
+            if args.disable_node or args.disable_link:
+                report["failure_simulation"] = topology.simulate_failure(
+                    disabled_nodes=set(args.disable_node), disabled_links=set(args.disable_link)
+                )
+            if bool(args.path_from) != bool(args.path_to):
+                raise TopologyError("--path-from and --path-to must be supplied together")
+            if args.path_from and args.path_to:
+                report["path_analysis"] = topology.shortest_path(args.path_from, args.path_to)
+            print(json.dumps(report, indent=2))
+            return 0
+        except (TopologyError, ValueError, TypeError) as exc:
+            print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
+            return 2
 
     inventory, read_status = _read_inventory(args.file)
     if read_status:

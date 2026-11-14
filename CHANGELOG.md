@@ -20,3 +20,13 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - No live device adapters, active discovery, monitoring service, authentication service, persistent storage, or configuration write operations.
 - No production deployment or external network lab validation has been completed.
 - No license has been selected.
+
+
+## Unreleased — Network digital twin foundation
+
+- Added a deterministic, simulation-only topology model with strict node/link validation.
+- Added connected-component, isolated-node, degree, and declared-capacity summaries.
+- Added lowest-latency path analysis and hypothetical node/link failure simulation.
+- Added the topology-report CLI command and a synthetic topology fixture.
+- Added regression tests and documented the distinction between modeled inputs and live telemetry.
+- No live network discovery, telemetry collection, or configuration changes were introduced.

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "nodes": [
+    {"id": "core-router", "role": "router", "site": "lab"},
+    {"id": "distribution-a", "role": "switch", "site": "lab"},
+    {"id": "distribution-b", "role": "switch", "site": "lab"},
+    {"id": "app-server", "role": "server", "site": "lab"},
+    {"id": "backup-server", "role": "server", "site": "remote-lab"}
+  ],
+  "links": [
+    {"id": "core-to-a", "source": "core-router", "target": "distribution-a", "latency_ms": 1.2, "capacity_mbps": 1000},
+    {"id": "core-to-b", "source": "core-router", "target": "distribution-b", "latency_ms": 1.5, "capacity_mbps": 1000},
+    {"id": "a-to-app", "source": "distribution-a", "target": "app-server", "latency_ms": 0.8, "capacity_mbps": 1000},
+    {"id": "b-to-app", "source": "distribution-b", "target": "app-server", "latency_ms": 1.1, "capacity_mbps": 1000}
+  ]
+}
