@@ -120,6 +120,13 @@ GitHub Actions runs these checks on Python 3.11, 3.12, and 3.13. A successful ru
 
 Every feature should include tests, a clear failure mode, updated documentation, and an explicit statement of whether it is simulated, local-only, or verified against real infrastructure. Avoid committing secrets or claiming operational readiness without evidence.
 
-## License
+## Licensing
 
-This project is licensed under the [MIT License](LICENSE). The license permits reuse, modification, and redistribution subject to its notice requirements and disclaims warranties. It does not grant permission to access any network or device; operators remain responsible for authorization and safe use.
+NETOPPS uses a dual-licensing model for the current codebase:
+
+- **Community edition:** GNU Affero General Public License v3.0 or later ([full text](LICENSE-AGPL-3.0.txt)). If you modify and operate a covered version for users over a network, AGPL section 13 generally requires offering those users the corresponding source code.
+- **Commercial edition:** A separate commercial license is available from the copyright holder under a written agreement. See [Commercial Licensing](COMMERCIAL-LICENSING.md) for the scope and enquiry route. No commercial license is granted by this repository itself.
+
+**Historical MIT grants:** Earlier versions and copies already distributed under MIT remain governed by that license; this change does not revoke permissions already granted. The original MIT text is preserved in [LICENSE-MIT-LEGACY](LICENSE-MIT-LEGACY).
+
+The dual-licensing offer applies only to material for which the copyright holder has the necessary rights. Third-party components and contributions remain subject to their own rights and license terms. Operators remain responsible for authorization and safe use of any network or device.

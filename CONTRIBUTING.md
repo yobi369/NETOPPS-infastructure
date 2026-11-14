@@ -1,6 +1,10 @@
 # Contributing to NETOPPS
 
-Thanks for helping improve NETOPPS. The current scope is a local-only inventory validator and dry-run subnet planner.
+Thanks for helping improve NETOPPS. The current scope includes local inventory validation, topology simulation, and institutional resilience analysis. The current community edition is licensed under AGPL-3.0-or-later; see [LICENSE](LICENSE), [LICENSE-AGPL-3.0.txt](LICENSE-AGPL-3.0.txt), and [COMMERCIAL-LICENSING.md](COMMERCIAL-LICENSING.md).
+
+## Contribution licensing
+
+By submitting a contribution, you agree that it will be distributed under the repository's AGPL-3.0-or-later community license. You retain copyright in your contribution unless a separate written agreement says otherwise. Do not submit code, documentation, or assets unless you have the right to license them under AGPL-3.0-or-later. Contributions are not automatically included in a separate commercial license: the project maintainer must obtain the contributor's separate written permission or other sufficient rights before offering contributed material under different commercial terms. A pull request alone does not transfer copyright or grant the maintainer additional relicensing rights.
 
 ## Before opening a change
 

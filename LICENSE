@@ -1,21 +1,23 @@
-MIT License
+NETOPPS Infrastructure — dual licensing
 
-Copyright (c) 2026 Brian Mutunga
+Current repository version:
+Copyright (C) 2026 Brian Mutunga
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Unless a file states otherwise, the current version of NETOPPS Infrastructure is
+available under the GNU Affero General Public License, version 3 or (at your
+option) any later version. The complete license text is in
+LICENSE-AGPL-3.0.txt.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+A separate commercial license may be obtained from the copyright holder under
+a written agreement. See COMMERCIAL-LICENSING.md. The commercial license is
+not included in this repository and no commercial license is granted merely
+by downloading or using this source code.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Historical licensing:
+Versions and copies distributed under the MIT License before this licensing
+change remain available under the MIT License and its terms. This change does
+not revoke or narrow permissions already granted for those earlier copies.
+The historical MIT license text is preserved in LICENSE-MIT-LEGACY.
+
+Third-party components remain subject to their respective licenses. See
+third-party notices and individual file headers where applicable.
