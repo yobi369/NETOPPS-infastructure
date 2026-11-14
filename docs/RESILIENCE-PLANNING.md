@@ -17,7 +17,7 @@ The default JSON output is machine-readable. Use --format html to render a self-
 
 The JSON report contains the following sections. To compare a concrete proposal, pass `--candidate-dependencies` with a second valid version-1 service dependency document. The report then compares baseline and candidate service-state counts, weighted affected-service priority, and modeled capacity-gap counts; negative impact/gap deltas indicate modeled improvement.
 
-The command emits JSON with:
+The JSON report includes:
 
 - **Executive assessment:** baseline service state counts, highest-risk failure domain, leading conditional recommendation, capacity-gap counts, and first recovery priority.
 - **Weakest dependencies:** one-at-a-time node, link, and site failure scenarios, ranked by affected service priority weight and unavailable-service count.
