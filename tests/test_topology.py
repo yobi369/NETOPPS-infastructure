@@ -337,9 +337,11 @@ class NetworkTopologyTests(unittest.TestCase):
         for field, value, message in cases:
             demand = {"id": "bad", "source": "core", "target": "edge-a", "demand_mbps": 5}
             demand[field] = value
-            with self.subTest(field=field, value=value):
-                with self.assertRaisesRegex(TopologyError, message):
-                    self.topology.simulate_traffic([demand])
+            with (
+                self.subTest(field=field, value=value),
+                self.assertRaisesRegex(TopologyError, message),
+            ):
+                self.topology.simulate_traffic([demand])
 
     def test_legacy_traffic_demands_keep_backward_compatible_defaults(self) -> None:
         result = self.topology.simulate_traffic([
