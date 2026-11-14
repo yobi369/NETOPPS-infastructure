@@ -17,3 +17,16 @@
 **Decision:** Every feature must document current behavior, safety boundaries, failure modes, and what has not been verified. Future roadmap items must not be described as implemented.
 
 **Consequences:** The README and readiness claims stay aligned with executable behavior and test evidence.
+
+
+## ADR-003: Use a simulation-first digital twin
+
+**Status:** Accepted
+
+The first adaptive-intelligence research milestone is a deterministic graph model built from operator-supplied topology data. It must not discover devices, open sockets, collect telemetry, or mutate live infrastructure. This enables reproducible failure and path-analysis experiments without operational risk.
+
+## ADR-004: Keep simulated metrics distinct from observed telemetry
+
+**Status:** Accepted
+
+Declared capacity and latency are scenario inputs, not measurements. Reports and documentation must label the model as simulation-only and must not imply that the digital twin reflects current network state unless a future evidence-backed ingestion adapter is implemented.
