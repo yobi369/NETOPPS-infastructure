@@ -36,3 +36,46 @@ A site failure disables every node whose `site` label exactly matches the target
 This is a deterministic graph scenario tool, not a fault-injection system. It does not power off equipment, disable interfaces, generate traffic, test protocol convergence, or verify physical diversity. Site membership is only as accurate as the supplied labels. The result quantifies modeled connectivity loss among surviving nodes, not business impact or service availability. Optional traffic impact adds demand-level reachability estimates, but it still does not represent application health, business criticality, measured throughput, SLA compliance, or live service availability. A demand is newly affected only when it was routable in the baseline and becomes unavailable or unroutable after the modeled failure.
 
 Use sanitized, synthetic topology data in source control. Never treat a scenario result as permission to run a live change.
+
+## Service criticality and dependency weighting
+
+Traffic-demand records may optionally include `service_id`, `service_name`,
+`criticality`, and `dependency_weight`. Existing records remain valid:
+omitted values default to the demand ID, that ID as the service name,
+`standard` criticality, and a dependency weight of `1.0`.
+
+| Criticality | Multiplier |
+| --- | ---: |
+| low | 1.0 |
+| standard | 1.5 |
+| high | 2.5 |
+| mission_critical | 4.0 |
+
+`dependency_weight` is an operator-supplied relative importance factor from
+`0.1` through `10.0`. Weighted impact is:
+
+`demand_mbps × criticality_multiplier × dependency_weight`
+
+Demands sharing a `service_id` are grouped in scenario results. Reports retain
+raw affected Mbps and rank affected services by weighted impact, then declared
+criticality, then stable service ID. These are explicit modeling inputs; NETOPPS
+does not infer service dependencies or business criticality.
+
+Example traffic-demand record:
+
+```json
+{
+  "id": "core-banking-api",
+  "source": "core-router",
+  "target": "banking-app",
+  "demand_mbps": 30,
+  "service_id": "core-banking",
+  "service_name": "Core Banking",
+  "criticality": "mission_critical",
+  "dependency_weight": 2.0
+}
+```
+
+This prioritization is not a business-impact assessment, measured dependency
+graph, SLA calculation, outage probability, or evidence of actual service health.
+Operators must supply and validate the criticality and dependency metadata.
