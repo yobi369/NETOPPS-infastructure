@@ -141,3 +141,8 @@ NETOPPS uses a dual-licensing model for the current codebase:
 **Historical MIT grants:** Earlier versions and copies already distributed under MIT remain governed by that license; this change does not revoke permissions already granted. The original MIT text is preserved in [LICENSE-MIT-LEGACY](LICENSE-MIT-LEGACY).
 
 The dual-licensing offer applies only to material for which the copyright holder has the necessary rights. External contributions require an accepted Contributor License Agreement before merge into the dual-licensed codebase; contributors retain ownership while granting the rights described in that agreement. Third-party components remain subject to their own rights and license terms. Commercial agreement templates are drafts only and do not grant rights until completed and signed. Operators remain responsible for authorization and safe use of any network or device.
+
+
+## Institutional Pilot Edition
+
+The `pilot/` directory contains the controlled evaluation package: a pilot charter, evidence register, acceptance checklist and local execution guide. It defines a six-stage workflow from authorization and onboarding through structured inventory, evidence review, baseline analysis, candidate improvement and executive comparison. The pilot uses the existing local Python engine and keeps customer data under the institution's approved control. It does not introduce hosted workspaces, data uploads, authentication, multi-tenant storage or live network integration. Start with [pilot/README.md](pilot/README.md), complete the [pilot charter](pilot/PILOT-CHARTER.md), and maintain the [evidence register](pilot/EVIDENCE-REGISTER.csv) before running an assessment.
