@@ -66,7 +66,7 @@ To validate your own inventory, copy `examples/inventory.json` and update it wit
 
 ## Telecom evaluation demonstration
 
-A synthetic two-site telecom-style topology and three illustrative service classes are provided for a bounded product walkthrough. Run the baseline and candidate comparison using the [Telecom Evaluation Demo](docs/TELECOM-EVALUATION-DEMO.md). These files do not represent Safaricom or any other operator's actual network.
+A guided, browser-based telecom scenario is available at the [NETOPPS interactive demo](https://netopps.vercel.app/demo/). It lets visitors select synthetic failures and compare baseline versus candidate redundancy. This is an explanatory front-end illustration, separate from the local analysis engine; it is not a live calculation from operator data. The reproducible CLI workflow and synthetic input files are documented in the [Telecom Evaluation Demo](docs/TELECOM-EVALUATION-DEMO.md). Neither the browser scenario nor the example files represent Safaricom or any other operator's actual network.
 
 ## Inventory contract
 

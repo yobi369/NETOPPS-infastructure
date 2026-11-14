@@ -11,6 +11,10 @@ The demonstration answers four questions:
 3. Does a proposed alternate dependency change the modeled service impact?
 4. Are the declared capacity and failure-domain assumptions sufficient to support the proposed resilience claim?
 
+## Guided browser walkthrough
+
+A separate, static browser demonstration is published at [https://netopps.vercel.app/demo/](https://netopps.vercel.app/demo/). It lets a visitor select one of four synthetic failure scenarios and compare the illustrative baseline and candidate dependency designs. The browser page uses its own small, explicit example model; it is not wired to the Python engine, does not load the JSON files below, and must not be presented as a live NETOPPS calculation. Its purpose is to make the product's resilience questions understandable in a first meeting.
+
 ## Files
 
 - `examples/telecom-evaluation-topology.json` — synthetic two-site network topology.
@@ -71,7 +75,7 @@ Record which findings the operator accepts, rejects or needs to validate. Identi
 
 ## What this demonstration proves — and does not prove
 
-It demonstrates that the current local NETOPPS engine can process an operator-supplied topology and service model, simulate selected failures, rank modeled service impacts, inspect declared redundancy and capacity, and compare baseline and candidate dependency documents.
+The local CLI workflow demonstrates that the current NETOPPS engine can process an operator-supplied topology and service model, simulate selected failures, rank modeled service impacts, inspect declared redundancy and capacity, and compare baseline and candidate dependency documents. The browser walkthrough is a separate illustrative experience and does not execute the engine.
 
 It does not demonstrate live telemetry, real-time network visibility, subscriber-level impact, packet-level simulation, routing-protocol convergence, automated failover, device configuration, carrier-grade scale, integration with OSS/BSS, or performance on a production operator network.
 
