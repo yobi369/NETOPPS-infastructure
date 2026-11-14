@@ -1,6 +1,12 @@
 """"Local-first institutional pilot manifest and evidence packaging tools."""
 from __future__ import annotations
-import argparse, csv, hashlib, json, re, sys, zipfile
+import argparse
+import csv
+import hashlib
+import json
+import re
+import sys
+import zipfile
 from datetime import date
 from pathlib import Path, PurePosixPath
 from typing import Any
