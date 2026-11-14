@@ -187,6 +187,46 @@ def verify_package(package_path: Path) -> dict[str, Any]:
         if not isinstance(key, Ed25519PublicKey) or fingerprint(key) != fp or record.get("fingerprint_sha256") != fp:
             raise PilotError(f"reviewer public key fingerprint mismatch: {fp}")
         public_keys[fp] = (key, record)
+    # Validate baseline/candidate provenance records against the packaged manifest and artifacts.
+    provenance_records = 0
+    manifest_digest = hashlib.sha256(files["pilot-manifest.json"]).hexdigest()
+    for name, raw in files.items():
+        if not name.startswith("provenance/") or not name.endswith(".json"):
+            continue
+        record = json.loads(raw)
+        if record.get("manifest_sha256") != manifest_digest:
+            raise PilotError(f"provenance manifest digest mismatch: {name}")
+        for item in record.get("inputs", []):
+            artifact = next((a for a in manifest.get("artifacts", []) if a.get("id") == item.get("artifact_id")), None)
+            if not artifact or artifact.get("path") not in files or hashlib.sha256(files[artifact["path"]]).hexdigest() != item.get("sha256"):
+                raise PilotError(f"provenance input digest mismatch: {name}")
+        report = record.get("assessment_report", {})
+        report_artifact = next((a for a in manifest.get("artifacts", []) if a.get("id") == report.get("artifact_id")), None)
+        if not report_artifact or report_artifact.get("path") not in files or hashlib.sha256(files[report_artifact["path"]]).hexdigest() != report.get("sha256"):
+            raise PilotError(f"provenance report digest mismatch: {name}")
+        provenance_records += 1
+    # Verify the signed append-only activity chain from the package contents.
+    audit_entries = 0
+    previous_hash = "0" * 64
+    audit_bytes = files.get("audit/activity.jsonl", b"")
+    for line_no, line in enumerate(audit_bytes.decode("utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        entry = json.loads(line)
+        payload = dict(entry["payload"])
+        entry_hash = payload.pop("entry_hash")
+        if entry_hash != hashlib.sha256(canonical(payload)).hexdigest() or payload.get("previous_hash") != previous_hash or payload.get("sequence") != audit_entries + 1:
+            raise PilotError(f"packaged audit chain integrity failure at line {line_no}")
+        signer = entry["signature"]["key_fingerprint_sha256"]
+        key_record = public_keys.get(signer)
+        if not key_record or key_record[1].get("status") not in {"active", "revoked"}:
+            raise PilotError(f"packaged audit signer is unknown: {signer}")
+        import base64
+        key_record[0].verify(base64.b64decode(entry["signature"]["value_base64"], validate=True), canonical(entry["payload"]))
+        if entry["payload"].get("actor", {}).get("reviewer_id") != key_record[1].get("reviewer_id"):
+            raise PilotError(f"packaged audit actor mismatch at line {line_no}")
+        previous_hash = entry_hash
+        audit_entries += 1
     approvals = 0
     for name, raw in files.items():
         if not name.startswith("approvals/") or not name.endswith(".json"):
@@ -203,7 +243,7 @@ def verify_package(package_path: Path) -> dict[str, Any]:
             raise PilotError(f"approval report digest mismatch: {name}")
         approvals += 1
     return {"valid": True, "pilot_id": manifest.get("pilot_id"), "artifacts_verified": checked,
-            "reviewer_keys_verified": len(public_keys), "approvals_verified": approvals,
+            "reviewer_keys_verified": len(public_keys), "approvals_verified": approvals,\n            "provenance_records_verified": provenance_records, "audit_entries_verified": audit_entries,
             "package_sha256": sha256_file(package_path)}
 
 
