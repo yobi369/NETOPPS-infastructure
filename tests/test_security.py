@@ -71,6 +71,11 @@ class SecurityTests(unittest.TestCase):
         self.assertTrue(verify_trust_change(receipt, self.registry)["valid"])
         self.assertTrue(verify_approval(approval, self.registry, self.root)["valid"])
 
+    def test_last_trust_admin_cannot_be_revoked(self):
+        admin_fp = next(fp for fp, rec in json.loads(self.registry.read_text())["reviewers"].items() if rec["reviewer_id"] == "admin-01")
+        with self.assertRaisesRegex(ValueError, "last active trust administrator"):
+            revoke_reviewer(self.registry, admin_fp, "test", self.admin_private, "admin-passphrase-2026", self.base / "admin-revoke.json")
+
     def test_revocation_requires_trust_admin(self):
         fp = next(fp for fp, rec in json.loads(self.registry.read_text())["reviewers"].items() if rec["reviewer_id"] == "reviewer-01")
         with self.assertRaisesRegex(ValueError, "Trust Administrator"):
