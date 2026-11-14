@@ -46,3 +46,8 @@ These are design directions, not current features.
 The new `netopps.topology` module models operator-supplied nodes and undirected links. It provides deterministic component analysis, lowest-latency path selection, and hypothetical node/link failure analysis. It is pure local computation and does not connect to devices.
 
 The twin is deliberately separate from the existing inventory schema. Inventory records management identity and address allocations; topology records modeled relationships and scenario attributes. A future adapter may explicitly map between these contracts, but must preserve schema validation and evidence provenance.
+
+
+## Traffic-demand simulation
+
+The digital twin can accept a separate versioned demand scenario. Each demand is assigned to one deterministic lowest-latency path; demand rates are summed on shared links and compared with declared capacity. This is a simplified capacity-pressure estimate, not a packet-level simulator or live measurement. The scenario contract and assumptions are documented in docs/TRAFFIC-SIMULATION.md.
