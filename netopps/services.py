@@ -94,13 +94,15 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
             raise TopologyError(f"dependencies[{index}].failure_domains must be an array of unique non-empty strings")
         if failure_domains and kind == "service":
             raise TopologyError(f"dependencies[{index}].failure_domains can only annotate infrastructure dependencies")
+        if diversity_evidence is not None and kind == "service":
+            raise TopologyError(f"dependencies[{index}].diversity_evidence can only annotate infrastructure dependencies")
         if diversity_evidence is not None:
             evidence_fields = {"evidence_ref", "evidence_type", "verification_status", "verified_at", "verified_by"}
             if not isinstance(diversity_evidence, dict) or set(diversity_evidence) - evidence_fields:
                 raise TopologyError(f"dependencies[{index}].diversity_evidence has invalid properties")
-            if diversity_evidence.get("verification_status") not in {"unverified", "documented", "independently_verified"}:
+            if not isinstance(diversity_evidence.get("verification_status"), str) or diversity_evidence["verification_status"] not in {"unverified", "documented", "independently_verified"}:
                 raise TopologyError(f"dependencies[{index}].diversity_evidence.verification_status is invalid")
-            if diversity_evidence.get("evidence_type") not in {"site_survey", "carrier_attestation", "route_trace", "power_audit", "failover_test", "other"}:
+            if not isinstance(diversity_evidence.get("evidence_type"), str) or diversity_evidence["evidence_type"] not in {"site_survey", "carrier_attestation", "route_trace", "power_audit", "failover_test", "other"}:
                 raise TopologyError(f"dependencies[{index}].diversity_evidence.evidence_type is invalid")
             if not isinstance(diversity_evidence.get("evidence_ref"), str) or not diversity_evidence["evidence_ref"].strip():
                 raise TopologyError(f"dependencies[{index}].diversity_evidence.evidence_ref must be non-empty")
