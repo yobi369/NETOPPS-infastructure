@@ -202,6 +202,177 @@ class NetworkTopology:
                 "latency_ms": round(distances[target], 6)}
 
 
+
+    def compare(self, candidate: NetworkTopology) -> dict[str, Any]:
+        """Return a deterministic, identity-based diff against another topology."""
+        if not isinstance(candidate, NetworkTopology):
+            raise TopologyError("candidate must be a NetworkTopology")
+
+        baseline_nodes = self._nodes
+        candidate_nodes = candidate._nodes
+        added_nodes = sorted(candidate_nodes.keys() - baseline_nodes.keys())
+        removed_nodes = sorted(baseline_nodes.keys() - candidate_nodes.keys())
+        changed_nodes = []
+        for identifier in sorted(baseline_nodes.keys() & candidate_nodes.keys()):
+            before, after = baseline_nodes[identifier], candidate_nodes[identifier]
+            changes = {}
+            for field in ("role", "site"):
+                old_value, new_value = getattr(before, field), getattr(after, field)
+                if old_value != new_value:
+                    changes[field] = {"before": old_value, "after": new_value}
+            if changes:
+                changed_nodes.append({"id": identifier, "changes": changes})
+
+        def link_state(link: Link) -> dict[str, Any]:
+            return {
+                "endpoints": sorted((link.source, link.target)),
+                "latency_ms": link.latency_ms,
+                "capacity_mbps": link.capacity_mbps,
+                "enabled": link.enabled,
+            }
+
+        baseline_links = self._links
+        candidate_links = candidate._links
+        added_links = [
+            {"id": identifier, **link_state(candidate_links[identifier])}
+            for identifier in sorted(candidate_links.keys() - baseline_links.keys())
+        ]
+        removed_links = [
+            {"id": identifier, **link_state(baseline_links[identifier])}
+            for identifier in sorted(baseline_links.keys() - candidate_links.keys())
+        ]
+        changed_links = []
+        for identifier in sorted(baseline_links.keys() & candidate_links.keys()):
+            before, after = link_state(baseline_links[identifier]), link_state(candidate_links[identifier])
+            changes = {
+                field: {"before": before[field], "after": after[field]}
+                for field in before if before[field] != after[field]
+            }
+            if changes:
+                changed_links.append({"id": identifier, "changes": changes})
+
+        summary = {
+            "nodes_added": len(added_nodes), "nodes_removed": len(removed_nodes),
+            "nodes_changed": len(changed_nodes), "links_added": len(added_links),
+            "links_removed": len(removed_links), "links_changed": len(changed_links),
+        }
+        return {
+            "mode": "simulation-only", "comparison": "baseline-to-candidate",
+            "summary": summary,
+            "nodes": {
+                "added": added_nodes, "removed": removed_nodes, "changed": changed_nodes,
+            },
+            "links": {
+                "added": added_links, "removed": removed_links, "changed": changed_links,
+            },
+            "topology_mutated": False,
+        }
+
+    def _critical_elements(self) -> tuple[list[str], list[str]]:
+        """Find articulation nodes and bridge links with iterative Tarjan traversal."""
+        graph = self._adjacency()
+        discovery: dict[str, int] = {}
+        low: dict[str, int] = {}
+        parent: dict[str, str | None] = {}
+        parent_edge: dict[str, str | None] = {}
+        child_count: dict[str, int] = {}
+        articulation: set[str] = set()
+        bridges: set[str] = set()
+        clock = 0
+
+        for root in self._ordered_node_ids:
+            if root in discovery:
+                continue
+            parent[root] = None
+            parent_edge[root] = None
+            child_count[root] = 0
+            discovery[root] = low[root] = clock
+            clock += 1
+            stack: list[tuple[str, int]] = [(root, 0)]
+
+            while stack:
+                current, offset = stack[-1]
+                neighbors = graph[current]
+                if offset < len(neighbors):
+                    neighbor, link = neighbors[offset]
+                    stack[-1] = (current, offset + 1)
+                    if link.id == parent_edge[current]:
+                        continue
+                    if neighbor not in discovery:
+                        parent[neighbor] = current
+                        parent_edge[neighbor] = link.id
+                        child_count[neighbor] = 0
+                        child_count[current] += 1
+                        discovery[neighbor] = low[neighbor] = clock
+                        clock += 1
+                        stack.append((neighbor, 0))
+                    else:
+                        low[current] = min(low[current], discovery[neighbor])
+                    continue
+
+                stack.pop()
+                ancestor = parent[current]
+                if ancestor is None:
+                    if child_count[current] > 1:
+                        articulation.add(current)
+                    continue
+
+                low[ancestor] = min(low[ancestor], low[current])
+                if parent[ancestor] is not None and low[current] >= discovery[ancestor]:
+                    articulation.add(ancestor)
+                if low[current] > discovery[ancestor]:
+                    bridge_id = parent_edge[current]
+                    if bridge_id is not None:
+                        bridges.add(bridge_id)
+
+        return sorted(articulation), sorted(bridges)
+
+    def risk_report(self) -> dict[str, Any]:
+        """Calculate a transparent rule-based topology fragility score (0-100)."""
+        topology = self.report()
+        articulation_nodes, bridge_links = self._critical_elements()
+        isolated_nodes = topology["isolated_nodes"]
+        component_count = topology["component_count"]
+
+        fragmentation_points = min(25.0, max(0, component_count - 1) * 12.5)
+        articulation_points = min(30.0, len(articulation_nodes) * 10.0)
+        bridge_points = min(25.0, len(bridge_links) * 5.0)
+        isolation_points = min(20.0, len(isolated_nodes) * 5.0)
+        factors = [
+            {
+                "factor": "network_fragmentation", "points": fragmentation_points,
+                "evidence": {"component_count": component_count, "components": topology["components"]},
+                "rationale": "Multiple disconnected components reduce end-to-end reachability.",
+            },
+            {
+                "factor": "articulation_nodes", "points": articulation_points,
+                "evidence": {"node_ids": articulation_nodes},
+                "rationale": "Removing an articulation node would split at least one connected component.",
+            },
+            {
+                "factor": "bridge_links", "points": bridge_points,
+                "evidence": {"link_ids": bridge_links},
+                "rationale": "Removing a bridge link would split at least one connected component.",
+            },
+            {
+                "factor": "isolated_nodes", "points": isolation_points,
+                "evidence": {"node_ids": isolated_nodes},
+                "rationale": "Isolated nodes have no active modeled path to other nodes.",
+            },
+        ]
+        score = round(min(100.0, sum(item["points"] for item in factors)), 1)
+        severity = (
+            "low" if score < 25 else "guarded" if score < 50
+            else "elevated" if score < 75 else "critical"
+        )
+        return {
+            "mode": "simulation-only", "risk_model": "NETOPPS-structural-fragility-v1",
+            "score": score, "severity": severity, "scale": "0-100 rule-based points; not a probability",
+            "factors": factors,
+            "critical_nodes": articulation_nodes, "critical_links": bridge_links,
+            "topology_mutated": False,
+        }
+
     def simulate_traffic(self, demands: Any) -> dict[str, Any]:
         """Route modeled traffic demands and estimate declared-link capacity pressure."""
         if not isinstance(demands, list):
