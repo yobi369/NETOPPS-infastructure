@@ -51,7 +51,8 @@ netopps topology-report examples/topology.json --disable-link core-to-a
 netopps topology-report examples/topology.json --traffic-file examples/traffic-demands.json
 netopps topology-risk examples/topology.json
 netopps topology-diff examples/topology.json examples/topology-candidate.json
-netopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json\nnetopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json --dependency-file examples/service-dependencies.json
+netopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json
+netopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json --dependency-file examples/service-dependencies.json
 netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json
 # Compare a proposed dependency design against the baseline
 netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json --candidate-dependencies proposed-service-dependencies.json
