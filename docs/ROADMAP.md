@@ -71,7 +71,8 @@ Acceptance: no write operation runs without an explicit approved apply action; f
 - [x] Add site-level failure scenario packs and baseline comparisons.
 - [x] Quantify optional traffic-demand reachability impact for each failure scenario.
 - [x] Prioritize affected services using declared criticality and dependency weights.
-- [x] Evaluate explicit service dependencies on services, nodes, links, and sites, including required/optional behavior and cascading impact.\n- [x] Trace direct and recursive failure paths, classify direct/transitive impact, and rank affected institutions using unique service criticality/dependency weights.
+- [x] Evaluate explicit service dependencies on services, nodes, links, and sites, including required/optional behavior and cascading impact.
+- [x] Trace direct and recursive failure paths, classify direct/transitive impact, and rank affected institutions using unique service criticality/dependency weights.
 - [x] Rank weakest institutional dependency failure domains and conditional redundancy recommendations.
 - [x] Assess declared failover capacity under modeled single-dependency failures and rank recovery priorities.
 - [x] Produce machine-readable executive resilience assessments through the CLI.
