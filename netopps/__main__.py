@@ -10,6 +10,7 @@ from typing import Any
 
 from netopps.health import check_connectivity
 from netopps.planner import allocate_subnets
+from netopps.report import render_resilience_html
 from netopps.resilience import analyze_resilience
 from netopps.topology import NetworkTopology, TopologyError
 from netopps.validator import validate_inventory
@@ -153,6 +154,8 @@ def main() -> int:
     resilience_parser.add_argument("topology", type=Path, help="operator-supplied topology JSON file")
     resilience_parser.add_argument("dependencies", type=Path, help="version-1 service dependency JSON file")
     resilience_parser.add_argument("--candidate-dependencies", type=Path, help="optional proposed version-1 dependency model for before/after comparison")
+    resilience_parser.add_argument("--format", choices=("json", "html"), default="json", help="report format (default: json)")
+    resilience_parser.add_argument("--output", type=Path, help="optional output file; otherwise write to stdout")
 
     args = parser.parse_args()
 
@@ -261,9 +264,14 @@ def main() -> int:
                 candidate_document, candidate_status = _read_inventory(args.candidate_dependencies)
                 if candidate_status:
                     return candidate_status
-            print(json.dumps(analyze_resilience(topology, dependency_document, candidate_document), indent=2))
+            report = analyze_resilience(topology, dependency_document, candidate_document)
+            output = render_resilience_html(report) if args.format == "html" else json.dumps(report, indent=2)
+            if args.output:
+                args.output.write_text(output + "\n", encoding="utf-8")
+            else:
+                print(output)
             return 0
-        except (TopologyError, ValueError, TypeError) as exc:
+        except (OSError, TopologyError, ValueError, TypeError) as exc:
             print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
             return 2
 

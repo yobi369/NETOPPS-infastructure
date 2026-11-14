@@ -80,5 +80,6 @@ Acceptance: no write operation runs without an explicit approved apply action; f
 - [x] Simulate correlated failures across operator-declared shared power, carrier, site, route, and other failure-domain labels.
 - [x] Record diversity evidence metadata and flag shared failure domains across redundancy-group members without claiming independent authentication.
 - [x] Capture service-defined RTO/RPO targets and use them in recovery-priority tie-breaking.
+- [x] Export a self-contained, offline executive HTML briefing from the resilience assessment.
 
 Acceptance: simulations are deterministic, non-mutating, have no network I/O, and distinguish declared scenario inputs from observed telemetry.

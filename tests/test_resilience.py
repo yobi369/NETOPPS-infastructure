@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import unittest
 
+from netopps.report import render_resilience_html
 from netopps.resilience import analyze_resilience
 from netopps.topology import NetworkTopology, TopologyError
 
@@ -19,6 +20,29 @@ class ResilienceTests(unittest.TestCase):
         self.topology_doc = load_fixture("multi-site-topology.json")
         self.dependency_doc = load_fixture("service-dependencies.json")
         self.topology = NetworkTopology.from_dict(self.topology_doc)
+
+    def test_html_briefing_is_self_contained_and_escapes_untrusted_values(self) -> None:
+        report = analyze_resilience(self.topology, self.dependency_doc)
+        report["executive_assessment"]["headline"] = "<script>alert('x')</script>"
+        output = render_resilience_html(report)
+        self.assertIn("Institutional Resilience Briefing", output)
+        self.assertIn("&lt;script&gt;alert(&#x27;x&#x27;)&lt;/script&gt;", output)
+        self.assertNotIn("<script>alert", output)
+        self.assertIn("Content-Security-Policy", output)
+        self.assertIn("Correlated failure scenarios", output)
+        self.assertNotIn("https://", output)
+
+
+    def test_html_briefing_handles_empty_finding_sections(self) -> None:
+        report = analyze_resilience(self.topology, self.dependency_doc)
+        report["weakest_dependencies"] = []
+        report["correlated_failure_scenarios"] = []
+        report["physical_diversity_assessment"] = []
+        report["redundancy_recommendations"] = []
+        report["capacity_assessment"] = []
+        report["recovery_priorities"] = []
+        output = render_resilience_html(report)
+        self.assertGreaterEqual(output.count("No findings."), 5)
 
     def test_report_ranks_dependencies_and_recovery_deterministically(self) -> None:
         first = analyze_resilience(self.topology, self.dependency_doc)
