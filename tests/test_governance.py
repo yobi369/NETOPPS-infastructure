@@ -20,6 +20,7 @@ from netopps.governance import (
 )
 from netopps.pilot import init_workspace
 
+
 class GovernanceTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory(); self.base=Path(self.temp.name); self.root=self.base/"pilot"
