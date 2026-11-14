@@ -18,7 +18,7 @@ from netopps.governance import (
     ALG, canonical, fingerprint, load_private, load_public, load_registry,
     signed, trusted, verify_signed,
 )
-from netopps.pilot import PilotError, load_manifest, sha256_file, validate_workspace
+from netopps.pilot import PilotError, load_manifest, sha256_file
 
 
 def _write_json(path: Path, value: dict[str, Any]) -> None:
@@ -211,12 +211,35 @@ def main() -> int:
     parser = argparse.ArgumentParser(prog="netopps-security", description="Institutional trust administration and evidence verification.")
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("verify-package"); p.add_argument("--package", type=Path, required=True)
+    p = sub.add_parser("rotate-reviewer")
+    p.add_argument("--registry", type=Path, required=True); p.add_argument("--old-fingerprint", required=True)
+    p.add_argument("--new-public-key", type=Path, required=True); p.add_argument("--reviewer-id", required=True)
+    p.add_argument("--display-name", required=True); p.add_argument("--organization", required=True)
+    p.add_argument("--role", required=True); p.add_argument("--admin-private-key", type=Path, required=True)
+    p.add_argument("--receipt", type=Path, required=True)
+    p = sub.add_parser("revoke-reviewer")
+    p.add_argument("--registry", type=Path, required=True); p.add_argument("--fingerprint", required=True)
+    p.add_argument("--reason", required=True); p.add_argument("--admin-private-key", type=Path, required=True)
+    p.add_argument("--receipt", type=Path, required=True)
+    p = sub.add_parser("verify-trust-change"); p.add_argument("--registry", type=Path, required=True)
+    p.add_argument("--receipt", type=Path, required=True)
     p = sub.add_parser("verify-checkpoint"); p.add_argument("--directory", type=Path, required=True); p.add_argument("--registry", type=Path, required=True); p.add_argument("--checkpoint", type=Path, required=True)
     p = sub.add_parser("checkpoint"); p.add_argument("--directory", type=Path, required=True); p.add_argument("--registry", type=Path, required=True); p.add_argument("--private-key", type=Path, required=True); p.add_argument("--output", type=Path, required=True)
     p = sub.add_parser("verify-policy"); p.add_argument("--directory", type=Path, required=True); p.add_argument("--registry", type=Path, required=True); p.add_argument("--policy", type=Path, required=True); p.add_argument("--approvals", type=Path, nargs="+", required=True)
     args = parser.parse_args()
     try:
         if args.command == "verify-package": result = verify_package(args.package)
+        elif args.command == "verify-trust-change": result = verify_trust_change(args.receipt, args.registry)
+        elif args.command == "rotate-reviewer":
+            password = __import__("getpass").getpass("Trust administrator passphrase: ")
+            fp = rotate_reviewer(args.registry, args.old_fingerprint, args.new_public_key, args.reviewer_id,
+                                 args.display_name, args.organization, args.role, args.admin_private_key,
+                                 password, args.receipt)
+            result = {"new_fingerprint_sha256": fp, "receipt": str(args.receipt)}
+        elif args.command == "revoke-reviewer":
+            password = __import__("getpass").getpass("Trust administrator passphrase: ")
+            revoke_reviewer(args.registry, args.fingerprint, args.reason, args.admin_private_key, password, args.receipt)
+            result = {"revoked_fingerprint_sha256": args.fingerprint, "receipt": str(args.receipt)}
         elif args.command == "verify-checkpoint": result = verify_checkpoint(args.directory, args.registry, args.checkpoint)
         elif args.command == "verify-policy": result = verify_approval_policy(args.directory, args.registry, args.policy, args.approvals)
         else:
