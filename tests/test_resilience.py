@@ -6,14 +6,18 @@ import unittest
 from netopps.resilience import analyze_resilience
 from netopps.topology import NetworkTopology
 
-
 ROOT = __file__.rsplit("/", 2)[0]
+
+
+def load_fixture(name: str) -> dict:
+    with open(f"{ROOT}/examples/{name}", encoding="utf-8") as handle:
+        return json.load(handle)
 
 
 class ResilienceTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.topology_doc = json.loads(open(f"{ROOT}/examples/multi-site-topology.json", encoding="utf-8").read())
-        self.dependency_doc = json.loads(open(f"{ROOT}/examples/service-dependencies.json", encoding="utf-8").read())
+        self.topology_doc = load_fixture("multi-site-topology.json")
+        self.dependency_doc = load_fixture("service-dependencies.json")
         self.topology = NetworkTopology.from_dict(self.topology_doc)
 
     def test_report_ranks_dependencies_and_recovery_deterministically(self) -> None:
