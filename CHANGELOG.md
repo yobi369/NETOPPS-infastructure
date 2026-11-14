@@ -55,3 +55,5 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Added deterministic before/after component and surviving-node connectivity impact reports.
 - Added multi-site synthetic topology and failure scenario examples, CLI command, tests, and documentation.
 - Site failures remove all nodes carrying the exact target site label in the simulated state only.
+- Added optional traffic-demand impact analysis per failure scenario, including failed endpoints, route loss, newly affected Mbps, and residual routed demand.
+- Added CLI integration and regression coverage proving the feature performs no network I/O and does not mutate the baseline topology.
