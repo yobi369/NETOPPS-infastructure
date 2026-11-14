@@ -153,6 +153,35 @@ class CliTests(unittest.TestCase):
         socket_factory.assert_not_called()
         self.assertEqual("", stderr)
 
+
+    def test_topology_cli_accepts_separate_traffic_scenario(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            topology_path = Path(directory) / "topology.json"
+            traffic_path = Path(directory) / "traffic.json"
+            topology_path.write_text(json.dumps({
+                "schema_version": 1,
+                "nodes": [{"id": "a"}, {"id": "b"}],
+                "links": [{"id": "ab", "source": "a", "target": "b",
+                           "latency_ms": 1, "capacity_mbps": 10}],
+            }), encoding="utf-8")
+            traffic_path.write_text(json.dumps({
+                "schema_version": 1,
+                "demands": [{"id": "flow-1", "source": "a", "target": "b", "demand_mbps": 15}],
+            }), encoding="utf-8")
+            stdout = io.StringIO()
+            with (
+                patch.object(sys, "argv", ["netopps", "topology-report", str(topology_path),
+                                           "--traffic-file", str(traffic_path)]),
+                contextlib.redirect_stdout(stdout),
+                patch("socket.socket") as socket_factory,
+            ):
+                code = main()
+        result = json.loads(stdout.getvalue())
+        self.assertEqual(0, code)
+        self.assertEqual(1, result["traffic_simulation"]["congested_link_count"])
+        self.assertEqual(5.0, result["traffic_simulation"]["links"][0]["overloaded_mbps"])
+        socket_factory.assert_not_called()
+
     def test_plan_subnets_is_read_only_and_deterministic(self) -> None:
         payload = json.dumps({
             "schema_version": 1,

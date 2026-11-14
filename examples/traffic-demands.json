@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "demands": [
+    {"id": "office-to-app", "source": "distribution-a", "target": "app-server", "demand_mbps": 120},
+    {"id": "backup-to-app", "source": "distribution-b", "target": "app-server", "demand_mbps": 80},
+    {"id": "core-to-backup", "source": "core-router", "target": "backup-server", "demand_mbps": 25}
+  ]
+}

@@ -30,3 +30,10 @@ The first adaptive-intelligence research milestone is a deterministic graph mode
 **Status:** Accepted
 
 Declared capacity and latency are scenario inputs, not measurements. Reports and documentation must label the model as simulation-only and must not imply that the digital twin reflects current network state unless a future evidence-backed ingestion adapter is implemented.
+
+
+## ADR-005: Model traffic as explicit demand scenarios
+
+**Status:** Accepted
+
+Traffic demand is supplied as a separate, versioned scenario and assigned deterministically to one lowest-latency path. The model aggregates rates on shared links and compares them with declared capacities. It must clearly disclose its single-path assumptions and must not present estimates as measured utilization or generate live traffic.

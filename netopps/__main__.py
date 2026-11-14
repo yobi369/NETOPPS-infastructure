@@ -125,6 +125,7 @@ def main() -> int:
     topology_parser.add_argument("--disable-link", action="append", default=[], help="simulate a failed link (repeatable)")
     topology_parser.add_argument("--path-from", help="optional source node for lowest-latency path analysis")
     topology_parser.add_argument("--path-to", help="optional target node for lowest-latency path analysis")
+    topology_parser.add_argument("--traffic-file", type=Path, help="optional versioned JSON traffic-demand scenario")
     args = parser.parse_args()
 
     if args.command == "check-connectivity" and not args.allow_network:
@@ -146,6 +147,16 @@ def main() -> int:
                 raise TopologyError("--path-from and --path-to must be supplied together")
             if args.path_from and args.path_to:
                 report["path_analysis"] = topology.shortest_path(args.path_from, args.path_to)
+            if args.traffic_file:
+                traffic_document, traffic_status = _read_inventory(args.traffic_file)
+                if traffic_status:
+                    return traffic_status
+                if (not isinstance(traffic_document, dict)
+                        or isinstance(traffic_document.get("schema_version"), bool)
+                        or traffic_document.get("schema_version") != 1
+                        or not isinstance(traffic_document.get("demands"), list)):
+                    raise TopologyError("traffic file must contain schema_version 1 and a demands array")
+                report["traffic_simulation"] = topology.simulate_traffic(traffic_document["demands"])
             print(json.dumps(report, indent=2))
             return 0
         except (TopologyError, ValueError, TypeError) as exc:
