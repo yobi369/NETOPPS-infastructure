@@ -44,3 +44,10 @@ Traffic demand is supplied as a separate, versioned scenario and assigned determ
 **Status:** Accepted
 
 NETOPPS uses a transparent rule-based score derived only from the supplied topology graph. The score reports separate evidence for fragmentation, articulation nodes, bridge links, and isolated nodes. It is a prioritization heuristic, not an outage probability or a substitute for operational risk assessment. Factor weights and severity bands are versioned and documented.
+
+
+## ADR-007: Represent repeatable failures as versioned scenario packs
+
+**Status:** Accepted
+
+Failure scenarios are declared in a separate versioned JSON pack and reference exact site labels, node IDs, or link IDs from the supplied topology. Site failure removes all nodes assigned to that site and their incident links in the simulation. Each result reports baseline and remaining connectivity without mutating the source model. This is not live fault injection or a claim of physical site independence.
