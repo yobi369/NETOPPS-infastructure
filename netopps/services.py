@@ -90,7 +90,14 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
     if len(order) != len(services):
         raise TopologyError("service dependency graph contains a cycle")
     nodes_down, sites_down = failed_nodes or set(), failed_sites or set()
-    links_down = (failed_links or set()) | {key for key, link in topology._links.items() if not link.enabled}
+    explicitly_down_links = (failed_links or set()) | {
+        key for key, link in topology._links.items() if not link.enabled
+    }
+    endpoint_failed_links = {
+        key for key, link in topology._links.items()
+        if link.source in nodes_down or link.target in nodes_down
+    }
+    links_down = explicitly_down_links | endpoint_failed_links
     statuses: dict[str, dict[str, Any]] = {}
     for owner in order:
         failed: list[dict[str, Any]] = []
@@ -102,7 +109,9 @@ def analyze_service_dependencies(topology: NetworkTopology, document: Any,
             if kind == "node" and target in nodes_down:
                 target_status, reason = "unavailable", "node_failed"
             elif kind == "link" and target in links_down:
-                target_status, reason = "unavailable", "link_failed"
+                target_status, reason = "unavailable", (
+                    "link_endpoint_failed" if target in endpoint_failed_links else "link_failed"
+                )
             elif kind == "site" and target in sites_down:
                 target_status, reason = "unavailable", "site_failed"
             elif kind == "service":
