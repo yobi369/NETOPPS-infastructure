@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import json
 import unittest
 
@@ -32,7 +31,7 @@ class ResilienceTests(unittest.TestCase):
                             for item in report["capacity_assessment"]))
 
     def test_missing_capacity_is_not_invented(self) -> None:
-        document = copy.deepcopy(self.dependency_doc)
+        document = json.loads(json.dumps(self.dependency_doc))
         for edge in document["dependencies"]:
             if edge.get("redundancy_group") == "identity-ha":
                 edge.pop("capacity_mbps", None)
@@ -41,7 +40,7 @@ class ResilienceTests(unittest.TestCase):
                             for item in report["capacity_assessment"]))
 
     def test_inputs_are_not_mutated(self) -> None:
-        topology_before = copy.deepcopy(self.topology_doc)
+        topology_before = json.loads(json.dumps(self.topology_doc))
         dependencies_before = copy.deepcopy(self.dependency_doc)
         analyze_resilience(self.topology, self.dependency_doc)
         self.assertEqual(topology_before, self.topology_doc)
