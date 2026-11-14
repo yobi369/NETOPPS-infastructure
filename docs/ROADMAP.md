@@ -58,3 +58,16 @@ Acceptance: no write operation runs without an explicit approved apply action; f
 - Silent configuration changes.
 - Storing production secrets in Git.
 - Claims of production readiness without environment-specific validation.
+
+
+## Phase 6 — Simulation-first network intelligence
+
+- [x] Introduce a deterministic topology model with strict input validation.
+- [x] Report connected components, isolated nodes, degree, and declared link capacity.
+- [x] Compute lowest-latency paths over modeled links.
+- [x] Simulate node/link failures and quantify newly disconnected surviving node pairs.
+- [ ] Add deterministic traffic-demand and congestion scenarios.
+- [ ] Add topology diffs and explainable risk scoring.
+- [ ] Add site-level failure scenario packs and baseline comparisons.
+
+Acceptance: simulations are deterministic, non-mutating, have no network I/O, and distinguish declared scenario inputs from observed telemetry.
