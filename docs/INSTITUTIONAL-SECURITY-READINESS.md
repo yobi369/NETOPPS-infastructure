@@ -19,7 +19,7 @@ netopps-security rotate-reviewer \
   --receipt ./pilot-cases/example/trust/changes/rotation.json
 ```
 
-Revocation marks the key inactive in the local trust registry and writes an administrator-signed receipt. Preserve the prior registry and receipts in institution-controlled versioned storage. Historical signatures remain verifiable only while the corresponding public key and historical trust-state evidence are retained; current active status is not proof that a key was active at the historical signing time. This local registry is not an online certificate authority.
+Revocation marks the key inactive in the local trust registry and writes an administrator-signed receipt. Preserve the prior registry and receipts in institution-controlled versioned storage. Historical signatures remain cryptographically verifiable after revocation while the corresponding public key and trust record are retained. Revocation prevents new approvals because signing requires an active key; it does not invalidate earlier signed bytes. The local trust registry is not an online certificate authority. Reviewers and auditors must separately establish whether the key was valid at the historical signing time from retained trust-change records.
 
 ## Signed audit-head checkpoints
 
