@@ -45,7 +45,7 @@ class ResilienceTests(unittest.TestCase):
 
     def test_inputs_are_not_mutated(self) -> None:
         topology_before = json.loads(json.dumps(self.topology_doc))
-        dependencies_before = copy.deepcopy(self.dependency_doc)
+        dependencies_before = json.loads(json.dumps(self.dependency_doc))
         analyze_resilience(self.topology, self.dependency_doc)
         self.assertEqual(topology_before, self.topology_doc)
         self.assertEqual(dependencies_before, self.dependency_doc)
