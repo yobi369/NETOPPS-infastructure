@@ -78,6 +78,34 @@ class NetworkTopologyTests(unittest.TestCase):
         with self.assertRaisesRegex(TopologyError, "unknown disabled links"):
             self.topology.simulate_failure(disabled_links={"not-a-link"})
 
+
+    def test_traffic_simulation_estimates_congestion_without_mutation(self) -> None:
+        before = self.topology.report()
+        result = self.topology.simulate_traffic([
+            {"id": "heavy", "source": "core", "target": "server", "demand_mbps": 150},
+            {"id": "unreachable", "source": "isolated", "target": "core", "demand_mbps": 10},
+        ])
+        self.assertEqual(160.0, result["total_requested_mbps"])
+        self.assertEqual(150.0, result["total_routed_mbps"])
+        self.assertEqual(1, result["unroutable_demand_count"])
+        self.assertEqual(1, result["congested_link_count"])
+        congested = next(link for link in result["links"] if link["id"] == "a-server")
+        self.assertEqual("congested", congested["status"])
+        self.assertEqual(50.0, congested["overloaded_mbps"])
+        self.assertFalse(result["topology_mutated"])
+        self.assertEqual(before, self.topology.report())
+
+    def test_traffic_simulation_rejects_invalid_demands(self) -> None:
+        with self.assertRaisesRegex(TopologyError, "positive number"):
+            self.topology.simulate_traffic([
+                {"id": "bad", "source": "core", "target": "server", "demand_mbps": 0}
+            ])
+
+    def test_traffic_simulation_rejects_duplicate_demand_ids(self) -> None:
+        demand = {"id": "same", "source": "core", "target": "server", "demand_mbps": 1}
+        with self.assertRaisesRegex(TopologyError, "duplicate traffic demand"):
+            self.topology.simulate_traffic([demand, demand])
+
     def test_same_node_path_is_zero_cost(self) -> None:
         self.assertEqual({"nodes": ["core"], "links": [], "latency_ms": 0.0},
                          self.topology.shortest_path("core", "core"))
