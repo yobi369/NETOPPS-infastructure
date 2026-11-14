@@ -11,6 +11,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Any
 
+
 @dataclass(frozen=True, slots=True)
 class Node:
     """A logical network node in the digital twin."""
