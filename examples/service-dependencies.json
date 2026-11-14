@@ -7,7 +7,8 @@
       "institution_id": "example-bank",
       "institution_name": "Example Bank",
       "criticality": "mission_critical",
-      "dependency_weight": 1.5
+      "dependency_weight": 1.5,
+      "required_capacity_mbps": 300
     },
     {
       "id": "core-banking",
@@ -45,6 +46,20 @@
       "service_id": "identity-platform",
       "depends_on_type": "node",
       "depends_on_id": "hq-core"
+    },
+    {
+      "service_id": "identity-platform",
+      "depends_on_type": "node",
+      "depends_on_id": "backup-server",
+      "redundancy_group": "identity-ha",
+      "capacity_mbps": 250
+    },
+    {
+      "service_id": "identity-platform",
+      "depends_on_type": "node",
+      "depends_on_id": "hq-core",
+      "redundancy_group": "identity-ha",
+      "capacity_mbps": 250
     },
     {
       "service_id": "core-banking",
