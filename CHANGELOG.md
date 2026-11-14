@@ -30,3 +30,11 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Added the topology-report CLI command and a synthetic topology fixture.
 - Added regression tests and documented the distinction between modeled inputs and live telemetry.
 - No live network discovery, telemetry collection, or configuration changes were introduced.
+
+
+## Unreleased — Traffic-demand simulation
+
+- Added deterministic single-path traffic assignment using lowest-latency routes.
+- Added per-link carried-load, utilization, and capacity-overload estimates.
+- Added versioned traffic scenario input, CLI integration, tests, and model-limit documentation.
+- Kept all traffic analysis local and simulation-only; no packets are generated and no live telemetry is read.
