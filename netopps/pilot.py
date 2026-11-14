@@ -1,5 +1,6 @@
-""""Local-first institutional pilot manifest and evidence packaging tools."""
+"""Local-first institutional pilot manifest and evidence packaging tools."""
 from __future__ import annotations
+
 import argparse
 import csv
 import hashlib
