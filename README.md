@@ -39,6 +39,7 @@ Requires Python 3.11 or newer. Install the CLI from the repository root:
 python -m pip install .
 # Local institutional pilot case/evidence workspace
 netopps-pilot --help
+netopps-governance --help
 ```
 
 Then run:
@@ -68,7 +69,11 @@ To validate your own inventory, copy `examples/inventory.json` and update it wit
 
 ## Institutional pilot workspace
 
-Create a local evidence-linked pilot case with `netopps-pilot init`, validate artifact hashes and evidence references with `netopps-pilot validate`, and create a reproducibility package with `netopps-pilot package`. See [Institutional Pilot Workspace](docs/INSTITUTIONAL-PILOT-WORKSPACE.md). The workspace is local-only and does not provide hosted storage, encryption, authentication, role enforcement or tamper-proof audit logging.
+Create a local evidence-linked pilot case with `netopps-pilot init`, validate artifact hashes and evidence references with `netopps-pilot validate`, and create a reproducibility package with `netopps-pilot package`. See [Institutional Pilot Workspace](docs/INSTITUTIONAL-PILOT-WORKSPACE.md). The workspace is local-only. Governance signatures protect approvals and log entries, but the product does not provide hosted storage, identity proofing, role enforcement or immutable audit storage.
+
+## Institutional pilot governance
+
+The local `netopps-governance` CLI adds Ed25519-signed assessment approvals, a signed hash-chained activity log, reviewer trust-registry checks, baseline/candidate provenance records and reproducible evidence packages. See [Pilot Governance and Trust](docs/PILOT-GOVERNANCE-AND-TRUST.md). Private signing keys are encrypted and must remain outside Git; the trust registry must be controlled by the institution. Signatures prove key possession and document integrity, not legal identity or delegated authority. A local audit chain cannot by itself prevent truncation or wholesale replacement; retain verified head hashes independently.
 
 ## Telecom evaluation demonstration
 
