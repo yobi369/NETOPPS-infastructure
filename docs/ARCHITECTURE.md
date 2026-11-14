@@ -39,3 +39,10 @@ Prefer pure functions and explicit interfaces. Keep parsing separate from policy
 - Optional dashboard only after stable API and authorization boundaries exist.
 
 These are design directions, not current features.
+
+
+## Simulation-first digital twin
+
+The new `netopps.topology` module models operator-supplied nodes and undirected links. It provides deterministic component analysis, lowest-latency path selection, and hypothetical node/link failure analysis. It is pure local computation and does not connect to devices.
+
+The twin is deliberately separate from the existing inventory schema. Inventory records management identity and address allocations; topology records modeled relationships and scenario attributes. A future adapter may explicitly map between these contracts, but must preserve schema validation and evidence provenance.
