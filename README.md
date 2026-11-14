@@ -46,6 +46,8 @@ python -m netopps validate examples/inventory.json
 netopps plan-subnets examples/inventory.json --pool 10.20.0.0/16 --prefix 24 --count 4
 # Only run on networks you are authorized to check; this opens TCP connections.
 netopps check-connectivity examples/inventory.json --allow-network --limit 20 --timeout 1.0
+netopps topology-report examples/topology.json --path-from core-router --path-to app-server
+netopps topology-report examples/topology.json --disable-link core-to-a
 ```
 
 Exit codes: `0` means the requested checks passed; `1` means inventory findings, an incomplete subnet plan, an unreachable endpoint, or a truncated connectivity scope; `2` means input/arguments could not be safely processed.
