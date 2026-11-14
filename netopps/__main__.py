@@ -10,8 +10,8 @@ from typing import Any
 
 from netopps.health import check_connectivity
 from netopps.planner import allocate_subnets
-from netopps.validator import validate_inventory
 from netopps.topology import NetworkTopology, TopologyError
+from netopps.validator import validate_inventory
 
 _MAX_INPUT_BYTES = 5 * 1024 * 1024
 _MAX_JSON_DEPTH = 100
