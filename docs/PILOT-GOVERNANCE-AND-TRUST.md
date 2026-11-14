@@ -7,8 +7,8 @@ NETOPPS governance commands operate locally. Pilot data and private keys are not
 NETOPPS uses Ed25519 signatures over canonical UTF-8 JSON. Generate a reviewer keypair; the private key is encrypted with a passphrase and written with owner-only permissions on supported POSIX filesystems.
 
 ```bash
-netopps-governance keygen --private-key ./trust/reviewer.private.pem --public-key ./trust/reviewer.public.pem
-netopps-governance register-reviewer --registry ./trust/reviewers.json --public-key ./trust/reviewer.public.pem --reviewer-id reviewer-001 --display-name "Authorized Reviewer" --organization "Example Institution" --role "Resilience Reviewer"
+netopps-governance keygen --private-key ./trust/reviewer.private.pem --public-key ./pilot-cases/example/trust/reviewer.public.pem
+netopps-governance register-reviewer --registry ./pilot-cases/example/trust/reviewers.json --public-key ./pilot-cases/example/trust/reviewer.public.pem --reviewer-id reviewer-001 --display-name "Authorized Reviewer" --organization "Example Institution" --role "Resilience Reviewer"
 netopps-governance approve --directory ./pilot-cases/example --registry ./pilot-cases/example/trust/reviewers.json --private-key ./trust/reviewer.private.pem --assessment-id comparison-01 --decision approved --output ./pilot-cases/example/approvals/comparison-01.json
 netopps-governance verify-approval --approval ./pilot-cases/example/approvals/comparison-01.json --registry ./pilot-cases/example/trust/reviewers.json --directory ./pilot-cases/example
 ```
