@@ -137,6 +137,12 @@ def main() -> int:
         "topology-risk", help="calculate explainable structural fragility for a topology"
     )
     risk_parser.add_argument("file", type=Path, help="topology JSON file")
+
+    scenarios_parser = subparsers.add_parser(
+        "topology-scenarios", help="evaluate a versioned pack of node, link, and site failure scenarios"
+    )
+    scenarios_parser.add_argument("topology", type=Path, help="topology JSON file")
+    scenarios_parser.add_argument("scenarios", type=Path, help="scenario-pack JSON file")
     args = parser.parse_args()
 
     if args.command == "check-connectivity" and not args.allow_network:
@@ -185,6 +191,26 @@ def main() -> int:
             baseline = NetworkTopology.from_dict(baseline_document)
             candidate = NetworkTopology.from_dict(candidate_document)
             print(json.dumps(baseline.compare(candidate), indent=2))
+            return 0
+        except (TopologyError, ValueError, TypeError) as exc:
+            print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
+            return 2
+
+    if args.command == "topology-scenarios":
+        topology_document, topology_status = _read_inventory(args.topology)
+        if topology_status:
+            return topology_status
+        scenarios_document, scenarios_status = _read_inventory(args.scenarios)
+        if scenarios_status:
+            return scenarios_status
+        try:
+            if (not isinstance(scenarios_document, dict)
+                    or isinstance(scenarios_document.get("schema_version"), bool)
+                    or scenarios_document.get("schema_version") != 1
+                    or not isinstance(scenarios_document.get("scenarios"), list)):
+                raise TopologyError("scenario pack must contain schema_version 1 and a scenarios array")
+            topology = NetworkTopology.from_dict(topology_document)
+            print(json.dumps(topology.analyze_scenarios(scenarios_document["scenarios"]), indent=2))
             return 0
         except (TopologyError, ValueError, TypeError) as exc:
             print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))

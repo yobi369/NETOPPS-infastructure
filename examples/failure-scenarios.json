@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "branch-west-site-outage",
+      "name": "Loss of the entire western branch site",
+      "failure_type": "site",
+      "target": "branch-west"
+    },
+    {
+      "id": "hq-direct-link-outage",
+      "name": "Loss of the direct headquarters application link",
+      "failure_type": "link",
+      "target": "hq-direct-to-app"
+    },
+    {
+      "id": "backup-server-outage",
+      "name": "Backup server becomes unavailable",
+      "failure_type": "node",
+      "target": "backup-server"
+    }
+  ]
+}

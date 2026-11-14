@@ -179,6 +179,55 @@ class NetworkTopologyTests(unittest.TestCase):
         self.assertEqual(0.0, result["score"])
         self.assertEqual("low", result["severity"])
 
+
+    def test_site_failure_scenario_removes_all_nodes_at_site(self) -> None:
+        topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [
+                {"id": "core", "site": "hq"},
+                {"id": "edge", "site": "branch"},
+                {"id": "server", "site": "hq"},
+                {"id": "isolated", "site": "warehouse"},
+            ],
+            "links": [
+                {"id": "core-edge", "source": "core", "target": "edge",
+                 "latency_ms": 1, "capacity_mbps": 100},
+                {"id": "edge-server", "source": "edge", "target": "server",
+                 "latency_ms": 1, "capacity_mbps": 100},
+            ],
+        })
+        before = topology.report()
+        result = topology.analyze_scenarios([
+            {"id": "branch-outage", "name": "Branch site unavailable",
+             "failure_type": "site", "target": "branch"},
+            {"id": "edge-outage", "failure_type": "node", "target": "edge"},
+            {"id": "uplink-outage", "failure_type": "link", "target": "core-edge"},
+        ])
+        self.assertEqual(["branch-outage", "edge-outage", "uplink-outage"],
+                         [item["id"] for item in result["scenarios"]])
+        site_result = result["scenarios"][0]
+        self.assertEqual(["edge"], site_result["failed_nodes"])
+        self.assertEqual(3, site_result["impact"]["component_count_after"])
+        self.assertEqual(1, site_result["impact"]["newly_disconnected_node_pairs"])
+        self.assertEqual(3, site_result["remaining_topology"]["node_count"])
+        self.assertEqual(before, topology.report())
+        self.assertFalse(result["topology_mutated"])
+
+    def test_scenario_pack_rejects_unknown_site_and_duplicate_ids(self) -> None:
+        with self.assertRaisesRegex(TopologyError, "unknown or empty site"):
+            self.topology.analyze_scenarios([
+                {"id": "bad-site", "failure_type": "site", "target": "missing"}
+            ])
+        scenario = {"id": "same", "failure_type": "node", "target": "core"}
+        with self.assertRaisesRegex(TopologyError, "duplicate scenario id"):
+            self.topology.analyze_scenarios([scenario, scenario])
+
+    def test_scenario_pack_rejects_non_string_failure_type(self) -> None:
+        with self.assertRaisesRegex(TopologyError, "failure_type must be"):
+            self.topology.analyze_scenarios([
+                {"id": "bad-type", "failure_type": [], "target": "core"}
+            ])
+
     def test_same_node_path_is_zero_cost(self) -> None:
         self.assertEqual({"nodes": ["core"], "links": [], "latency_ms": 0.0},
                          self.topology.shortest_path("core", "core"))

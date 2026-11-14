@@ -449,6 +449,97 @@ class NetworkTopology:
             "topology_mutated": False,
         }
 
+
+    def analyze_scenarios(self, scenarios: Any) -> dict[str, Any]:
+        """Run a deterministic pack of node, link, and whole-site failure scenarios."""
+        if not isinstance(scenarios, list):
+            raise TopologyError("scenarios must be an array")
+        seen_ids: set[str] = set()
+        baseline = self.report()
+        results: list[dict[str, Any]] = []
+
+        for index, scenario in enumerate(scenarios):
+            if not isinstance(scenario, dict):
+                raise TopologyError(f"scenarios[{index}] must be an object")
+            unknown = set(scenario) - {"id", "name", "failure_type", "target"}
+            if unknown:
+                raise TopologyError(f"scenarios[{index}] has unknown properties")
+            identifier, name = scenario.get("id"), scenario.get("name", "")
+            failure_type, target = scenario.get("failure_type"), scenario.get("target")
+            if not isinstance(identifier, str) or not identifier.strip():
+                raise TopologyError(f"scenarios[{index}].id must be a non-empty string")
+            if identifier in seen_ids:
+                raise TopologyError(f"duplicate scenario id: {identifier}")
+            if not isinstance(name, str):
+                raise TopologyError(f"scenarios[{index}].name must be a string")
+            if not isinstance(failure_type, str) or failure_type not in {"node", "link", "site"}:
+                raise TopologyError(f"scenarios[{index}].failure_type must be node, link, or site")
+            if not isinstance(target, str) or not target.strip():
+                raise TopologyError(f"scenarios[{index}].target must be a non-empty string")
+            seen_ids.add(identifier)
+
+            if failure_type == "node":
+                if target not in self._nodes:
+                    raise TopologyError(f"scenario {identifier} references unknown node: {target}")
+                failed_nodes = {target}
+                failed_links: set[str] = set()
+            elif failure_type == "link":
+                if target not in self._links:
+                    raise TopologyError(f"scenario {identifier} references unknown link: {target}")
+                failed_nodes = set()
+                failed_links = {target}
+            else:
+                failed_nodes = {
+                    node.id for node in self._nodes.values() if node.site == target
+                }
+                if not failed_nodes:
+                    raise TopologyError(f"scenario {identifier} references unknown or empty site: {target}")
+                failed_links = set()
+
+            impact = self.simulate_failure(
+                disabled_nodes=failed_nodes, disabled_links=failed_links
+            )
+            remaining_nodes = tuple(
+                node for node in self._nodes.values() if node.id not in failed_nodes
+            )
+            remaining_links = tuple(
+                Link(
+                    link.id, link.source, link.target, link.latency_ms,
+                    link.capacity_mbps,
+                    link.enabled and link.id not in failed_links,
+                )
+                for link in self._ordered_links
+                if link.source not in failed_nodes and link.target not in failed_nodes
+            )
+            remaining_topology = NetworkTopology(remaining_nodes, remaining_links)
+            remaining_report = remaining_topology.report()
+            results.append({
+                "id": identifier, "name": name, "failure_type": failure_type,
+                "target": target, "failed_nodes": sorted(failed_nodes),
+                "failed_links": sorted(failed_links),
+                "impact": impact,
+                "remaining_topology": {
+                    "node_count": remaining_report["node_count"],
+                    "active_link_count": remaining_report["active_link_count"],
+                    "component_count": remaining_report["component_count"],
+                    "components": remaining_report["components"],
+                    "isolated_nodes": remaining_report["isolated_nodes"],
+                },
+            })
+
+        return {
+            "mode": "simulation-only", "scenario_pack_version": 1,
+            "baseline": {
+                "node_count": baseline["node_count"],
+                "active_link_count": baseline["active_link_count"],
+                "component_count": baseline["component_count"],
+                "components": baseline["components"],
+            },
+            "scenario_count": len(results),
+            "scenarios": sorted(results, key=lambda item: item["id"]),
+            "topology_mutated": False,
+        }
+
     def simulate_failure(self, *, disabled_nodes: set[str] | None = None,
                          disabled_links: set[str] | None = None) -> dict[str, Any]:
         """Compare baseline and failure-state connectivity without mutating the twin."""

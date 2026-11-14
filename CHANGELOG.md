@@ -47,3 +47,11 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Added explainable 0–100 structural-fragility scoring with factor-level evidence and documented weights.
 - Added `topology-diff` and `topology-risk` CLI commands with local-only regression tests.
 - Scores are heuristics, not outage probabilities; no live telemetry or network operations are involved.
+
+
+## Unreleased — Multi-site failure scenario packs
+
+- Added versioned scenario packs for whole-site, node, and link failures.
+- Added deterministic before/after component and surviving-node connectivity impact reports.
+- Added multi-site synthetic topology and failure scenario examples, CLI command, tests, and documentation.
+- Site failures remove all nodes carrying the exact target site label in the simulated state only.

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "nodes": [
+    {"id": "hq-core", "role": "router", "site": "headquarters"},
+    {"id": "branch-router", "role": "router", "site": "branch-west"},
+    {"id": "branch-switch", "role": "switch", "site": "branch-west"},
+    {"id": "app-server", "role": "server", "site": "headquarters"},
+    {"id": "backup-server", "role": "server", "site": "remote-dc"},
+    {"id": "sensor-01", "role": "sensor", "site": "remote-dc"}
+  ],
+  "links": [
+    {"id": "hq-to-branch", "source": "hq-core", "target": "branch-router", "latency_ms": 8, "capacity_mbps": 500},
+    {"id": "branch-router-to-switch", "source": "branch-router", "target": "branch-switch", "latency_ms": 1, "capacity_mbps": 1000},
+    {"id": "branch-to-app", "source": "branch-switch", "target": "app-server", "latency_ms": 7, "capacity_mbps": 500},
+    {"id": "hq-direct-to-app", "source": "hq-core", "target": "app-server", "latency_ms": 2, "capacity_mbps": 1000},
+    {"id": "branch-to-backup", "source": "branch-router", "target": "backup-server", "latency_ms": 18, "capacity_mbps": 200}
+  ]
+}
