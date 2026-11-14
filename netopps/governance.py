@@ -1,13 +1,31 @@
 """Ed25519 approvals and evidence governance for local NETOPPS pilot workspaces."""
 from __future__ import annotations
-import argparse, base64, getpass, hashlib, json, os, sys, zipfile
-from datetime import datetime, timezone
+import argparse
+import base64
+import getpass
+import hashlib
+import json
+import os
+import sys
+import zipfile
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
-from netopps.pilot import PilotError, load_manifest, safe_file, sha256_file, validate_workspace
+from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+    Ed25519PrivateKey,
+    Ed25519PublicKey,
+)
+
+from netopps.pilot import (
+    PilotError,
+    load_manifest,
+    safe_file,
+    sha256_file,
+    validate_workspace,
+)
 
 ALG = "Ed25519"
 REGISTRY_VERSION = 1
@@ -93,7 +111,7 @@ def approve(root: Path, registry: Path, private_path: Path, password: str, asses
     if assessment is None: raise PilotError("assessment not found")
     report=next(a for a in manifest["artifacts"] if a["id"]==assessment["report_artifact_id"])
     key=load_private(private_path,password); fp=fingerprint(key.public_key()); reviewer,_=trusted(registry,fp)
-    payload={"schema_version":1,"approval_id":hashlib.sha256(os.urandom(32)).hexdigest()[:24],"pilot_id":manifest["pilot_id"],"assessment_id":assessment_id,"assessment_kind":assessment["kind"],"decision":decision,"manifest_sha256":hashlib.sha256((root/"pilot-manifest.json").read_bytes()).hexdigest(),"report_artifact_id":report["id"],"report_sha256":sha256_file(safe_file(root,report["path"])),"reviewer":{k:reviewer[k] for k in ("reviewer_id","display_name","organization","role")},"signed_at":datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    payload={"schema_version":1,"approval_id":hashlib.sha256(os.urandom(32)).hexdigest()[:24],"pilot_id":manifest["pilot_id"],"assessment_id":assessment_id,"assessment_kind":assessment["kind"],"decision":decision,"manifest_sha256":hashlib.sha256((root/"pilot-manifest.json").read_bytes()).hexdigest(),"report_artifact_id":report["id"],"report_sha256":sha256_file(safe_file(root,report["path"])),"reviewer":{k:reviewer[k] for k in ("reviewer_id","display_name","organization","role")},"signed_at":datetime.now(UTC).isoformat(timespec="seconds")}
     output.parent.mkdir(parents=True,exist_ok=True); output.write_text(json.dumps(signed(payload,key,fp),indent=2,sort_keys=True)+"\n",encoding="utf-8")
 
 def verify_approval(path: Path, registry: Path, root: Path|None=None) -> dict[str,Any]:
