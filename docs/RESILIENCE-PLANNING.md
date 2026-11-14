@@ -9,9 +9,13 @@ The resilience planner turns NETOPPS' operator-declared topology and service dep
 ```bash
 netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json
 netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json --candidate-dependencies examples/service-dependencies-candidate.json
+# Export a self-contained executive HTML briefing
+netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json --format html --output resilience-briefing.html
 ```
 
-The command emits JSON with the following sections. To compare a concrete proposal, pass `--candidate-dependencies` with a second valid version-1 service dependency document. The report then compares baseline and candidate service-state counts, weighted affected-service priority, and modeled capacity-gap counts; negative impact/gap deltas indicate modeled improvement.
+The default JSON output is machine-readable. Use --format html to render a self-contained, offline executive briefing; add --output FILE to write it to a file instead of stdout. The HTML report includes summary metrics, dependency risks, correlated failures, diversity evidence status, recovery priorities, capacity gaps, candidate comparisons, and model limitations. It uses no external scripts, stylesheets, fonts, images, or network calls and escapes all model-supplied text.
+
+The JSON report contains the following sections. To compare a concrete proposal, pass `--candidate-dependencies` with a second valid version-1 service dependency document. The report then compares baseline and candidate service-state counts, weighted affected-service priority, and modeled capacity-gap counts; negative impact/gap deltas indicate modeled improvement.
 
 The command emits JSON with:
 
