@@ -563,3 +563,94 @@ class InstitutionalDependencyImpactTests(unittest.TestCase):
         ]}
         with self.assertRaisesRegex(TopologyError, "conflicting names"):
             analyze_service_dependencies(self.topology, conflicting, failed_nodes={"core"})
+
+
+class InstitutionalResilienceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [{"id": "provider-a"}, {"id": "provider-b"}],
+            "links": [],
+        })
+
+    def test_redundancy_group_activates_failover_and_reports_capacity(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        graph = {
+            "schema_version": 1,
+            "services": [{
+                "id": "payments", "name": "Payments", "criticality": "mission_critical",
+                "required_capacity_mbps": 80,
+                "institution_id": "bank", "institution_name": "Example Bank",
+            }],
+            "dependencies": [
+                {"service_id": "payments", "depends_on_type": "node", "depends_on_id": "provider-a",
+                 "redundancy_group": "payment-providers", "capacity_mbps": 60},
+                {"service_id": "payments", "depends_on_type": "node", "depends_on_id": "provider-b",
+                 "redundancy_group": "payment-providers", "capacity_mbps": 50},
+            ],
+        }
+        baseline = analyze_service_dependencies(self.topology, graph)
+        self.assertEqual("available", baseline["services"][0]["status"])
+        self.assertEqual(110.0, baseline["services"][0]["redundancy"][0]["remaining_capacity_mbps"])
+
+        failed = analyze_service_dependencies(self.topology, graph, failed_nodes={"provider-a"})
+        service = failed["services"][0]
+        self.assertEqual("degraded", service["status"])
+        self.assertTrue(service["redundancy"][0]["failover_active"])
+        self.assertEqual(50.0, service["redundancy"][0]["remaining_capacity_mbps"])
+        self.assertFalse(service["redundancy"][0]["capacity_adequate"])
+        self.assertEqual("direct", service["impact_scope"])
+
+    def test_redundancy_group_exhaustion_causes_unavailability(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        graph = {
+            "schema_version": 1,
+            "services": [{"id": "directory", "name": "Directory"}],
+            "dependencies": [
+                {"service_id": "directory", "depends_on_type": "node", "depends_on_id": "provider-a",
+                 "redundancy_group": "directory-ha"},
+                {"service_id": "directory", "depends_on_type": "node", "depends_on_id": "provider-b",
+                 "redundancy_group": "directory-ha"},
+            ],
+        }
+        result = analyze_service_dependencies(
+            self.topology, graph, failed_nodes={"provider-a", "provider-b"}
+        )
+        self.assertEqual("unavailable", result["services"][0]["status"])
+        self.assertEqual(0, result["services"][0]["redundancy"][0]["operational_member_count"])
+
+    def test_optional_redundancy_group_degrades_when_all_members_fail(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        graph = {
+            "schema_version": 1,
+            "services": [{"id": "analytics", "name": "Analytics"}],
+            "dependencies": [
+                {"service_id": "analytics", "depends_on_type": "node", "depends_on_id": "provider-a",
+                 "required": False, "redundancy_group": "analytics-sources"},
+                {"service_id": "analytics", "depends_on_type": "node", "depends_on_id": "provider-b",
+                 "required": False, "redundancy_group": "analytics-sources"},
+            ],
+        }
+        result = analyze_service_dependencies(
+            self.topology, graph, failed_nodes={"provider-a", "provider-b"}
+        )
+        self.assertEqual("degraded", result["services"][0]["status"])
+
+    def test_redundancy_group_rejects_mixed_required_members(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        graph = {
+            "schema_version": 1,
+            "services": [{"id": "directory", "name": "Directory"}],
+            "dependencies": [
+                {"service_id": "directory", "depends_on_type": "node", "depends_on_id": "provider-a",
+                 "required": True, "redundancy_group": "directory-ha"},
+                {"service_id": "directory", "depends_on_type": "node", "depends_on_id": "provider-b",
+                 "required": False, "redundancy_group": "directory-ha"},
+            ],
+        }
+        with self.assertRaisesRegex(TopologyError, "mixes required and optional"):
+            analyze_service_dependencies(self.topology, graph)
