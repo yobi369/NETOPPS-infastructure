@@ -70,6 +70,23 @@ class GovernanceTests(unittest.TestCase):
             self.assertIn("trust/reviewers.json",archive.namelist())
             self.assertIn("trust/reviewer.public.pem",archive.namelist())
             self.assertNotIn("trust/reviewer.private.pem",archive.namelist())
+    def test_package_ignores_unapproved_files_in_governance_folders(self):
+        secret = self.root / "approvals" / "private.pem"
+        secret.parent.mkdir(parents=True, exist_ok=True)
+        secret.write_text("not for distribution")
+        archive_path = self.base / "allowlist.zip"
+        package(self.root, archive_path)
+        with zipfile.ZipFile(archive_path) as archive:
+            self.assertNotIn("approvals/private.pem", archive.namelist())
+
+    def test_package_rejects_private_key_misregistered_as_public_key(self):
+        registry = json.loads(self.registry.read_text())
+        record = next(iter(registry["reviewers"].values()))
+        record["public_key"] = "reviewer.private.pem"
+        self.registry.write_text(json.dumps(registry))
+        with self.assertRaises(PilotError):
+            package(self.root, self.base / "bad-trust.zip")
+
     def test_key_files_are_not_overwritten(self):
         with self.assertRaisesRegex(PilotError,"overwrite"): keygen(self.private,self.public,"test-passphrase-2026")
 
