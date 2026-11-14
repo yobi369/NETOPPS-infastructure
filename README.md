@@ -90,6 +90,10 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 - `docs/LAB-ACCEPTANCE.md` — authorized lab acceptance checklist before operational reliance.
 - `CHANGELOG.md` — implemented changes and limitations.
 - `docs/DECISIONS.md` — engineering decision records.
+- `COMMERCIAL-LICENSING.md` — community and commercial licensing paths.
+- `CONTRIBUTOR-LICENSE-AGREEMENT.md` — draft contributor rights agreement.
+- `docs/COMMERCIAL-LICENSE-AGREEMENT-TEMPLATE.md` — draft institutional commercial agreement.
+- `docs/COMMERCIAL-READINESS-CHECKLIST.md` — ownership, release, and customer-contract readiness gates.
 
 ## Network digital twin (simulation-only)
 
@@ -129,4 +133,4 @@ NETOPPS uses a dual-licensing model for the current codebase:
 
 **Historical MIT grants:** Earlier versions and copies already distributed under MIT remain governed by that license; this change does not revoke permissions already granted. The original MIT text is preserved in [LICENSE-MIT-LEGACY](LICENSE-MIT-LEGACY).
 
-The dual-licensing offer applies only to material for which the copyright holder has the necessary rights. Third-party components and contributions remain subject to their own rights and license terms. Operators remain responsible for authorization and safe use of any network or device.
+The dual-licensing offer applies only to material for which the copyright holder has the necessary rights. External contributions require an accepted Contributor License Agreement before merge into the dual-licensed codebase; contributors retain ownership while granting the rights described in that agreement. Third-party components remain subject to their own rights and license terms. Commercial agreement templates are drafts only and do not grant rights until completed and signed. Operators remain responsible for authorization and safe use of any network or device.
