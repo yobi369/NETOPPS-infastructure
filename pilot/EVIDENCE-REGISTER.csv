@@ -1,0 +1,8 @@
+evidence_id,category,claim_or_input,source_reference_or_hash,source_owner,collected_at,valid_until_or_review_date,measurement_window,validation_status,reviewer,permitted_use,limitations,related_asset_or_service,decision_reference
+EV-001,topology,,,,,,,unreviewed,,,,,
+EV-002,service_inventory,,,,,,,unreviewed,,,,,
+EV-003,dependency,,,,,,,unreviewed,,,,,
+EV-004,capacity,,,,,,,unknown,,,,,
+EV-005,failure_domain,,,,,,,unknown,,,,,
+EV-006,physical_diversity,,,,,,,unknown,,,,,
+EV-007,criticality_and_RTO_RPO,,,,,,,unreviewed,,,,,
