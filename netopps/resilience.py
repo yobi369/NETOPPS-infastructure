@@ -7,7 +7,11 @@ from netopps.services import analyze_service_dependencies
 from netopps.topology import NetworkTopology, TopologyError
 
 
-def analyze_resilience(topology: NetworkTopology, dependencies: Any) -> dict[str, Any]:
+def analyze_resilience(
+    topology: NetworkTopology,
+    dependencies: Any,
+    candidate_dependencies: Any | None = None,
+) -> dict[str, Any]:
     """Rank weak institutional dependencies and model planning opportunities.
 
     Recommendations are hypotheses: the planner cannot invent an alternate asset,
@@ -137,7 +141,7 @@ def analyze_resilience(topology: NetworkTopology, dependencies: Any) -> dict[str
         "unknown_capacity_count": sum(gap.get("capacity_gap_mbps") is None for gap in capacity_gaps),
         "first_recovery_priority": recovery_priorities[0] if recovery_priorities else None,
     }
-    return {
+    report = {
         "mode": "simulation-only",
         "report_type": "institutional-resilience-and-recovery-plan",
         "model_version": 1,
@@ -167,3 +171,56 @@ def analyze_resilience(topology: NetworkTopology, dependencies: Any) -> dict[str
         "topology_mutated": False,
         "dependency_document_mutated": False,
     }
+    if candidate_dependencies is not None:
+        candidate = analyze_resilience(topology, candidate_dependencies)
+        before = baseline
+        after = candidate["baseline_service_resilience"]
+        before_impact = sum(
+            item["priority_weight"] for item in before["services"]
+            if item["status"] != "available"
+        )
+        after_impact = sum(
+            item["priority_weight"] for item in after["services"]
+            if item["status"] != "available"
+        )
+        baseline_gaps = sum(item.get("capacity_gap_mbps") is not None for item in capacity_gaps)
+        candidate_gaps = sum(
+            item.get("capacity_gap_mbps") is not None
+            for item in candidate["capacity_assessment"]
+        )
+        report["candidate_comparison"] = {
+            "candidate_supplied": True,
+            "baseline": {
+                "available": before["available_count"],
+                "degraded": before["degraded_count"],
+                "unavailable": before["unavailable_count"],
+                "weighted_affected_priority": round(before_impact, 6),
+                "modeled_capacity_gap_count": baseline_gaps,
+            },
+            "candidate": {
+                "available": after["available_count"],
+                "degraded": after["degraded_count"],
+                "unavailable": after["unavailable_count"],
+                "weighted_affected_priority": round(after_impact, 6),
+                "modeled_capacity_gap_count": candidate_gaps,
+            },
+            "change": {
+                "available_services": after["available_count"] - before["available_count"],
+                "degraded_services": after["degraded_count"] - before["degraded_count"],
+                "unavailable_services": after["unavailable_count"] - before["unavailable_count"],
+                "weighted_affected_priority": round(after_impact - before_impact, 6),
+                "modeled_capacity_gaps": candidate_gaps - baseline_gaps,
+            },
+            "candidate_redundancy_recommendations": candidate["redundancy_recommendations"],
+            "interpretation": (
+                "Negative affected-priority and capacity-gap changes indicate modeled improvement. "
+                "Candidate outcomes remain conditional on the accuracy and physical independence "
+                "of the supplied dependency declarations."
+            ),
+        }
+    else:
+        report["candidate_comparison"] = {
+            "candidate_supplied": False,
+            "status": "provide --candidate-dependencies to compare a concrete proposed dependency model",
+        }
+    return report
