@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import unittest
+
 from netopps.topology import NetworkTopology, TopologyError
 
 def sample_topology() -> dict[str, object]:
