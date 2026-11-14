@@ -10,6 +10,7 @@ from typing import Any
 
 from netopps.health import check_connectivity
 from netopps.planner import allocate_subnets
+from netopps.resilience import analyze_resilience
 from netopps.topology import NetworkTopology, TopologyError
 from netopps.validator import validate_inventory
 
@@ -145,6 +146,14 @@ def main() -> int:
     scenarios_parser.add_argument("scenarios", type=Path, help="scenario-pack JSON file")
     scenarios_parser.add_argument("--traffic-file", type=Path, help="optional versioned JSON traffic-demand scenario")
     scenarios_parser.add_argument("--dependency-file", type=Path, help="optional versioned service dependency graph")
+    resilience_parser = subparsers.add_parser(
+        "resilience-report",
+        help="rank institutional dependencies, resilience options, capacity gaps, and recovery priorities",
+    )
+    resilience_parser.add_argument("topology", type=Path, help="operator-supplied topology JSON file")
+    resilience_parser.add_argument("dependencies", type=Path, help="version-1 service dependency JSON file")
+    resilience_parser.add_argument("--candidate-dependencies", type=Path, help="optional proposed version-1 dependency model for before/after comparison")
+
     args = parser.parse_args()
 
     if args.command == "check-connectivity" and not args.allow_network:
@@ -233,6 +242,26 @@ def main() -> int:
                 scenarios_document["scenarios"], traffic_demands=traffic_demands,
                 service_dependencies=service_dependencies,
             ), indent=2))
+            return 0
+        except (TopologyError, ValueError, TypeError) as exc:
+            print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
+            return 2
+
+    if args.command == "resilience-report":
+        topology_document, topology_status = _read_inventory(args.topology)
+        if topology_status:
+            return topology_status
+        dependency_document, dependency_status = _read_inventory(args.dependencies)
+        if dependency_status:
+            return dependency_status
+        try:
+            topology = NetworkTopology.from_dict(topology_document)
+            candidate_document = None
+            if args.candidate_dependencies:
+                candidate_document, candidate_status = _read_inventory(args.candidate_dependencies)
+                if candidate_status:
+                    return candidate_status
+            print(json.dumps(analyze_resilience(topology, dependency_document, candidate_document), indent=2))
             return 0
         except (TopologyError, ValueError, TypeError) as exc:
             print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))

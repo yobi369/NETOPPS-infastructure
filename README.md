@@ -51,7 +51,11 @@ netopps topology-report examples/topology.json --disable-link core-to-a
 netopps topology-report examples/topology.json --traffic-file examples/traffic-demands.json
 netopps topology-risk examples/topology.json
 netopps topology-diff examples/topology.json examples/topology-candidate.json
-netopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json\nnetopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json --dependency-file examples/service-dependencies.json
+netopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json
+netopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json --dependency-file examples/service-dependencies.json
+netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json
+# Compare a proposed dependency design against the baseline
+netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json --candidate-dependencies proposed-service-dependencies.json
 ```
 
 Exit codes: `0` means the requested checks passed; `1` means inventory findings, an incomplete subnet plan, an unreachable endpoint, or a truncated connectivity scope; `2` means input/arguments could not be safely processed.
@@ -64,7 +68,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 
 ## Repository map
 
-- `netopps/` — inventory validation, subnet planning, opt-in connectivity checks, topology simulation, and CLI.
+- `netopps/` — inventory validation, subnet planning, opt-in connectivity checks, topology simulation, institutional resilience planning, and CLI.
 - `tests/` — validator and CLI regression tests.
 - `examples/` — safe, synthetic inventory.
 - `schemas/` — versioned inventory schema.
@@ -73,6 +77,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 - `docs/TRAFFIC-SIMULATION.md` — traffic demand assumptions and congestion estimates.
 - `docs/TOPOLOGY-RISK.md` — topology diff semantics and explainable risk scoring.
 - `docs/SCENARIO-PACKS.md` — repeatable node, link, and site outage scenarios.
+- `docs/RESILIENCE-PLANNING.md` — ranked institutional resilience options, capacity assessment, and recovery priorities.
 - `docs/SECURITY.md` — threat model and safe-use rules.
 - `docs/OPERATIONS.md` — repeatable local workflow and incident discipline.
 - `docs/ROADMAP.md` — staged delivery with verifiable acceptance criteria.
@@ -86,7 +91,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 
 ## Network digital twin (simulation-only)
 
-NETOPPS now includes a deterministic graph model for operator-supplied topology scenarios. It can summarize connectivity components, identify isolated nodes, calculate lowest-latency paths, simulate hypothetical node or link failures, estimate traffic demand against declared link capacity, compare baseline and candidate topologies, and produce explainable structural-fragility scores. Optional service dependency graphs add recursive failure paths, service-state classification, and institution-level impact ranking from operator-supplied metadata. The model is local-only and does not discover devices, collect telemetry, open sockets, or change infrastructure. Declared latency and capacity are scenario inputs, not live measurements. See [Network Digital Twin](docs/NETWORK-DIGITAL-TWIN.md), [Traffic Simulation](docs/TRAFFIC-SIMULATION.md), and the synthetic topology and demand examples.
+NETOPPS now includes a deterministic graph model for operator-supplied topology scenarios. It can summarize connectivity components, identify isolated nodes, calculate lowest-latency paths, simulate hypothetical node or link failures, estimate traffic demand against declared link capacity, compare baseline and candidate topologies, and produce explainable structural-fragility scores. Optional service dependency graphs add recursive failure paths, service-state classification, and institution-level impact ranking from operator-supplied metadata. The `resilience-report` command ranks single-dependency failure domains, proposes conditional redundancy improvements, reports capacity shortfalls under modeled failures, and orders recovery priorities by declared service criticality. The model is local-only and does not discover devices, collect telemetry, open sockets, or change infrastructure. Declared latency and capacity are scenario inputs, not live measurements. See [Network Digital Twin](docs/NETWORK-DIGITAL-TWIN.md), [Traffic Simulation](docs/TRAFFIC-SIMULATION.md), and the synthetic topology and demand examples.
 
 ## Safety boundaries
 

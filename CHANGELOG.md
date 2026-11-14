@@ -85,3 +85,13 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Added validation for mixed required/optional members in a redundancy group.
 - Added regression tests for successful failover, capacity shortfall, total redundancy exhaustion, optional groups, and invalid group contracts.
 - Extended the synthetic institutional example and documented the simulation-only limits of declared redundancy and capacity.
+
+
+## Unreleased — Resilience optimization and recovery planning
+
+- Added a deterministic resilience assessment for operator-declared institutional service dependencies.
+- Ranked single infrastructure dependency failure domains by modeled service impact and generated conditional redundancy recommendations.
+- Assessed declared failover capacity under each modeled single-dependency failure and reported numeric gaps or unknown inputs.
+- Added deterministic recovery priorities based on declared criticality and dependency weights, plus an executive assessment summary.
+- Added the `resilience-report` CLI, regression tests, and documented model assumptions and limitations.
+- Recommendations are planning hypotheses; no physical independence, successful failover, restoration time, or live state is claimed.

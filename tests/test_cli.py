@@ -27,6 +27,32 @@ class CliTests(unittest.TestCase):
                 code = main()
             return code, stdout.getvalue(), stderr.getvalue()
 
+    def test_resilience_report_cli_emits_assessment_json(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            topology_path = Path(directory) / "topology.json"
+            dependencies_path = Path(directory) / "dependencies.json"
+            topology_path.write_text(
+                (root / "examples/multi-site-topology.json").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            dependencies_path.write_text(
+                (root / "examples/service-dependencies.json").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+            with (
+                patch.object(sys, "argv", [
+                    "netopps", "resilience-report", str(topology_path), str(dependencies_path)
+                ]),
+                contextlib.redirect_stdout(stdout),
+            ):
+                code = main()
+        report = json.loads(stdout.getvalue())
+        self.assertEqual(0, code)
+        self.assertEqual("institutional-resilience-and-recovery-plan", report["report_type"])
+        self.assertFalse(report["candidate_comparison"]["candidate_supplied"])
+
     def test_valid_inventory_returns_zero_and_json(self) -> None:
         payload = json.dumps({
             "schema_version": 1,
