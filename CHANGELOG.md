@@ -64,3 +64,4 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Added a versioned, explicit service dependency graph for service-to-service and service-to-infrastructure relationships.
 - Failure scenarios now report available, degraded, and unavailable services, including cascading required dependencies and optional dependency degradation.
 - Added CLI integration, strict reference/cycle validation, synthetic dependency examples, and documented simulation-only boundaries.
+- Corrected service dependency evaluation so links incident to failed nodes/sites are unavailable to dependent services; added regression tests for node, site, and pre-disabled link cases.
