@@ -5,7 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "netopps-infrastructure"
 version = "0.1.0"
-description = "Safety-first local network inventory validation tools."
+description = "Safety-first network infrastructure validation and institutional resilience analysis tools."
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE", "LICENSE-AGPL-3.0.txt", "LICENSE-MIT-LEGACY"]
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
