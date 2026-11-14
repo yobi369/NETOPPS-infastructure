@@ -1,3 +1,10 @@
+## Unreleased — Institutional sales package
+
+- Added a sector-aware product overview for government, universities, telecom operators, and enterprise infrastructure teams, with explicit current-capability boundaries.
+- Added community and commercial licensing options and non-binding packaging concepts without invented prices or unsupported product promises.
+- Added a customer-specific institutional proposal template covering scope, deliverables, acceptance, fees, licensing, support, security, assumptions, and exclusions.
+- Added a discovery and bounded-pilot guide to qualify customer requirements and prevent overpromising hosted, telemetry, control, or certification capabilities.
+
 ## Unreleased — Commercial and contributor rights framework
 
 - Added a Contributor License Agreement template that retains contributor ownership while granting the project explicit copyright and scoped patent permissions for dual licensing.
