@@ -95,11 +95,13 @@ references must resolve exactly against the service graph or supplied topology.
 Duplicate edges and service dependency cycles are rejected.
 
 A failed required infrastructure dependency makes its service unavailable. A
-failed optional dependency degrades it. A required supporting service that is
-unavailable propagates unavailability to dependent services; a degraded
-supporting service propagates degradation. Reports include baseline states and
-per-scenario available, degraded, and unavailable counts, affected services,
-and the specific failed dependency evidence.
+failed optional dependency degrades it. A link dependency is also considered
+failed when either endpoint node is removed by a node or site scenario, even if
+the link was not named directly in the failure. A required supporting service
+that is unavailable propagates unavailability to dependent services; a
+degraded supporting service propagates degradation. Reports include baseline
+states and per-scenario available, degraded, and unavailable counts, affected
+services, and the specific failed dependency evidence.
 
 Criticality and dependency weights are retained as prioritization metadata;
 they do not change dependency-state rules. This remains a deterministic
