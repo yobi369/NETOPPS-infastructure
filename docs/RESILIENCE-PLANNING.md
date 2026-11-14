@@ -8,10 +8,10 @@ The resilience planner turns NETOPPS' operator-declared topology and service dep
 
 ```bash
 netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json
-netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json --candidate-dependencies proposed-service-dependencies.json
+netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json --candidate-dependencies examples/service-dependencies-candidate.json
 ```
 
-The command emits JSON with. To compare a concrete proposal, pass `--candidate-dependencies` with a second valid version-1 service dependency document. The report then compares baseline and candidate service-state counts, weighted affected-service priority, and modeled capacity-gap counts; negative impact/gap deltas indicate modeled improvement.
+The command emits JSON with the following sections. To compare a concrete proposal, pass `--candidate-dependencies` with a second valid version-1 service dependency document. The report then compares baseline and candidate service-state counts, weighted affected-service priority, and modeled capacity-gap counts; negative impact/gap deltas indicate modeled improvement.
 
 The command emits JSON with:
 
