@@ -66,7 +66,7 @@ Acceptance: no write operation runs without an explicit approved apply action; f
 - [x] Report connected components, isolated nodes, degree, and declared link capacity.
 - [x] Compute lowest-latency paths over modeled links.
 - [x] Simulate node/link failures and quantify newly disconnected surviving node pairs.
-- [ ] Add deterministic traffic-demand and congestion scenarios.
+- [x] Add deterministic traffic-demand and congestion scenarios.
 - [ ] Add topology diffs and explainable risk scoring.
 - [ ] Add site-level failure scenario packs and baseline comparisons.
 
