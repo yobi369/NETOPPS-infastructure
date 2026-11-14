@@ -4,6 +4,7 @@ import unittest
 
 from netopps.topology import NetworkTopology, TopologyError
 
+
 def sample_topology() -> dict[str, object]:
     return {
         "schema_version": 1,
