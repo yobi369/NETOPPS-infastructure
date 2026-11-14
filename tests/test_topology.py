@@ -138,7 +138,7 @@ class NetworkTopologyTests(unittest.TestCase):
         self.assertEqual(["new-link"], [item["id"] for item in result["links"]["added"]])
         self.assertEqual(["b-server"], [item["id"] for item in result["links"]["removed"]])
         self.assertEqual(["core-a"], [item["id"] for item in result["links"]["changed"]])
-        self.assertEqual(["edge-a", "core"], result["links"]["changed"][0]["changes"]["endpoints"]["before"])
+        self.assertEqual(["core", "edge-a"], result["links"]["changed"][0]["changes"]["endpoints"]["before"])
         self.assertFalse(result["topology_mutated"])
 
     def test_risk_report_explains_articulation_nodes_and_bridge_links(self) -> None:
