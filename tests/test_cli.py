@@ -236,6 +236,49 @@ class CliTests(unittest.TestCase):
         socket_factory.assert_not_called()
         self.assertEqual("", stderr.getvalue())
 
+
+    def test_topology_scenarios_cli_runs_site_failure_pack_locally(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            topology_path = Path(directory) / "topology.json"
+            scenarios_path = Path(directory) / "scenarios.json"
+            topology_path.write_text(json.dumps({
+                "schema_version": 1,
+                "nodes": [
+                    {"id": "core", "site": "hq"},
+                    {"id": "edge", "site": "branch"},
+                    {"id": "server", "site": "hq"},
+                ],
+                "links": [
+                    {"id": "core-edge", "source": "core", "target": "edge",
+                     "latency_ms": 1, "capacity_mbps": 100},
+                    {"id": "edge-server", "source": "edge", "target": "server",
+                     "latency_ms": 1, "capacity_mbps": 100},
+                ],
+            }), encoding="utf-8")
+            scenarios_path.write_text(json.dumps({
+                "schema_version": 1,
+                "scenarios": [
+                    {"id": "branch-outage", "failure_type": "site", "target": "branch"}
+                ],
+            }), encoding="utf-8")
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with (
+                patch.object(sys, "argv", ["netopps", "topology-scenarios",
+                                           str(topology_path), str(scenarios_path)]),
+                contextlib.redirect_stdout(stdout),
+                contextlib.redirect_stderr(stderr),
+                patch("socket.socket") as socket_factory,
+            ):
+                code = main()
+        result = json.loads(stdout.getvalue())
+        self.assertEqual(0, code)
+        self.assertEqual(1, result["scenario_count"])
+        self.assertEqual(["edge"], result["scenarios"][0]["failed_nodes"])
+        self.assertEqual(1, result["scenarios"][0]["impact"]["newly_disconnected_node_pairs"])
+        self.assertFalse(result["topology_mutated"])
+        socket_factory.assert_not_called()
+        self.assertEqual("", stderr.getvalue())
+
     def test_plan_subnets_is_read_only_and_deterministic(self) -> None:
         payload = json.dumps({
             "schema_version": 1,
