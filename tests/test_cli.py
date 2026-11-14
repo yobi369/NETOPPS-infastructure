@@ -234,7 +234,7 @@ class CliTests(unittest.TestCase):
         self.assertEqual(1, result["summary"]["nodes_added"])
         self.assertFalse(result["topology_mutated"])
         socket_factory.assert_not_called()
-        self.assertEqual("", stderr)
+        self.assertEqual("", stderr.getvalue())
 
     def test_plan_subnets_is_read_only_and_deterministic(self) -> None:
         payload = json.dumps({
