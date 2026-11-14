@@ -450,12 +450,65 @@ class NetworkTopology:
         }
 
 
-    def analyze_scenarios(self, scenarios: Any) -> dict[str, Any]:
-        """Run a deterministic pack of node, link, and whole-site failure scenarios."""
+    def _scenario_traffic_impact(
+        self, remaining_topology: NetworkTopology, demands: list[dict[str, Any]],
+        failed_nodes: set[str],
+    ) -> dict[str, Any]:
+        """Measure modeled demand impact after a failure without live traffic."""
+        baseline = self.simulate_traffic(demands)
+        surviving_demands = [
+            demand for demand in demands
+            if demand["source"] not in failed_nodes and demand["target"] not in failed_nodes
+        ]
+        after = remaining_topology.simulate_traffic(surviving_demands)
+        after_by_id = {item["id"]: item for item in after["demands"]}
+        baseline_by_id = {item["id"]: item for item in baseline["demands"]}
+        affected: list[dict[str, Any]] = []
+        endpoint_unavailable_count = 0
+        unroutable_after_count = 0
+
+        for demand in sorted(demands, key=lambda item: item["id"]):
+            identifier = demand["id"]
+            before_status = baseline_by_id[identifier]["status"]
+            if demand["source"] in failed_nodes or demand["target"] in failed_nodes:
+                after_status = "endpoint_unavailable"
+                reason = "source_or_target_node_failed"
+                endpoint_unavailable_count += 1
+            else:
+                after_status = after_by_id[identifier]["status"]
+                reason = "no_surviving_route" if after_status == "unroutable" else ""
+            if after_status != "routed":
+                unroutable_after_count += 1
+            if before_status == "routed" and after_status != "routed":
+                affected.append({
+                    "id": identifier, "status_after_failure": after_status,
+                    "reason": reason, "demand_mbps": float(demand["demand_mbps"]),
+                })
+
+        return {
+            "mode": "simulation-only",
+            "demand_count": len(demands),
+            "endpoint_unavailable_count": endpoint_unavailable_count,
+            "unroutable_after_failure_count": unroutable_after_count,
+            "newly_affected_demand_count": len(affected),
+            "newly_affected_mbps": round(sum(item["demand_mbps"] for item in affected), 6),
+            "remaining_routed_mbps": after["total_routed_mbps"],
+            "remaining_congested_link_count": after["congested_link_count"],
+            "affected_demands": affected,
+            "topology_mutated": False,
+        }
+
+    def analyze_scenarios(
+        self, scenarios: Any, traffic_demands: Any | None = None,
+    ) -> dict[str, Any]:
+        """Run deterministic node, link, and site failures, optionally with traffic impact."""
         if not isinstance(scenarios, list):
             raise TopologyError("scenarios must be an array")
         seen_ids: set[str] = set()
         baseline = self.report()
+        if traffic_demands is not None:
+            # Validate the complete demand contract against the baseline before simulation.
+            self.simulate_traffic(traffic_demands)
         results: list[dict[str, Any]] = []
 
         for index, scenario in enumerate(scenarios):
@@ -513,7 +566,7 @@ class NetworkTopology:
             )
             remaining_topology = NetworkTopology(remaining_nodes, remaining_links)
             remaining_report = remaining_topology.report()
-            results.append({
+            scenario_result = {
                 "id": identifier, "name": name, "failure_type": failure_type,
                 "target": target, "failed_nodes": sorted(failed_nodes),
                 "failed_links": sorted(failed_links),
@@ -525,7 +578,12 @@ class NetworkTopology:
                     "components": remaining_report["components"],
                     "isolated_nodes": remaining_report["isolated_nodes"],
                 },
-            })
+            }
+            if traffic_demands is not None:
+                scenario_result["traffic_impact"] = self._scenario_traffic_impact(
+                    remaining_topology, traffic_demands, failed_nodes
+                )
+            results.append(scenario_result)
 
         return {
             "mode": "simulation-only", "scenario_pack_version": 1,

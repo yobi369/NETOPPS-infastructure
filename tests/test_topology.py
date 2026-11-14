@@ -222,6 +222,69 @@ class NetworkTopologyTests(unittest.TestCase):
         with self.assertRaisesRegex(TopologyError, "duplicate scenario id"):
             self.topology.analyze_scenarios([scenario, scenario])
 
+    def test_scenario_traffic_impact_identifies_failed_endpoints_and_lost_routes(self) -> None:
+        topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [{"id": "a", "site": "hq"}, {"id": "b", "site": "branch"},
+                      {"id": "c", "site": "hq"}, {"id": "d", "site": "hq"}],
+            "links": [
+                {"id": "ab", "source": "a", "target": "b", "latency_ms": 1, "capacity_mbps": 100},
+                {"id": "bc", "source": "b", "target": "c", "latency_ms": 1, "capacity_mbps": 100},
+                {"id": "cd", "source": "c", "target": "d", "latency_ms": 1, "capacity_mbps": 100},
+                {"id": "ad", "source": "a", "target": "d", "latency_ms": 8, "capacity_mbps": 100},
+            ],
+        })
+        demands = [
+            {"id": "branch-service", "source": "a", "target": "b", "demand_mbps": 20},
+            {"id": "hq-service", "source": "a", "target": "d", "demand_mbps": 30},
+            {"id": "cross-site", "source": "b", "target": "d", "demand_mbps": 40},
+        ]
+        before = topology.report()
+        result = topology.analyze_scenarios(
+            [{"id": "branch-loss", "failure_type": "site", "target": "branch"}],
+            traffic_demands=demands,
+        )
+        impact = result["scenarios"][0]["traffic_impact"]
+        self.assertEqual(2, impact["newly_affected_demand_count"])
+        self.assertEqual(60.0, impact["newly_affected_mbps"])
+        self.assertEqual(2, impact["endpoint_unavailable_count"])
+        self.assertEqual(["branch-service", "cross-site"],
+                         [item["id"] for item in impact["affected_demands"]])
+        self.assertEqual(30.0, impact["remaining_routed_mbps"])
+        self.assertFalse(impact["topology_mutated"])
+        self.assertEqual(before, topology.report())
+
+    def test_scenario_traffic_reports_route_loss_when_endpoints_survive(self) -> None:
+        topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [{"id": "a"}, {"id": "b"}, {"id": "c"}, {"id": "d"}],
+            "links": [
+                {"id": "ab", "source": "a", "target": "b", "latency_ms": 1, "capacity_mbps": 10},
+                {"id": "bc", "source": "b", "target": "c", "latency_ms": 1, "capacity_mbps": 10},
+                {"id": "cd", "source": "c", "target": "d", "latency_ms": 1, "capacity_mbps": 10},
+            ],
+        })
+        result = topology.analyze_scenarios(
+            [{"id": "middle-link", "failure_type": "link", "target": "bc"}],
+            traffic_demands=[
+                {"id": "a-to-d", "source": "a", "target": "d", "demand_mbps": 7}
+            ],
+        )
+        impact = result["scenarios"][0]["traffic_impact"]
+        self.assertEqual(1, impact["unroutable_after_failure_count"])
+        self.assertEqual(1, impact["newly_affected_demand_count"])
+        self.assertEqual("no_surviving_route", impact["affected_demands"][0]["reason"])
+        self.assertEqual(7.0, impact["newly_affected_mbps"])
+
+    def test_scenario_traffic_rejects_invalid_demand_pack(self) -> None:
+        with self.assertRaisesRegex(TopologyError, "positive number"):
+            self.topology.analyze_scenarios(
+                [{"id": "node-loss", "failure_type": "node", "target": "core"}],
+                traffic_demands=[
+                    {"id": "bad", "source": "core", "target": "edge-a", "demand_mbps": 0}
+                ],
+            )
+
     def test_scenario_pack_rejects_non_string_failure_type(self) -> None:
         with self.assertRaisesRegex(TopologyError, "failure_type must be"):
             self.topology.analyze_scenarios([

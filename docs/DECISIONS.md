@@ -51,3 +51,9 @@ NETOPPS uses a transparent rule-based score derived only from the supplied topol
 **Status:** Accepted
 
 Failure scenarios are declared in a separate versioned JSON pack and reference exact site labels, node IDs, or link IDs from the supplied topology. Site failure removes all nodes assigned to that site and their incident links in the simulation. Each result reports baseline and remaining connectivity without mutating the source model. This is not live fault injection or a claim of physical site independence.
+
+## ADR-008: Attach modeled traffic impact to failure scenarios
+
+**Status:** Accepted
+
+Failure scenario packs may consume the existing versioned traffic-demand contract. For each simulated failure, demands whose endpoints fail are marked endpoint-unavailable; surviving endpoint pairs are re-routed over the residual topology. Only baseline-routable demands that become unavailable or unroutable count as newly affected. Reports include affected demand IDs and rates plus remaining modeled routed demand. This is a local estimate, not application monitoring, observed throughput, SLA evidence, or live traffic generation.

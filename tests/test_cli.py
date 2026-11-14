@@ -279,6 +279,44 @@ class CliTests(unittest.TestCase):
         socket_factory.assert_not_called()
         self.assertEqual("", stderr.getvalue())
 
+    def test_topology_scenarios_cli_accepts_traffic_file_without_network_io(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            topology_path = Path(directory) / "topology.json"
+            scenarios_path = Path(directory) / "scenarios.json"
+            traffic_path = Path(directory) / "traffic.json"
+            topology_path.write_text(json.dumps({
+                "schema_version": 1,
+                "nodes": [{"id": "a", "site": "hq"}, {"id": "b", "site": "branch"},
+                          {"id": "c", "site": "hq"}],
+                "links": [
+                    {"id": "ab", "source": "a", "target": "b", "latency_ms": 1, "capacity_mbps": 100},
+                    {"id": "bc", "source": "b", "target": "c", "latency_ms": 1, "capacity_mbps": 100},
+                    {"id": "ac", "source": "a", "target": "c", "latency_ms": 5, "capacity_mbps": 100},
+                ],
+            }), encoding="utf-8")
+            scenarios_path.write_text(json.dumps({
+                "schema_version": 1,
+                "scenarios": [{"id": "branch-outage", "failure_type": "site", "target": "branch"}],
+            }), encoding="utf-8")
+            traffic_path.write_text(json.dumps({
+                "schema_version": 1,
+                "demands": [{"id": "branch-flow", "source": "a", "target": "b", "demand_mbps": 12}],
+            }), encoding="utf-8")
+            stdout = io.StringIO()
+            with (
+                patch.object(sys, "argv", ["netopps", "topology-scenarios",
+                    str(topology_path), str(scenarios_path), "--traffic-file", str(traffic_path)]),
+                contextlib.redirect_stdout(stdout),
+                patch("socket.socket") as socket_factory,
+            ):
+                code = main()
+        result = json.loads(stdout.getvalue())
+        impact = result["scenarios"][0]["traffic_impact"]
+        self.assertEqual(0, code)
+        self.assertEqual(1, impact["newly_affected_demand_count"])
+        self.assertEqual(12.0, impact["newly_affected_mbps"])
+        socket_factory.assert_not_called()
+
     def test_plan_subnets_is_read_only_and_deterministic(self) -> None:
         payload = json.dumps({
             "schema_version": 1,
