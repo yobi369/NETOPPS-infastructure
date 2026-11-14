@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import copy
 import json
+import pathlib
 import unittest
+
 from netopps.resilience import analyze_resilience
 from netopps.topology import NetworkTopology
-from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 class ResilienceTests(unittest.TestCase):
