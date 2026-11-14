@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "services": [
+    {
+      "id": "mobile-data-session",
+      "name": "Illustrative Mobile Data Session Service",
+      "institution_id": "synthetic-telecom-operator",
+      "institution_name": "Synthetic Telecom Operator",
+      "criticality": "mission_critical",
+      "dependency_weight": 2.0,
+      "required_capacity_mbps": 12000,
+      "rto_minutes": 15,
+      "rpo_minutes": 5
+    },
+    {
+      "id": "voice-signalling",
+      "name": "Illustrative Voice Signalling Service",
+      "institution_id": "synthetic-telecom-operator",
+      "institution_name": "Synthetic Telecom Operator",
+      "criticality": "mission_critical",
+      "dependency_weight": 1.8,
+      "required_capacity_mbps": 6000,
+      "rto_minutes": 10,
+      "rpo_minutes": 1
+    },
+    {
+      "id": "mobile-money-api",
+      "name": "Illustrative Mobile Money API",
+      "institution_id": "synthetic-telecom-operator",
+      "institution_name": "Synthetic Telecom Operator",
+      "criticality": "mission_critical",
+      "dependency_weight": 2.0,
+      "required_capacity_mbps": 4000,
+      "rto_minutes": 10,
+      "rpo_minutes": 1
+    }
+  ],
+  "dependencies": [
+    {
+      "service_id": "mobile-data-session",
+      "depends_on_type": "node",
+      "depends_on_id": "mobile-core-east",
+      "redundancy_group": "mobile-core-paths",
+      "capacity_mbps": 15000,
+      "failure_domains": ["site:east-data-centre", "power:east-grid", "transport:east-route"]
+    },
+    {
+      "service_id": "mobile-data-session",
+      "depends_on_type": "node",
+      "depends_on_id": "mobile-core-west",
+      "redundancy_group": "mobile-core-paths",
+      "capacity_mbps": 15000,
+      "failure_domains": ["site:west-data-centre", "power:west-grid", "transport:west-route"]
+    },
+    {
+      "service_id": "voice-signalling",
+      "depends_on_type": "node",
+      "depends_on_id": "mobile-core-east",
+      "redundancy_group": "voice-core-paths",
+      "capacity_mbps": 8000,
+      "failure_domains": ["site:east-data-centre", "power:east-grid", "transport:east-route"]
+    },
+    {
+      "service_id": "voice-signalling",
+      "depends_on_type": "node",
+      "depends_on_id": "mobile-core-west",
+      "redundancy_group": "voice-core-paths",
+      "capacity_mbps": 8000,
+      "failure_domains": ["site:west-data-centre", "power:west-grid", "transport:west-route"]
+    },
+    {
+      "service_id": "mobile-money-api",
+      "depends_on_type": "node",
+      "depends_on_id": "api-edge-east",
+      "redundancy_group": "money-api-paths",
+      "capacity_mbps": 5000,
+      "failure_domains": ["site:east-data-centre", "power:east-grid", "transport:east-route"]
+    },
+    {
+      "service_id": "mobile-money-api",
+      "depends_on_type": "node",
+      "depends_on_id": "api-edge-west",
+      "redundancy_group": "money-api-paths",
+      "capacity_mbps": 5000,
+      "failure_domains": ["site:west-data-centre", "power:west-grid", "transport:west-route"]
+    }
+  ]
+}
