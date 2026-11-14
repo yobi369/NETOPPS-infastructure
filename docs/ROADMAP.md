@@ -83,3 +83,18 @@ Acceptance: no write operation runs without an explicit approved apply action; f
 - [x] Export a self-contained, offline executive HTML briefing from the resilience assessment.
 
 Acceptance: simulations are deterministic, non-mutating, have no network I/O, and distinguish declared scenario inputs from observed telemetry.
+
+
+## Phase 7 — Commercial and contributor rights readiness
+
+- [x] Document the distinction between the AGPL community path and a separately signed commercial licence.
+- [x] Add a contributor licence agreement template that preserves contributor ownership while granting explicit project relicensing rights.
+- [x] Require CLA acceptance before merging external contributions into the dual-licensed codebase.
+- [x] Add a commercial agreement template with scope, deployment, fee, support, data, IP, warranty, liability, and signature schedules.
+- [x] Add a commercial readiness checklist and clearly disclose current product boundaries.
+- [ ] Obtain qualified legal review of the CLA, commercial agreement, AGPL notices, historical MIT grants, and ownership chain.
+- [ ] Verify the rights holder's legal identity and rights for all existing code, documentation, examples, and assets.
+- [ ] Complete third-party licence inventory and publish release-specific SBOM / notices.
+- [ ] Define actual commercial pricing, support scope, deployment limits, and any SLA before making customer offers.
+
+Acceptance: no external contribution is treated as commercially relicensable without a signed rights grant; no customer receives commercial rights, warranty, SLA, or support commitment until a complete agreement is signed by authorized parties.
