@@ -174,22 +174,29 @@ def package(root: Path, output: Path) -> str:
     register=root/"evidence-register.csv"
     if register.exists(): files["evidence-register.csv"]=register
     for item in manifest["artifacts"]: files[item["path"]]=safe_file(root,item["path"])
-    for folder in ("approvals","provenance","audit"):
-        directory=root/folder
+    allowed = {"approvals": ".json", "provenance": ".json", "audit": ".jsonl"}
+    for folder, suffix in allowed.items():
+        directory = root / folder
         if directory.exists():
             for path in sorted(directory.rglob("*")):
-                if path.is_file():
-                    if path.is_symlink() or not path.resolve().is_relative_to(root.resolve()): raise PilotError(f"unsafe package path: {path}")
-                    files[path.relative_to(root).as_posix()]=path
-    # Include only the explicit public trust registry and public keys; never sweep trust directories.
-    registry=root/"trust"/"reviewers.json"
+                if not path.is_file() or path.suffix.lower() != suffix:
+                    continue
+                if path.is_symlink() or not path.resolve().is_relative_to(root.resolve()):
+                    raise PilotError(f"unsafe package path: {path}")
+                files[path.relative_to(root).as_posix()] = path
+    # Validate and include only registered public keys; never sweep trust directories.
+    registry = root / "trust" / "reviewers.json"
     if registry.exists():
-        files["trust/reviewers.json"]=registry
-        trust=load_registry(registry)
+        trust = load_registry(registry)
+        files["trust/reviewers.json"] = registry
         for record in trust["reviewers"].values():
-            key_path=(registry.parent/record["public_key"]).resolve()
-            if not key_path.is_relative_to(registry.parent.resolve()): raise PilotError("public key escapes trust directory")
-            files[key_path.relative_to(root).as_posix()]=key_path
+            key_path = (registry.parent / record["public_key"]).resolve()
+            if not key_path.is_relative_to(registry.parent.resolve()):
+                raise PilotError("public key escapes trust directory")
+            public_key = load_public(key_path)
+            if fingerprint(public_key) != record.get("fingerprint_sha256"):
+                raise PilotError("registered public key fingerprint mismatch during packaging")
+            files[key_path.relative_to(root).as_posix()] = key_path
     output.parent.mkdir(parents=True,exist_ok=True)
     with zipfile.ZipFile(output,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
         for name,path in sorted(files.items()):
