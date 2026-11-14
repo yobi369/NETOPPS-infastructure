@@ -106,6 +106,79 @@ class NetworkTopologyTests(unittest.TestCase):
         with self.assertRaisesRegex(TopologyError, "duplicate traffic demand"):
             self.topology.simulate_traffic([demand, demand])
 
+
+    def test_topology_diff_reports_added_removed_and_changed_objects(self) -> None:
+        baseline_document = sample_topology()
+        candidate_document = {
+            "schema_version": 1,
+            "nodes": [
+                {"id": "core", "role": "firewall"},
+                {"id": "edge-a", "role": "switch"},
+                {"id": "edge-b", "role": "switch"},
+                {"id": "server", "role": "server"},
+                {"id": "new-node", "role": "router"},
+            ],
+            "links": [
+                {"id": "core-a", "source": "edge-a", "target": "core",
+                 "latency_ms": 1, "capacity_mbps": 2000},
+                {"id": "core-b", "source": "core", "target": "edge-b",
+                 "latency_ms": 2, "capacity_mbps": 1000},
+                {"id": "a-server", "source": "edge-a", "target": "server",
+                 "latency_ms": 3, "capacity_mbps": 100},
+                {"id": "new-link", "source": "edge-a", "target": "edge-b",
+                 "latency_ms": 1, "capacity_mbps": 500},
+            ],
+        }
+        baseline = NetworkTopology.from_dict(baseline_document)
+        candidate = NetworkTopology.from_dict(candidate_document)
+        result = baseline.compare(candidate)
+        self.assertEqual(["new-node"], result["nodes"]["added"])
+        self.assertEqual(["isolated"], result["nodes"]["removed"])
+        self.assertEqual("firewall", result["nodes"]["changed"][0]["changes"]["role"]["after"])
+        self.assertEqual(["new-link"], [item["id"] for item in result["links"]["added"]])
+        self.assertEqual(["b-server"], [item["id"] for item in result["links"]["removed"]])
+        self.assertEqual(["core-a"], [item["id"] for item in result["links"]["changed"]])
+        self.assertEqual(["edge-a", "core"], result["links"]["changed"][0]["changes"]["endpoints"]["before"])
+        self.assertFalse(result["topology_mutated"])
+
+    def test_risk_report_explains_articulation_nodes_and_bridge_links(self) -> None:
+        topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [{"id": "a"}, {"id": "b"}, {"id": "c"}],
+            "links": [
+                {"id": "ab", "source": "a", "target": "b", "latency_ms": 1, "capacity_mbps": 10},
+                {"id": "bc", "source": "b", "target": "c", "latency_ms": 1, "capacity_mbps": 10},
+            ],
+        })
+        result = topology.risk_report()
+        self.assertEqual(20.0, result["score"])
+        self.assertEqual("low", result["severity"])
+        self.assertEqual(["b"], result["critical_nodes"])
+        self.assertEqual(["ab", "bc"], result["critical_links"])
+        self.assertEqual(10.0, result["factors"][1]["points"])
+        self.assertEqual(10.0, result["factors"][2]["points"])
+        self.assertFalse(result["topology_mutated"])
+
+    def test_parallel_links_are_not_both_classified_as_bridges(self) -> None:
+        topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [{"id": "a"}, {"id": "b"}, {"id": "c"}],
+            "links": [
+                {"id": "ab-1", "source": "a", "target": "b", "latency_ms": 1, "capacity_mbps": 10},
+                {"id": "ab-2", "source": "a", "target": "b", "latency_ms": 2, "capacity_mbps": 10},
+                {"id": "bc", "source": "b", "target": "c", "latency_ms": 1, "capacity_mbps": 10},
+            ],
+        })
+        result = topology.risk_report()
+        self.assertEqual(["bc"], result["critical_links"])
+        self.assertEqual(["b"], result["critical_nodes"])
+
+    def test_empty_topology_has_zero_structural_risk(self) -> None:
+        topology = NetworkTopology.from_dict({"schema_version": 1, "nodes": [], "links": []})
+        result = topology.risk_report()
+        self.assertEqual(0.0, result["score"])
+        self.assertEqual("low", result["severity"])
+
     def test_same_node_path_is_zero_cost(self) -> None:
         self.assertEqual({"nodes": ["core"], "links": [], "latency_ms": 0.0},
                          self.topology.shortest_path("core", "core"))
