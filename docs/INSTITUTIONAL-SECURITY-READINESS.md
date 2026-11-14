@@ -19,7 +19,7 @@ netopps-security rotate-reviewer \
   --receipt ./pilot-cases/example/trust/changes/rotation.json
 ```
 
-Revocation marks the key inactive in the local trust registry and writes an administrator-signed receipt. Preserve the prior registry and receipts in institution-controlled versioned storage. Historical signatures remain cryptographically verifiable after revocation while the corresponding public key and trust record are retained. Revocation prevents new approvals because signing requires an active key; it does not invalidate earlier signed bytes. The local trust registry is not an online certificate authority. Reviewers and auditors must separately establish whether the key was valid at the historical signing time from retained trust-change records.
+Revocation marks the key inactive in the local trust registry and writes an administrator-signed receipt. The workflow prevents removal of the final active trust-administrator role; rotation of that final administrator must assign the replacement an administrator role. Preserve the prior registry and receipts in institution-controlled versioned storage. Historical signatures remain cryptographically verifiable after revocation while the corresponding public key and trust record are retained. Revocation prevents new approvals because signing requires an active key; it does not invalidate earlier signed bytes. The local trust registry is not an online certificate authority. Reviewers and auditors must separately establish whether the key was valid at the historical signing time from retained trust-change records.
 
 ## Signed audit-head checkpoints
 
@@ -68,7 +68,7 @@ An external auditor can verify a ZIP without extracting it:
 netopps-security verify-package --package ./deliverables/example-pilot.zip
 ```
 
-The verifier checks archive path safety and duplicate names, declared artifact hashes, packaged reviewer public-key fingerprints, approval signatures, manifest digests and assessment report digests. It does not certify the truth or completeness of source evidence, independently validate reviewer identity, prove a signing time, or replace institutional audit procedures.
+The verifier checks archive path safety and duplicate names, declared artifact hashes, packaged reviewer public-key fingerprints, approval signatures, signed audit-chain continuity, provenance input/report digests, manifest digests and assessment report digests. It does not certify the truth or completeness of source evidence, independently validate reviewer identity, prove a signing time, or replace institutional audit procedures.
 
 ## Deployment and security acceptance
 
