@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08111f">
+  <meta name="description" content="NETOPPS helps infrastructure teams inspect network designs, model failures, assess institutional dependencies and plan recovery before incidents happen.">
+  <title>NETOPPS — Infrastructure Resilience Planning</title>
+  <style>
+    :root{color-scheme:dark;--bg:#08111f;--panel:#101d30;--line:#263850;--text:#eef5ff;--muted:#a9bad0;--cyan:#67e8f9;--green:#8ee6bd;--amber:#f6c978}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#15304b 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+    a{color:inherit}.wrap{width:min(1120px,calc(100% - 40px));margin:auto}.nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid #ffffff18}.brand{font-weight:800;letter-spacing:.13em}.brand span{color:var(--cyan)}.navlinks{display:flex;gap:22px;color:var(--muted);font-size:14px}.navlinks a{text-decoration:none}.hero{padding:92px 0 76px;max-width:850px}.eyebrow{color:var(--cyan);font-size:12px;font-weight:800;letter-spacing:.19em;text-transform:uppercase}.hero h1{font-size:clamp(42px,7vw,76px);line-height:1.04;letter-spacing:-.055em;margin:20px 0}.hero p{font-size:19px;color:var(--muted);max-width:760px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.btn{display:inline-flex;padding:12px 18px;border-radius:9px;text-decoration:none;font-weight:750;border:1px solid var(--line)}.primary{background:var(--cyan);color:#061321;border-color:var(--cyan)}.secondary{background:#ffffff08}.notice{border:1px solid #f6c97855;background:#f6c9780c;padding:15px 18px;border-radius:10px;color:#f4dfb7;font-size:14px;margin:0 0 58px}.section{padding:54px 0}.section h2{font-size:clamp(28px,4vw,42px);letter-spacing:-.035em;margin:8px 0 12px}.lead{color:var(--muted);max-width:760px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}.card{background:linear-gradient(145deg,#14243a,#0d192a);border:1px solid var(--line);border-radius:14px;padding:23px}.card .num{color:var(--cyan);font-size:12px;font-weight:800;letter-spacing:.12em}.card h3{margin:12px 0 7px;font-size:19px}.card p{color:var(--muted);margin:0;font-size:14px}.split{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}.list{padding-left:19px;color:var(--muted)}.list li{margin:9px 0}.panel{border:1px solid var(--line);background:#0d1a2b;border-radius:14px;padding:24px}.tag{display:inline-block;border:1px solid #67e8f955;color:var(--cyan);padding:4px 9px;border-radius:99px;font-size:12px;margin:4px 5px 4px 0}.foot{border-top:1px solid #ffffff18;padding:28px 0 42px;color:var(--muted);font-size:13px}.footrow{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}.small{font-size:13px;color:var(--muted)}
+    @media(max-width:760px){.nav{align-items:flex-start;gap:15px;flex-direction:column}.navlinks{flex-wrap:wrap;gap:14px}.hero{padding:64px 0 48px}.grid,.split{grid-template-columns:1fr}.section{padding:38px 0}}
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="#" aria-label="NETOPPS home" style="text-decoration:none">NET<span>OPPS</span></a>
+      <div class="navlinks"><a href="#capabilities">Capabilities</a><a href="#sectors">Who it's for</a><a href="#evaluation">Evaluation</a><a href="#contact">Contact</a></div>
+    </nav>
+    <section class="hero">
+      <div class="eyebrow">Network infrastructure · Resilience engineering</div>
+      <h1>Understand what fails.<br><span style="color:var(--cyan)">Plan what recovers.</span></h1>
+      <p>NETOPPS is an infrastructure analysis toolkit for teams that need to inspect network designs, model disruption scenarios, understand critical service dependencies and prioritise recovery options — before an incident.</p>
+      <div class="actions">
+        <a class="btn primary" href="https://github.com/yobi369/NETOPPS-infastructure">Explore the GitHub repository ↗</a>
+        <a class="btn secondary" href="#evaluation">Discuss an institutional evaluation</a>
+      </div>
+    </section>
+    <div class="notice"><strong>Current product scope:</strong> NETOPPS is a local, operator-driven Python CLI and offline analysis toolkit. It is not a hosted monitoring service, network controller or automated failover system. Results depend on the quality of supplied topology and service data.</div>
+  </header>
+  <main>
+    <section class="wrap section" id="capabilities">
+      <div class="eyebrow">What it helps teams examine</div>
+      <h2>From topology visibility to recovery priorities.</h2>
+      <p class="lead">Use structured, reproducible analysis to explore how infrastructure design choices may affect important services during disruption.</p>
+      <div class="grid">
+        <article class="card"><div class="num">01 / DESIGN</div><h3>Topology and structural risk</h3><p>Compare network designs, inspect connectivity paths, identify isolated components and highlight structural fragility in supplied models.</p></article>
+        <article class="card"><div class="num">02 / DISRUPTION</div><h3>Failure scenario analysis</h3><p>Model selected node, link and site failures, trace affected dependencies and examine potential cascading service impacts.</p></article>
+        <article class="card"><div class="num">03 / RESILIENCE</div><h3>Recovery and capacity planning</h3><p>Evaluate declared redundancy, capacity shortfalls, service criticality and operator-defined recovery objectives.</p></article>
+      </div>
+    </section>
+    <section class="wrap section" id="sectors">
+      <div class="eyebrow">Potential institutional applications</div>
+      <h2>Designed for serious infrastructure conversations.</h2>
+      <div class="split">
+        <div><p class="lead">NETOPPS can support structured technical evaluations by teams responsible for important digital and network services.</p><div><span class="tag">Government ICT</span><span class="tag">Universities</span><span class="tag">Telecommunications</span><span class="tag">Enterprise IT</span><span class="tag">Infrastructure teams</span></div></div>
+        <div class="panel"><h3>Questions an evaluation can explore</h3><ul class="list"><li>Which modeled services depend on a single component or failure domain?</li><li>Where could additional redundancy improve modeled resilience?</li><li>What declared capacity is available after selected failures?</li><li>Which services should receive recovery attention first?</li></ul></div>
+      </div>
+    </section>
+    <section class="wrap section" id="evaluation">
+      <div class="eyebrow">Evaluation pathway</div>
+      <h2>Start with a bounded, evidence-led pilot.</h2>
+      <div class="grid">
+        <article class="card"><div class="num">STEP 1</div><h3>Define the scope</h3><p>Agree on a non-sensitive, representative topology and the services or scenarios to examine.</p></article>
+        <article class="card"><div class="num">STEP 2</div><h3>Run the analysis</h3><p>Use the local toolkit to produce reproducible scenario results and an offline executive briefing.</p></article>
+        <article class="card"><div class="num">STEP 3</div><h3>Review the evidence</h3><p>Validate assumptions with the institution's engineers and document limitations, findings and next steps.</p></article>
+      </div>
+      <div class="actions"><a class="btn primary" href="https://github.com/yobi369/NETOPPS-infastructure/tree/main/sales">View institutional information ↗</a><a class="btn secondary" href="https://github.com/yobi369/NETOPPS-infastructure/issues">Start a technical discussion ↗</a></div>
+    </section>
+    <section class="wrap section" id="contact">
+      <div class="panel split">
+        <div><div class="eyebrow">Connect with the project</div><h2>Explore an institutional evaluation.</h2><p class="lead">For technical discussions, pilot scoping and licensing enquiries, start with the public project materials or open a GitHub discussion.</p></div>
+        <div><p><strong>Project repository</strong><br><a href="https://github.com/yobi369/NETOPPS-infastructure">github.com/yobi369/NETOPPS-infastructure</a></p><p><strong>Institutional product overview</strong><br><a href="https://github.com/yobi369/NETOPPS-infastructure/blob/main/sales/PRODUCT-OVERVIEW.md">Read the product overview ↗</a></p><p><strong>Licensing information</strong><br><a href="https://github.com/yobi369/NETOPPS-infastructure/blob/main/sales/LICENSING-OPTIONS.md">Review licensing options ↗</a></p><p class="small">Commercial licensing is subject to a separately negotiated written agreement. Public repository access does not itself grant a commercial licence.</p></div>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap foot"><div class="footrow"><span>© NETOPPS Infrastructure · Independent project</span><span>Inspect carefully. Model explicitly. Recover deliberately.</span></div></footer>
+</body>
+</html>
