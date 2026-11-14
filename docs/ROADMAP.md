@@ -71,6 +71,6 @@ Acceptance: no write operation runs without an explicit approved apply action; f
 - [x] Add site-level failure scenario packs and baseline comparisons.
 - [x] Quantify optional traffic-demand reachability impact for each failure scenario.
 - [x] Prioritize affected services using declared criticality and dependency weights.
-- [x] Evaluate explicit service dependencies on services, nodes, links, and sites, including required/optional behavior and cascading impact.
+- [x] Evaluate explicit service dependencies on services, nodes, links, and sites, including required/optional behavior and cascading impact.\n- [x] Trace direct and recursive failure paths, classify direct/transitive impact, and rank affected institutions using unique service criticality/dependency weights.
 
 Acceptance: simulations are deterministic, non-mutating, have no network I/O, and distinguish declared scenario inputs from observed telemetry.
