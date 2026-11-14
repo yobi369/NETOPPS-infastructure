@@ -45,11 +45,6 @@
     {
       "service_id": "identity-platform",
       "depends_on_type": "node",
-      "depends_on_id": "hq-core"
-    },
-    {
-      "service_id": "identity-platform",
-      "depends_on_type": "node",
       "depends_on_id": "backup-server",
       "redundancy_group": "identity-ha",
       "capacity_mbps": 250
