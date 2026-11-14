@@ -386,12 +386,41 @@ class NetworkTopology:
         for index, demand in enumerate(demands):
             if not isinstance(demand, dict):
                 raise TopologyError(f"demands[{index}] must be an object")
-            unknown = set(demand) - {"id", "source", "target", "demand_mbps"}
+            unknown = set(demand) - {
+                "id", "source", "target", "demand_mbps", "service_id",
+                "service_name", "criticality", "dependency_weight",
+            }
             if unknown:
                 raise TopologyError(f"demands[{index}] has unknown properties")
             identifier = demand.get("id")
             source, target = demand.get("source"), demand.get("target")
             rate = demand.get("demand_mbps")
+            service_id = demand.get("service_id", identifier)
+            service_name = demand.get("service_name", service_id)
+            criticality = demand.get("criticality", "standard")
+            dependency_weight = demand.get("dependency_weight", 1.0)
+            criticality_multipliers = {
+                "low": 1.0, "standard": 1.5, "high": 2.5, "mission_critical": 4.0,
+            }
+            if not isinstance(service_id, str) or not service_id.strip():
+                raise TopologyError(f"demands[{index}].service_id must be a non-empty string")
+            if not isinstance(service_name, str) or not service_name.strip():
+                raise TopologyError(f"demands[{index}].service_name must be a non-empty string")
+            if not isinstance(criticality, str) or criticality not in criticality_multipliers:
+                raise TopologyError(f"demands[{index}].criticality must be low, standard, high, or mission_critical")
+            if (isinstance(dependency_weight, bool) or not isinstance(dependency_weight, (int, float))
+                    or not math.isfinite(dependency_weight) or not 0.1 <= dependency_weight <= 10.0):
+                raise TopologyError(f"demands[{index}].dependency_weight must be a finite number from 0.1 to 10.0")
+            dependency_weight = float(dependency_weight)
+            criticality_multiplier = criticality_multipliers[criticality]
+            metadata = {
+                "service_id": service_id, "service_name": service_name,
+                "criticality": criticality, "dependency_weight": dependency_weight,
+                "criticality_multiplier": criticality_multiplier,
+                "weighted_impact_mbps": round(float(rate) * criticality_multiplier * dependency_weight, 6)
+                    if isinstance(rate, (int, float)) and not isinstance(rate, bool)
+                    and math.isfinite(rate) and rate > 0 else 0.0,
+            }
             if not isinstance(identifier, str) or not identifier.strip():
                 raise TopologyError(f"demands[{index}].id must be a non-empty string")
             if identifier in seen_ids:
@@ -410,6 +439,7 @@ class NetworkTopology:
                 demand_results.append({
                     "id": identifier, "status": "unroutable",
                     "source": source, "target": target, "demand_mbps": float(rate),
+                    **metadata,
                 })
                 continue
             total_routed += float(rate)
@@ -418,6 +448,7 @@ class NetworkTopology:
             demand_results.append({
                 "id": identifier, "status": "routed", "source": source,
                 "target": target, "demand_mbps": float(rate), "path": route,
+                **metadata,
             })
 
         link_results = []
