@@ -187,6 +187,7 @@ def analyze_resilience(
             item.get("capacity_gap_mbps") is not None
             for item in candidate["capacity_assessment"]
         )
+        report["scenario_comparison"]["proposed_change_results"] = "baseline_and_candidate_dependency_models_compared"
         report["candidate_comparison"] = {
             "candidate_supplied": True,
             "baseline": {
