@@ -1,3 +1,11 @@
+## Unreleased — Commercial and contributor rights framework
+
+- Added a Contributor License Agreement template that retains contributor ownership while granting the project explicit copyright and scoped patent permissions for dual licensing.
+- Updated contribution policy to require CLA acceptance before external contributions are merged into the dual-licensed codebase.
+- Added a commercial licence agreement template with schedules for licensed scope, fees, deployment, support, data handling, IP, warranties, liability, and signatures.
+- Added a commercial readiness checklist covering ownership, third-party licences, release evidence, customer terms, and current product boundaries.
+- Clarified that templates are drafts only, require qualified legal review, and do not create a commercial licence or service-level commitment while unsigned.
+
 # Changelog
 
 All notable changes to NETOPPS are documented here. This project currently uses an early `0.x` version; interfaces may change before a stable release.
