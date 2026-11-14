@@ -22,7 +22,7 @@ classifiers = [
   "Topic :: System :: Networking",
 ]
 
-dependencies = ["cryptography>=44,<47"]
+dependencies = ["cryptography>=50,<51"]
 
 [project.optional-dependencies]
 test = ["coverage>=7.6,<8", "ruff>=0.11,<1", "bandit>=1.8,<2", "jsonschema>=4.23,<5", "pip-audit>=2.7,<3", "setuptools>=84.1.0", "detect-secrets>=1.5,<2"]
