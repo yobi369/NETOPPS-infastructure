@@ -62,6 +62,57 @@ class ResilienceTests(unittest.TestCase):
         )
         self.assertLess(comparison["change"]["modeled_capacity_gaps"], 0)
 
+
+    def test_correlated_failure_domains_combine_multiple_assets(self) -> None:
+        document = json.loads(json.dumps(self.dependency_doc))
+        for edge in document["dependencies"]:
+            if edge.get("depends_on_type") == "node" and edge.get("depends_on_id") in {"backup-server", "hq-core"}:
+                edge["failure_domains"] = ["shared-power-domain"]
+        report = analyze_resilience(self.topology, document)
+        scenario = next(
+            item for item in report["correlated_failure_scenarios"]
+            if item["failure_domain"] == "shared-power-domain"
+        )
+        self.assertEqual(["backup-server", "hq-core"], scenario["failed_assets"]["nodes"])
+        self.assertIn("identity-platform", scenario["unavailable_services"])
+
+    def test_diversity_report_detects_shared_domains_and_unverified_evidence(self) -> None:
+        document = json.loads(json.dumps(self.dependency_doc))
+        for edge in document["dependencies"]:
+            if edge.get("redundancy_group") == "identity-ha":
+                edge["failure_domains"] = ["shared-carrier"]
+                edge["diversity_evidence"] = {
+                    "evidence_ref": "example-only:carrier-record",
+                    "evidence_type": "carrier_attestation",
+                    "verification_status": "documented",
+                }
+        report = analyze_resilience(self.topology, document)
+        group = next(item for item in report["physical_diversity_assessment"]
+                     if item["service_id"] == "identity-platform")
+        self.assertEqual(["shared-carrier"], group["shared_failure_domains"])
+        self.assertEqual("shared_failure_domain_detected", group["diversity_status"])
+
+    def test_recovery_objectives_are_reported_without_inventing_targets(self) -> None:
+        document = json.loads(json.dumps(self.dependency_doc))
+        document["services"][0]["rto_minutes"] = 45
+        document["services"][0]["rpo_minutes"] = 10
+        report = analyze_resilience(self.topology, document)
+        identity = next(item for item in report["recovery_priorities"]
+                        if item["service_id"] == "identity-platform")
+        self.assertEqual({"rto_minutes": 45.0, "rpo_minutes": 10.0, "status": "defined"},
+                         identity["recovery_objectives"])
+        guest = next(item for item in report["recovery_priorities"]
+                     if item["service_id"] == "guest-wifi")
+        self.assertEqual("not_defined", guest["recovery_objectives"]["status"])
+
+    def test_invalid_recovery_objective_is_rejected(self) -> None:
+        from netopps.topology import TopologyError
+
+        document = json.loads(json.dumps(self.dependency_doc))
+        document["services"][0]["rto_minutes"] = 0
+        with self.assertRaises(TopologyError):
+            analyze_resilience(self.topology, document)
+
     def test_recommendations_are_conditional_not_claimed_as_verified(self) -> None:
         report = analyze_resilience(self.topology, self.dependency_doc)
         for item in report["redundancy_recommendations"]:
