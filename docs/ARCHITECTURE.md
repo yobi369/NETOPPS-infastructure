@@ -51,3 +51,8 @@ The twin is deliberately separate from the existing inventory schema. Inventory 
 ## Traffic-demand simulation
 
 The digital twin can accept a separate versioned demand scenario. Each demand is assigned to one deterministic lowest-latency path; demand rates are summed on shared links and compared with declared capacity. This is a simplified capacity-pressure estimate, not a packet-level simulator or live measurement. The scenario contract and assumptions are documented in docs/TRAFFIC-SIMULATION.md.
+
+
+## Topology comparison and structural risk
+
+Topology comparison is identity-based: node and link IDs are stable keys; link endpoints are canonicalized as undirected pairs. Attribute changes are returned as before/after values. Structural risk uses iterative graph traversal to identify articulation nodes and bridge links, then combines those findings with disconnected components and isolated nodes in a documented heuristic score. The score is evidence-backed and explainable, but is not a probability or live operational risk measurement.

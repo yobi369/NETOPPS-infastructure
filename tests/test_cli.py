@@ -182,6 +182,60 @@ class CliTests(unittest.TestCase):
         self.assertEqual(5.0, result["traffic_simulation"]["links"][0]["overloaded_mbps"])
         socket_factory.assert_not_called()
 
+
+    def test_topology_risk_cli_returns_explainable_score_without_network_io(self) -> None:
+        payload = json.dumps({
+            "schema_version": 1,
+            "nodes": [{"id": "a"}, {"id": "b"}, {"id": "c"}],
+            "links": [
+                {"id": "ab", "source": "a", "target": "b", "latency_ms": 1, "capacity_mbps": 10},
+                {"id": "bc", "source": "b", "target": "c", "latency_ms": 1, "capacity_mbps": 10},
+            ],
+        }).encode()
+        with patch("socket.socket") as socket_factory:
+            code, stdout, stderr = self.run_cli(payload, extra_args=["topology-risk"])
+        result = json.loads(stdout)
+        self.assertEqual(0, code)
+        self.assertEqual(20.0, result["score"])
+        self.assertEqual(["b"], result["critical_nodes"])
+        self.assertEqual(["ab", "bc"], result["critical_links"])
+        self.assertEqual("simulation-only", result["mode"])
+        self.assertFalse(result["topology_mutated"])
+        socket_factory.assert_not_called()
+        self.assertEqual("", stderr)
+
+    def test_topology_diff_cli_compares_two_local_files(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            baseline = Path(directory) / "baseline.json"
+            candidate = Path(directory) / "candidate.json"
+            baseline.write_text(json.dumps({
+                "schema_version": 1,
+                "nodes": [{"id": "a"}, {"id": "b"}],
+                "links": [{"id": "ab", "source": "a", "target": "b",
+                           "latency_ms": 1, "capacity_mbps": 10}],
+            }), encoding="utf-8")
+            candidate.write_text(json.dumps({
+                "schema_version": 1,
+                "nodes": [{"id": "a"}, {"id": "b"}, {"id": "c"}],
+                "links": [{"id": "ab", "source": "a", "target": "b",
+                           "latency_ms": 1, "capacity_mbps": 10}],
+            }), encoding="utf-8")
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with (
+                patch.object(sys, "argv", ["netopps", "topology-diff", str(baseline), str(candidate)]),
+                contextlib.redirect_stdout(stdout),
+                contextlib.redirect_stderr(stderr),
+                patch("socket.socket") as socket_factory,
+            ):
+                code = main()
+        result = json.loads(stdout.getvalue())
+        self.assertEqual(0, code)
+        self.assertEqual(["c"], result["nodes"]["added"])
+        self.assertEqual(1, result["summary"]["nodes_added"])
+        self.assertFalse(result["topology_mutated"])
+        socket_factory.assert_not_called()
+        self.assertEqual("", stderr.getvalue())
+
     def test_plan_subnets_is_read_only_and_deterministic(self) -> None:
         payload = json.dumps({
             "schema_version": 1,

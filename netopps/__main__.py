@@ -126,6 +126,17 @@ def main() -> int:
     topology_parser.add_argument("--path-from", help="optional source node for lowest-latency path analysis")
     topology_parser.add_argument("--path-to", help="optional target node for lowest-latency path analysis")
     topology_parser.add_argument("--traffic-file", type=Path, help="optional versioned JSON traffic-demand scenario")
+
+    diff_parser = subparsers.add_parser(
+        "topology-diff", help="compare two operator-supplied topology scenarios"
+    )
+    diff_parser.add_argument("baseline", type=Path, help="baseline topology JSON file")
+    diff_parser.add_argument("candidate", type=Path, help="candidate topology JSON file")
+
+    risk_parser = subparsers.add_parser(
+        "topology-risk", help="calculate explainable structural fragility for a topology"
+    )
+    risk_parser.add_argument("file", type=Path, help="topology JSON file")
     args = parser.parse_args()
 
     if args.command == "check-connectivity" and not args.allow_network:
@@ -158,6 +169,34 @@ def main() -> int:
                     raise TopologyError("traffic file must contain schema_version 1 and a demands array")
                 report["traffic_simulation"] = topology.simulate_traffic(traffic_document["demands"])
             print(json.dumps(report, indent=2))
+            return 0
+        except (TopologyError, ValueError, TypeError) as exc:
+            print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
+            return 2
+
+    if args.command == "topology-diff":
+        baseline_document, baseline_status = _read_inventory(args.baseline)
+        if baseline_status:
+            return baseline_status
+        candidate_document, candidate_status = _read_inventory(args.candidate)
+        if candidate_status:
+            return candidate_status
+        try:
+            baseline = NetworkTopology.from_dict(baseline_document)
+            candidate = NetworkTopology.from_dict(candidate_document)
+            print(json.dumps(baseline.compare(candidate), indent=2))
+            return 0
+        except (TopologyError, ValueError, TypeError) as exc:
+            print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
+            return 2
+
+    if args.command == "topology-risk":
+        document, read_status = _read_inventory(args.file)
+        if read_status:
+            return read_status
+        try:
+            topology = NetworkTopology.from_dict(document)
+            print(json.dumps(topology.risk_report(), indent=2))
             return 0
         except (TopologyError, ValueError, TypeError) as exc:
             print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
