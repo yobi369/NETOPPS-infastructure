@@ -94,6 +94,8 @@ and evaluate the graph deterministically in dependency-first order for each
 failure scenario.
 
 **Consequences:** Scenario reports can distinguish available, degraded, and
-unavailable services and show cascading dependency evidence. The graph is
-operator-declared and simulation-only; no dependency discovery, service health
-checks, SLA claims, or live network operations are implied.
+unavailable services and show cascading dependency evidence. A link dependency
+is unavailable when the link is explicitly failed, disabled in the baseline,
+or incident to a failed node. The graph is operator-declared and simulation-only;
+no dependency discovery, service health checks, SLA claims, or live network
+operations are implied.
