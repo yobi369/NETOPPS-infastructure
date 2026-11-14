@@ -30,7 +30,7 @@ test = ["coverage>=7.6,<8", "ruff>=0.11,<1", "bandit>=1.8,<2", "jsonschema>=4.23
 [project.scripts]
 netopps = "netopps.__main__:main"
 netopps-pilot = "netopps.pilot:main"
-netopps-governance = "netopps.governance:main"
+netopps-governance = "netopps.governance:main"\nnetopps-security = "netopps.security:main"
 
 [tool.setuptools.packages.find]
 include = ["netopps*"]
