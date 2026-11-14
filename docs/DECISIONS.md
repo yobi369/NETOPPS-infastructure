@@ -147,3 +147,14 @@ remaining declared capacity. Capacity adequacy is unknown when capacity inputs
 are incomplete. This is a deterministic model only: it does not validate
 physical diversity, provider independence, live failover, measured throughput,
 recovery time, or SLA compliance.
+
+
+## ADR-013: Rank resilience options and recovery priorities from explicit models
+
+**Status:** Accepted
+
+**Context:** Failure simulations identify impact, but institutional decision-makers also need a ranked view of weak dependency failure domains, conditional redundancy actions, declared capacity gaps, and recovery order.
+
+**Decision:** Add a deterministic read-only assessment that evaluates each declared infrastructure dependency as an individual failure scenario, ranks the resulting service impact, and proposes explicit redundancy design work only as a conditional planning action. Evaluate declared redundancy-group capacity during those scenarios and report numeric shortfalls only when both required and available capacity are supplied. Rank recovery priorities using declared criticality and dependency weights. Expose a machine-readable executive summary through a dedicated CLI command.
+
+**Consequences:** Results are reproducible planning evidence based on operator-supplied inputs. A proposed alternative is not treated as an implemented candidate or a guaranteed benefit. Physical diversity, correlated failures, failover behavior, live capacity, recovery-time objectives, and service-level agreements require independent evidence and validation.
