@@ -76,3 +76,24 @@ Aggregate affected demands by service ID and rank service summaries deterministi
 while retaining raw Mbps and demand-level evidence. Weights are model inputs only;
 they do not establish actual business criticality, dependencies, SLA compliance,
 service health, or outage probability.
+
+
+## ADR-010: Model explicit service-to-infrastructure dependencies
+
+**Status:** Accepted
+
+**Context:** Traffic demand and service criticality alone cannot represent the
+cascade from a failed infrastructure component through a supporting platform
+into dependent institutional services.
+
+**Decision:** Accept a separate version-1 service dependency document. Services
+may depend on other services, topology nodes, links, or sites. Dependencies are
+required by default; optional dependencies degrade rather than make a service
+unavailable. Validate references, reject duplicate edges and service cycles,
+and evaluate the graph deterministically in dependency-first order for each
+failure scenario.
+
+**Consequences:** Scenario reports can distinguish available, degraded, and
+unavailable services and show cascading dependency evidence. The graph is
+operator-declared and simulation-only; no dependency discovery, service health
+checks, SLA claims, or live network operations are implied.

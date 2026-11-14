@@ -60,3 +60,7 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Added backward-compatible service identity, criticality classes, and bounded dependency weights to traffic-demand simulation.
 - Failure scenario reports now include weighted impact per affected demand and deterministic affected-service summaries.
 - Documented the formula, defaults, examples, and limits; no business metadata is inferred and no live telemetry is accessed.
+
+- Added a versioned, explicit service dependency graph for service-to-service and service-to-infrastructure relationships.
+- Failure scenarios now report available, degraded, and unavailable services, including cascading required dependencies and optional dependency degradation.
+- Added CLI integration, strict reference/cycle validation, synthetic dependency examples, and documented simulation-only boundaries.

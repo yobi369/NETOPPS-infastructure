@@ -79,3 +79,29 @@ Example traffic-demand record:
 This prioritization is not a business-impact assessment, measured dependency
 graph, SLA calculation, outage probability, or evidence of actual service health.
 Operators must supply and validate the criticality and dependency metadata.
+
+## Explicit service dependency graph
+
+An optional dependency file adds a directed, versioned service graph to failure
+analysis. Run it independently of traffic-demand analysis:
+
+    netopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json --dependency-file examples/service-dependencies.json
+
+The file uses schema_version 1, a services array, and a dependencies array.
+A service declares id, name, and optional criticality and dependency weight
+metadata. Each dependency declares service_id, depends_on_type (service, node,
+link, or site), depends_on_id, and optional required (default true). All
+references must resolve exactly against the service graph or supplied topology.
+Duplicate edges and service dependency cycles are rejected.
+
+A failed required infrastructure dependency makes its service unavailable. A
+failed optional dependency degrades it. A required supporting service that is
+unavailable propagates unavailability to dependent services; a degraded
+supporting service propagates degradation. Reports include baseline states and
+per-scenario available, degraded, and unavailable counts, affected services,
+and the specific failed dependency evidence.
+
+Criticality and dependency weights are retained as prioritization metadata;
+they do not change dependency-state rules. This remains a deterministic
+simulation, not application monitoring, live dependency discovery, SLA
+verification, or proof that a service is operational.

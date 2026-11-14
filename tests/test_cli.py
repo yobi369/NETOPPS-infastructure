@@ -361,5 +361,43 @@ class CliTests(unittest.TestCase):
         self.assertEqual(1, result["output_schema_version"])
 
 
+    def test_topology_scenarios_cli_accepts_dependency_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            topology_path = Path(directory) / "topology.json"
+            scenarios_path = Path(directory) / "scenarios.json"
+            dependency_path = Path(directory) / "dependencies.json"
+            topology_path.write_text(json.dumps({
+                "schema_version": 1,
+                "nodes": [{"id": "core", "site": "hq"}, {"id": "edge", "site": "branch"}],
+                "links": [{"id": "core-edge", "source": "core", "target": "edge",
+                           "latency_ms": 1, "capacity_mbps": 100}],
+            }), encoding="utf-8")
+            scenarios_path.write_text(json.dumps({
+                "schema_version": 1,
+                "scenarios": [{"id": "core-loss", "failure_type": "node", "target": "core"}],
+            }), encoding="utf-8")
+            dependency_path.write_text(json.dumps({
+                "schema_version": 1,
+                "services": [{"id": "auth", "name": "Authentication"},
+                             {"id": "payments", "name": "Payments"}],
+                "dependencies": [
+                    {"service_id": "auth", "depends_on_type": "node", "depends_on_id": "core"},
+                    {"service_id": "payments", "depends_on_type": "service", "depends_on_id": "auth"},
+                ],
+            }), encoding="utf-8")
+            stdout = io.StringIO()
+            with (
+                patch.object(sys, "argv", ["netopps", "topology-scenarios",
+                    str(topology_path), str(scenarios_path), "--dependency-file", str(dependency_path)]),
+                contextlib.redirect_stdout(stdout),
+                patch("socket.socket") as socket_factory,
+            ):
+                code = main()
+        result = json.loads(stdout.getvalue())
+        impact = result["scenarios"][0]["service_dependency_impact"]
+        self.assertEqual(0, code)
+        self.assertEqual(2, impact["unavailable_count"])
+        socket_factory.assert_not_called()
+
 if __name__ == "__main__":
     unittest.main()

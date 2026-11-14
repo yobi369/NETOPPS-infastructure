@@ -353,5 +353,75 @@ class NetworkTopologyTests(unittest.TestCase):
         self.assertEqual(1.0, demand["dependency_weight"])
         self.assertEqual(7.5, demand["weighted_impact_mbps"])
 
+    def test_service_dependency_graph_propagates_required_and_optional_failures(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [{"id": "core", "site": "hq"}, {"id": "edge-a", "site": "branch"}],
+            "links": [{"id": "core-edge", "source": "core", "target": "edge-a",
+                       "latency_ms": 1, "capacity_mbps": 100}],
+        })
+        graph = {
+            "schema_version": 1,
+            "services": [
+                {"id": "identity", "name": "Identity Platform", "criticality": "mission_critical"},
+                {"id": "banking", "name": "Core Banking", "criticality": "mission_critical", "dependency_weight": 2},
+                {"id": "branch-ops", "name": "Branch Operations", "criticality": "high"},
+                {"id": "guest", "name": "Guest Wi-Fi", "criticality": "low"},
+            ],
+            "dependencies": [
+                {"service_id": "identity", "depends_on_type": "node", "depends_on_id": "core"},
+                {"service_id": "banking", "depends_on_type": "service", "depends_on_id": "identity"},
+                {"service_id": "branch-ops", "depends_on_type": "site", "depends_on_id": "branch"},
+                {"service_id": "guest", "depends_on_type": "node", "depends_on_id": "edge-a", "required": False},
+            ],
+        }
+        result = analyze_service_dependencies(
+            topology, graph, failed_nodes={"core", "edge-a"}, failed_sites={"branch"}
+        )
+        states = {item["id"]: item["status"] for item in result["services"]}
+        self.assertEqual("unavailable", states["identity"])
+        self.assertEqual("unavailable", states["banking"])
+        self.assertEqual("unavailable", states["branch-ops"])
+        self.assertEqual("degraded", states["guest"])
+        self.assertEqual(3, result["unavailable_count"])
+        self.assertEqual(1, result["degraded_count"])
+
+    def test_service_dependency_graph_rejects_cycles_and_unknown_references(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        services = [{"id": "a", "name": "A"}, {"id": "b", "name": "B"}]
+        cyclic = {"schema_version": 1, "services": services, "dependencies": [
+            {"service_id": "a", "depends_on_type": "service", "depends_on_id": "b"},
+            {"service_id": "b", "depends_on_type": "service", "depends_on_id": "a"},
+        ]}
+        with self.assertRaisesRegex(TopologyError, "cycle"):
+            analyze_service_dependencies(self.topology, cyclic)
+        invalid = {"schema_version": 1, "services": services, "dependencies": [
+            {"service_id": "a", "depends_on_type": "node", "depends_on_id": "missing"}
+        ]}
+        with self.assertRaisesRegex(TopologyError, "unknown node"):
+            analyze_service_dependencies(self.topology, invalid)
+
+    def test_scenario_analysis_includes_service_dependency_impact(self) -> None:
+        graph = {
+            "schema_version": 1,
+            "services": [{"id": "identity", "name": "Identity"},
+                         {"id": "banking", "name": "Banking"}],
+            "dependencies": [
+                {"service_id": "identity", "depends_on_type": "node", "depends_on_id": "core"},
+                {"service_id": "banking", "depends_on_type": "service", "depends_on_id": "identity"},
+            ],
+        }
+        result = self.topology.analyze_scenarios(
+            [{"id": "core-loss", "failure_type": "node", "target": "core"}],
+            service_dependencies=graph,
+        )
+        impact = result["scenarios"][0]["service_dependency_impact"]
+        self.assertEqual(2, impact["unavailable_count"])
+        self.assertEqual(["banking", "identity"],
+                         [item["id"] for item in impact["affected_services"]])
+
 if __name__ == "__main__":
     unittest.main()

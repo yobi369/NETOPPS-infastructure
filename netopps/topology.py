@@ -562,6 +562,7 @@ class NetworkTopology:
 
     def analyze_scenarios(
         self, scenarios: Any, traffic_demands: Any | None = None,
+        service_dependencies: Any | None = None,
     ) -> dict[str, Any]:
         """Run deterministic node, link, and site failures, optionally with traffic impact."""
         if not isinstance(scenarios, list):
@@ -571,6 +572,10 @@ class NetworkTopology:
         if traffic_demands is not None:
             # Validate the complete demand contract against the baseline before simulation.
             self.simulate_traffic(traffic_demands)
+        dependency_baseline = None
+        if service_dependencies is not None:
+            from netopps.services import analyze_service_dependencies
+            dependency_baseline = analyze_service_dependencies(self, service_dependencies)
         results: list[dict[str, Any]] = []
 
         for index, scenario in enumerate(scenarios):
@@ -645,6 +650,12 @@ class NetworkTopology:
                 scenario_result["traffic_impact"] = self._scenario_traffic_impact(
                     remaining_topology, traffic_demands, failed_nodes
                 )
+            if service_dependencies is not None:
+                from netopps.services import analyze_service_dependencies
+                scenario_result["service_dependency_impact"] = analyze_service_dependencies(
+                    self, service_dependencies, failed_nodes, failed_links,
+                    {target} if failure_type == "site" else set(),
+                )
             results.append(scenario_result)
 
         return {
@@ -656,6 +667,8 @@ class NetworkTopology:
                 "components": baseline["components"],
             },
             "scenario_count": len(results),
+            **({"service_dependency_baseline": dependency_baseline}
+               if dependency_baseline is not None else {}),
             "scenarios": sorted(results, key=lambda item: item["id"]),
             "topology_mutated": False,
         }
