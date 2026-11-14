@@ -38,3 +38,12 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Added per-link carried-load, utilization, and capacity-overload estimates.
 - Added versioned traffic scenario input, CLI integration, tests, and model-limit documentation.
 - Kept all traffic analysis local and simulation-only; no packets are generated and no live telemetry is read.
+
+
+## Unreleased — Topology comparison and structural risk
+
+- Added deterministic baseline-to-candidate node and link diffs.
+- Added iterative articulation-node and bridge-link analysis, including parallel-link handling.
+- Added explainable 0–100 structural-fragility scoring with factor-level evidence and documented weights.
+- Added `topology-diff` and `topology-risk` CLI commands with local-only regression tests.
+- Scores are heuristics, not outage probabilities; no live telemetry or network operations are involved.
