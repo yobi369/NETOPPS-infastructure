@@ -92,6 +92,25 @@ class ResilienceTests(unittest.TestCase):
         self.assertEqual(["shared-carrier"], group["shared_failure_domains"])
         self.assertEqual("shared_failure_domain_detected", group["diversity_status"])
 
+
+    def test_diversity_evidence_record_is_reported_but_not_authenticated(self) -> None:
+        document = json.loads(json.dumps(self.dependency_doc))
+        for edge in document["dependencies"]:
+            if edge.get("redundancy_group") == "identity-ha":
+                edge["failure_domains"] = [f"independent:{edge['depends_on_id']}"]
+                edge["diversity_evidence"] = {
+                    "evidence_ref": f"example-only:{edge['depends_on_id']}",
+                    "evidence_type": "site_survey",
+                    "verification_status": "independently_verified",
+                    "verified_at": "2026-11-14",
+                    "verified_by": "Synthetic test fixture",
+                }
+        report = analyze_resilience(self.topology, document)
+        group = next(item for item in report["physical_diversity_assessment"]
+                     if item["service_id"] == "identity-platform")
+        self.assertEqual("operator_recorded_independent_evidence", group["diversity_status"])
+        self.assertIn("does not independently authenticate", group["interpretation"])
+
     def test_recovery_objectives_are_reported_without_inventing_targets(self) -> None:
         document = json.loads(json.dumps(self.dependency_doc))
         document["services"][0]["rto_minutes"] = 45
