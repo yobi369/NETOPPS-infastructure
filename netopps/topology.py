@@ -4,6 +4,7 @@ This module models operator-supplied topology data. It never discovers devices,
 opens sockets, persists state, or changes a live network.
 """
 from __future__ import annotations
+
 import heapq
 import math
 from collections import deque
