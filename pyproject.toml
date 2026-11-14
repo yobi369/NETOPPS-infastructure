@@ -22,12 +22,15 @@ classifiers = [
   "Topic :: System :: Networking",
 ]
 
+dependencies = ["cryptography>=44,<47"]
+
 [project.optional-dependencies]
 test = ["coverage>=7.6,<8", "ruff>=0.11,<1", "bandit>=1.8,<2", "jsonschema>=4.23,<5", "pip-audit>=2.7,<3", "setuptools>=84.1.0", "detect-secrets>=1.5,<2"]
 
 [project.scripts]
 netopps = "netopps.__main__:main"
 netopps-pilot = "netopps.pilot:main"
+netopps-governance = "netopps.governance:main"
 
 [tool.setuptools.packages.find]
 include = ["netopps*"]
