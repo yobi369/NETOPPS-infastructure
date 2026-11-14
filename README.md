@@ -68,7 +68,7 @@ To validate your own inventory, copy `examples/inventory.json` and update it wit
 
 A guided, browser-based telecom scenario is available at the [NETOPPS interactive demo](https://netopps.vercel.app/demo/). It lets visitors select synthetic failures and compare baseline versus candidate redundancy. This is an explanatory front-end illustration, separate from the local analysis engine; it is not a live calculation from operator data. The reproducible CLI workflow and synthetic input files are documented in the [Telecom Evaluation Demo](docs/TELECOM-EVALUATION-DEMO.md). Neither the browser scenario nor the example files represent Safaricom or any other operator's actual network.
 
-## Inventory contract
+## Inspect actual engine output\n\nGenerate a machine-readable resilience report with `netopps resilience-report … --format json --output report.json`, then open the [NETOPPS Engine Report Viewer](https://netopps.vercel.app/analysis/) and select the file. The viewer reads it locally; it does not upload report data. See [Engine Report Viewer](docs/ENGINE-REPORT-VIEWER.md). This is separate from the illustrative [guided browser demo](https://netopps.vercel.app/demo/).\n\n## Inventory contract
 
 The versioned interchange schema is in [schemas/inventory.schema.json](schemas/inventory.schema.json). The schema defines the data shape; the Python validator additionally checks semantic conditions such as overlapping networks and duplicate management addresses.
 
