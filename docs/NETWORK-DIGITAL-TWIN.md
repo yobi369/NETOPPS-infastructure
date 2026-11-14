@@ -25,10 +25,18 @@ The model rejects duplicate IDs, unknown endpoints, self-links, invalid metrics,
 - Hypothetical node and link failure simulation.
 - Before/after component comparison and count of newly disconnected surviving node pairs.
 - Explicit non-mutation indicator in simulation results.
+- Identity-based baseline/candidate topology diffs for nodes and links.
+- Explainable structural-fragility scoring with articulation-node, bridge-link, fragmentation, and isolation evidence.
 - Deterministic traffic-demand routing over one lowest-latency path per demand.
 - Per-link modeled load, utilization, and capacity-overload estimates.
 
 Traffic demand assumptions and limitations are documented in [Traffic Simulation](TRAFFIC-SIMULATION.md).
+
+## Comparison and structural risk
+
+Use `netopps topology-diff baseline.json candidate.json` to report added, removed, and changed nodes and links. Node role/site attributes and link endpoints/latency/capacity/enabled state are compared. Link endpoints are treated as undirected; reversing source and target alone is not a change. IDs are the stable identity keys.
+
+Use `netopps topology-risk examples/topology.json` to calculate a transparent 0–100 structural-fragility score. The score is a rule-based prioritization heuristic, not a probability of outage or a measured operational risk. The weights and evidence are documented in [Topology Risk](TOPOLOGY-RISK.md).
 
 ## Example
 
@@ -52,7 +60,6 @@ Traffic demand assumptions and limitations are documented in [Traffic Simulation
 
 ## Next research steps
 
-1. Add topology-diff and risk scoring with explainable evidence.
-2. Add reproducible scenario packs for link, node, and site failures.
-3. Compare candidate network plans against baseline metrics.
-4. Only after simulator contracts mature, design a read-only adapter interface and authorized lab acceptance protocol.
+1. Add reproducible scenario packs for link, node, and site failures.
+2. Compare candidate network plans against baseline metrics and traffic scenarios.
+3. Only after simulator contracts mature, design a read-only adapter interface and authorized lab acceptance protocol.
