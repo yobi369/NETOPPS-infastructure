@@ -11,6 +11,18 @@ The pilot package defines a controlled, evidence-led evaluation using the existi
 5. Run the baseline and candidate assessments locally, in the institution-approved environment.
 6. Complete [PILOT-ACCEPTANCE-CHECKLIST.md](PILOT-ACCEPTANCE-CHECKLIST.md) and the before/after scorecard before presenting conclusions.
 
+## Create and validate a pilot workspace
+
+Install the package and create a case directory:
+
+```bash
+python -m pip install .
+netopps-pilot init --directory ./pilot-cases/telecom-evaluation --pilot-id telecom-eval-001 --institution "Example Institution" --title "Critical service resilience evaluation"
+netopps-pilot validate --directory ./pilot-cases/telecom-evaluation
+```
+
+Add approved artifacts to the manifest with SHA-256 digests and link evidence and assessment records. The complete manifest contract, packaging rules and security limitations are in [Institutional Pilot Workspace](../docs/INSTITUTIONAL-PILOT-WORKSPACE.md).
+
 ## Local analysis workflow
 
 From the NETOPPS repository root:
@@ -36,7 +48,7 @@ Use the [Engine Report Viewer](https://netopps.vercel.app/analysis/) to inspect 
 
 - Do not submit credentials, private keys, subscriber data, personal data or unredacted production topology to public repositories or public web forms.
 - The public showcase is not a secure tenant workspace. Do not enter confidential information there.
-- No data upload, central storage, authentication, multi-tenant isolation, live telemetry, device discovery or network configuration is introduced by this package.
+- The local manifest and packaging CLI adds no data upload, central storage, authentication, multi-tenant isolation, live telemetry, device discovery or network configuration. It does not encrypt data or enforce user roles.
 - The engine models operator-supplied data. It does not authenticate evidence or independently verify physical diversity, live capacity, failover or recovery performance.
 - No production change is part of this pilot workflow. Any later operational test requires a separate written authorization and change-control process.
 

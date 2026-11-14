@@ -120,7 +120,8 @@ Acceptance: customer-facing material accurately reflects the current local CLI a
 - [x] Add an evidence register template for provenance, freshness, ownership, validation state and permitted use.
 - [x] Add an institutional acceptance checklist covering authorization, inputs, baseline, candidate, executive assessment and closeout.
 - [x] Document the local CLI execution path using the existing resilience engine and report viewer.
-- [ ] Add schema-validated pilot manifest generation and repeatable evidence-linked assessment packaging.
+- [x] Add a local pilot manifest generator with authorization metadata, artifact hash validation, evidence references and repeatable ZIP packaging.
+- [ ] Validate the workflow with an authorized institutional partner and reviewer.
 - [ ] Validate the workflow with an authorized institutional partner and reviewer.
 
-Acceptance: pilot records identify approved scope and input versions; evidence and assumptions remain distinguishable; baseline inputs are immutable; candidate comparisons use the same scope; sensitive data remains within the institution-approved environment; no unsupported hosted, live-monitoring or automated-control capability is implied.
+Acceptance: pilot records identify approved scope and input versions; evidence and assumptions remain distinguishable; baseline input hashes detect drift; candidate comparisons use the same scope; sensitive data remains within the institution-approved environment; no unsupported hosted, live-monitoring or automated-control capability is implied.

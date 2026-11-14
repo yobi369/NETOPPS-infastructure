@@ -1,0 +1,18 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"NETOPPS Institutional Pilot Manifest",
+  "description":"Local-first evidence-linked pilot manifest; artifact paths are relative to the pilot directory.",
+  "type":"object","additionalProperties":false,
+  "required":["schema_version","pilot_id","institution","title","status","authorization","artifacts","evidence","assessments"],
+  "properties":{
+    "schema_version":{"const":1},
+    "pilot_id":{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$"},
+    "institution":{"type":"string","minLength":1,"maxLength":200},
+    "title":{"type":"string","minLength":1,"maxLength":200},
+    "status":{"enum":["draft","authorized","in_progress","closed"]},
+    "authorization":{"type":"object","additionalProperties":false,"required":["reference","environment","data_classification"],"properties":{"reference":{"type":"string","minLength":1},"environment":{"type":"string","minLength":1},"data_classification":{"type":"string","minLength":1}}},
+    "artifacts":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","role","path","sha256"],"properties":{"id":{"type":"string","minLength":1},"role":{"enum":["baseline_topology","baseline_dependencies","candidate_topology","candidate_dependencies","assessment_report","supporting_evidence"]},"path":{"type":"string","minLength":1},"sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"}}}},
+    "evidence":{"type":"array","items":{"type":"object","required":["id","claim","source_reference","owner","validation_status","permitted_use"],"properties":{"id":{"type":"string","minLength":1},"claim":{"type":"string","minLength":1},"source_reference":{"type":"string","minLength":1},"owner":{"type":"string","minLength":1},"collected_on":{"type":"string","format":"date"},"validation_status":{"enum":["unreviewed","accepted","rejected","superseded","unknown"]},"permitted_use":{"type":"string","minLength":1},"artifact_id":{"type":"string"},"reviewer":{"type":"string"},"reviewed_on":{"type":"string","format":"date"},"limitations":{"type":"string"}}}},
+    "assessments":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id","kind","report_artifact_id","evidence_ids"],"properties":{"id":{"type":"string","minLength":1},"kind":{"enum":["baseline","candidate","comparison"]},"report_artifact_id":{"type":"string","minLength":1},"evidence_ids":{"type":"array","items":{"type":"string"}},"reviewer":{"type":"string"},"reviewed_on":{"type":"string","format":"date"},"decision":{"type":"string"},"limitations":{"type":"string"}}}}
+  }
+}
