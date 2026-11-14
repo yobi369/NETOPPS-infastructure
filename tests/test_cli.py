@@ -27,7 +27,6 @@ class CliTests(unittest.TestCase):
                 code = main()
             return code, stdout.getvalue(), stderr.getvalue()
 
-
     def test_resilience_report_cli_emits_assessment_json(self) -> None:
         root = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as directory:
