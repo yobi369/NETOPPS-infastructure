@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from netopps.governance import keygen, register_reviewer, approve, package
+from netopps.governance import keygen, register_reviewer, approve, package, verify_approval
 from netopps.pilot import init_workspace
 from netopps.security import create_checkpoint, verify_checkpoint, verify_approval_policy, verify_package, revoke_reviewer, rotate_reviewer, verify_trust_change
 
@@ -63,10 +63,13 @@ class SecurityTests(unittest.TestCase):
         keygen(new_private, new_public, "new-reviewer-passphrase")
         old_fp = json.loads(self.registry.read_text())["reviewers"]
         old_fp = next(fp for fp, rec in old_fp.items() if rec["reviewer_id"] == "reviewer-01")
+        approval = self.root / "approvals/pre-rotation.json"
+        approve(self.root, self.registry, self.reviewer_private, "reviewer-passphrase-2026", "assessment-01", "approved", approval)
         receipt = self.base / "rotation.json"
         rotate_reviewer(self.registry, old_fp, new_public, "reviewer-02", "Reviewer Two", "Example Institution", "Resilience Reviewer", self.admin_private, "admin-passphrase-2026", receipt)
         self.assertEqual("revoked", json.loads(self.registry.read_text())["reviewers"][old_fp]["status"])
         self.assertTrue(verify_trust_change(receipt, self.registry)["valid"])
+        self.assertTrue(verify_approval(approval, self.registry, self.root)["valid"])
 
     def test_revocation_requires_trust_admin(self):
         fp = next(fp for fp, rec in json.loads(self.registry.read_text())["reviewers"].items() if rec["reviewer_id"] == "reviewer-01")
