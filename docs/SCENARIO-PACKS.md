@@ -144,3 +144,45 @@ Run with the existing scenario command:
 This remains a local, deterministic simulation. The primary path is an
 explanation of modeled dependency causality, not proof of a live incident path,
 application health, recovery time, SLA breach, or business loss.
+
+
+## Institutional resilience and redundancy groups
+
+Service dependency records may declare optional `redundancy_group` and
+`capacity_mbps` fields. Dependencies for the same service and redundancy-group
+name represent alternative providers or infrastructure dependencies (OR
+semantics): one surviving member can keep the dependency group operational.
+All members in a group must agree on the `required` flag. Ungrouped
+dependencies retain the existing independent AND semantics.
+
+When one or more alternatives fail but another remains operational, NETOPPS
+reports the service as `degraded` because failover has consumed redundancy.
+The report's `redundancy` entry shows member counts, whether failover is
+active, and remaining declared capacity. Capacity is summed only when every
+member in that group declares a valid `capacity_mbps`; otherwise remaining
+capacity is `null` and capacity adequacy is unknown.
+
+A service may optionally declare `required_capacity_mbps`. For each
+redundancy group, NETOPPS compares the surviving declared capacity with that
+threshold. A shortfall with some capacity remaining is degraded; zero
+surviving capacity makes a required group unavailable. If capacity inputs or
+the threshold are absent, NETOPPS does not infer capacity adequacy. This is a
+declared-capacity model, not measured throughput, tested failover, physical
+provider diversity, or an SLA guarantee.
+
+Example:
+
+```json
+{
+  "service_id": "identity-platform",
+  "depends_on_type": "node",
+  "depends_on_id": "backup-server",
+  "redundancy_group": "identity-ha",
+  "capacity_mbps": 250
+}
+```
+
+Use the example dependency file to see two identity-platform alternatives and
+a declared 300 Mbps service capacity requirement. Simulating loss of either
+provider leaves 250 Mbps and correctly reports degraded service with active
+failover; losing both makes the required dependency unavailable.
