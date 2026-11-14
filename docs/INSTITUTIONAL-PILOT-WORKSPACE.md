@@ -21,9 +21,9 @@ Add institution-approved inputs and reports to the workspace. Declare each artif
 
 A hash mismatch is a stop condition. Do not silently refresh a baseline hash; preserve the original and create a separately versioned baseline or pilot revision. Packaging validates first and includes only the manifest, CSV register and explicitly declared artifacts. The ZIP must be written outside the workspace.
 
-## Security boundary
+## Governance extension\n\nUse the separate [Pilot Governance and Trust](PILOT-GOVERNANCE-AND-TRUST.md) guide to register reviewer public keys, sign approvals, verify the audit chain, create baseline/candidate provenance and export a reproducible governance package. The trust registry is an institution-managed trust anchor; identity and delegated authority must be checked by the institution.\n\n## Security boundary
 
-Keep the workspace on institution-approved access-controlled storage. Do not put credentials, subscriber data, personal data or unredacted production topology in public repositories or public forms. This tool does not encrypt files, authenticate users, enforce roles, sign approvals or provide tamper-proof audit storage. Hashes detect content changes but do not prove origin or time. Apply institutional encryption, transfer, retention and access controls. No hosted storage, tenant isolation, network integration, live monitoring or device configuration is provided.
+Keep the workspace on institution-approved access-controlled storage. Do not put credentials, subscriber data, personal data or unredacted production topology in public repositories or public forms. The workspace itself does not encrypt pilot files or provide user authentication, hosted role enforcement or immutable audit storage. The governance CLI encrypts private signing keys and supports Ed25519 signatures; signatures establish key possession and integrity, not real-world identity or authority. Hashes alone do not prove origin or time. Apply institutional encryption, transfer, retention and access controls. No hosted storage, tenant isolation, network integration, live monitoring or device configuration is provided.
 
 The existing local engine remains responsible for analysis:
 ```bash
