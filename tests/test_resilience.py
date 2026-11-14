@@ -4,7 +4,7 @@ import json
 import unittest
 
 from netopps.resilience import analyze_resilience
-from netopps.topology import NetworkTopology
+from netopps.topology import NetworkTopology, TopologyError
 
 ROOT = __file__.rsplit("/", 2)[0]
 
@@ -106,8 +106,6 @@ class ResilienceTests(unittest.TestCase):
         self.assertEqual("not_defined", guest["recovery_objectives"]["status"])
 
     def test_invalid_recovery_objective_is_rejected(self) -> None:
-        from netopps.topology import TopologyError
-
         document = json.loads(json.dumps(self.dependency_doc))
         document["services"][0]["rto_minutes"] = 0
         with self.assertRaises(TopologyError):
