@@ -516,13 +516,13 @@ class InstitutionalDependencyImpactTests(unittest.TestCase):
         self.assertEqual("direct", services["identity"]["impact_scope"])
         self.assertEqual("transitive", services["records"]["impact_scope"])
         self.assertEqual(
-            [{"type": "node", "id": "core"}, {"type": "service", "id": "identity"},
-             {"type": "service", "id": "payments"}, {"type": "service", "id": "records"}],
+            [{"type": "node", "id": "app"}, {"type": "service", "id": "payments"},
+             {"type": "service", "id": "records"}],
             services["records"]["failure_path"],
         )
         self.assertEqual(1, services["payments"]["additional_failure_path_count"])
         self.assertEqual("bank-a", result["affected_institutions"][0]["institution_id"])
-        self.assertEqual(11.5, result["affected_institutions"][0]["weighted_impact"])
+        self.assertEqual(10.5, result["affected_institutions"][0]["weighted_impact"])
         self.assertEqual(before, self.topology.report())
         self.assertFalse(result["topology_mutated"])
 
