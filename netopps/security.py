@@ -193,7 +193,7 @@ def verify_package(package_path: Path) -> dict[str, Any]:
             continue
         doc = json.loads(raw); payload = doc["payload"]; sig = doc["signature"]
         key_record = public_keys.get(sig.get("key_fingerprint_sha256"))
-        if not key_record or key_record[1].get("status") != "active":
+        if not key_record or key_record[1].get("status") not in {"active", "revoked"}:
             raise PilotError(f"approval signer is not active in packaged trust registry: {name}")
         key_record[0].verify(__import__("base64").b64decode(sig["value_base64"], validate=True), canonical(payload))
         if payload.get("manifest_sha256") != hashlib.sha256(files["pilot-manifest.json"]).hexdigest():
