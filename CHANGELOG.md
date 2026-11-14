@@ -1,3 +1,11 @@
+## Unreleased — Telecom evaluation and acquisition readiness
+
+- Added a synthetic two-site telecom-style topology with illustrative mobile-data, voice-signalling and mobile-money API service classes.
+- Added baseline and candidate dependency models to demonstrate how declared alternate dependencies can change modeled service impact and recovery planning.
+- Added an operator-facing walkthrough with reproducible CLI commands, evaluation steps, explicit product boundaries and acceptance gates for a real telecom pilot.
+- Added an evidence-led commercial value framework covering analyst effort, dependency coverage, scenario completion, reviewer acceptance and customer-approved financial inputs.
+- No Safaricom network data, live telemetry, outage costs, savings, or operational performance claims are included.
+
 ## Unreleased — Institutional sales package
 
 - Added a sector-aware product overview for government, universities, telecom operators, and enterprise infrastructure teams, with explicit current-capability boundaries.

@@ -1,8 +1,8 @@
 # NETOPPS Infrastructure
 
-**A safety-first, observable, automation-ready network infrastructure toolkit.**
+**A safety-first network infrastructure and resilience analysis toolkit.**
 
-NETOPPS is a practical NetOps engineering workspace for inventory validation, network-plan checks, operational runbooks, and carefully scoped connectivity checks. The first principle is simple: **inspect and validate before changing live infrastructure**.
+NETOPPS is a practical NetOps engineering workspace for inventory validation, network-plan checks, operational runbooks, and carefully scoped connectivity checks. Its resilience-analysis workflow helps institutions model infrastructure dependencies, explore hypothetical disruption, and plan recovery. The first principle is simple: **inspect and validate before changing live infrastructure**.
 
 > Status: production candidate for the documented local CLI scope. Authorized real-network lab acceptance remains required before relying on connectivity results operationally. NETOPPS is not a live network controller.
 
@@ -64,6 +64,10 @@ Exit codes: `0` means the requested checks passed; `1` means inventory findings,
 
 To validate your own inventory, copy `examples/inventory.json` and update it with non-sensitive lab data. Do not commit credentials, private keys, SNMP communities, or real production topology details.
 
+## Telecom evaluation demonstration
+
+A synthetic two-site telecom-style topology and three illustrative service classes are provided for a bounded product walkthrough. Run the baseline and candidate comparison using the [Telecom Evaluation Demo](docs/TELECOM-EVALUATION-DEMO.md). These files do not represent Safaricom or any other operator's actual network.
+
 ## Inventory contract
 
 The versioned interchange schema is in [schemas/inventory.schema.json](schemas/inventory.schema.json). The schema defines the data shape; the Python validator additionally checks semantic conditions such as overlapping networks and duplicate management addresses.
@@ -72,7 +76,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 
 - `netopps/` — inventory validation, subnet planning, opt-in connectivity checks, topology simulation, institutional resilience planning, and CLI.
 - `tests/` — validator and CLI regression tests.
-- `examples/` — safe, synthetic inventory.
+- `examples/` — safe, synthetic inventory, topology, service dependency, and telecom evaluation data.
 - `schemas/` — versioned inventory schema.
 - `docs/ARCHITECTURE.md` — boundaries and extension points.
 - `docs/NETWORK-DIGITAL-TWIN.md` — simulation model, examples, limitations, and research path.
@@ -80,6 +84,8 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 - `docs/TOPOLOGY-RISK.md` — topology diff semantics and explainable risk scoring.
 - `docs/SCENARIO-PACKS.md` — repeatable node, link, and site outage scenarios.
 - `docs/RESILIENCE-PLANNING.md` — ranked institutional resilience options, capacity assessment, and recovery priorities.
+- `docs/TELECOM-EVALUATION-DEMO.md` — synthetic telecom demonstration, evaluation workflow, and pilot acceptance gates.
+- `docs/COMMERCIAL-VALUE-MEASUREMENT.md` — evidence-led pilot scorecard and commercial-value measurement method.
 - `docs/SECURITY.md` — threat model and safe-use rules.
 - `docs/OPERATIONS.md` — repeatable local workflow and incident discipline.
 - `docs/ROADMAP.md` — staged delivery with verifiable acceptance criteria.
@@ -98,7 +104,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 
 ## Network digital twin (simulation-only)
 
-NETOPPS now includes a deterministic graph model for operator-supplied topology scenarios. It can summarize connectivity components, identify isolated nodes, calculate lowest-latency paths, simulate hypothetical node or link failures, estimate traffic demand against declared link capacity, compare baseline and candidate topologies, and produce explainable structural-fragility scores. Optional service dependency graphs add recursive failure paths, service-state classification, and institution-level impact ranking from operator-supplied metadata. The `resilience-report` command ranks single-dependency failure domains, proposes conditional redundancy improvements, reports capacity shortfalls under modeled failures, and orders recovery priorities by declared service criticality and optional RTO/RPO objectives, simulates correlated failures from shared failure-domain labels, and audits operator-supplied physical-diversity evidence metadata. It flags shared failure domains but does not authenticate evidence or certify physical independence. The CLI can export a self-contained, offline HTML executive briefing. The model is local-only and does not discover devices, collect telemetry, open sockets, or change infrastructure. Declared latency and capacity are scenario inputs, not live measurements. See [Network Digital Twin](docs/NETWORK-DIGITAL-TWIN.md), [Traffic Simulation](docs/TRAFFIC-SIMULATION.md), and the synthetic topology and demand examples.
+NETOPPS includes a deterministic graph model for operator-supplied topology scenarios. It can summarize connectivity components, identify isolated nodes, calculate lowest-latency paths, simulate hypothetical node or link failures, estimate traffic demand against declared link capacity, compare baseline and candidate topologies, and produce explainable structural-fragility scores. Optional service dependency graphs add recursive failure paths, service-state classification, and institution-level impact ranking from operator-supplied metadata. The `resilience-report` command ranks single-dependency failure domains, proposes conditional redundancy improvements, reports capacity shortfalls under modeled failures, and orders recovery priorities by declared service criticality and optional RTO/RPO objectives. It also simulates correlated failures from shared failure-domain labels and audits operator-supplied physical-diversity evidence metadata. It flags shared failure domains but does not authenticate evidence or certify physical independence. The CLI can export a self-contained, offline HTML executive briefing. The model is local-only and does not discover devices, collect telemetry, open sockets, or change infrastructure. Declared latency and capacity are scenario inputs, not live measurements. See [Network Digital Twin](docs/NETWORK-DIGITAL-TWIN.md), [Traffic Simulation](docs/TRAFFIC-SIMULATION.md), [Resilience Planning](docs/RESILIENCE-PLANNING.md), and the [Telecom Evaluation Demo](docs/TELECOM-EVALUATION-DEMO.md).
 
 ## Safety boundaries
 
@@ -111,7 +117,7 @@ python -m pip install -e ".[test]"
 python -m compileall -q netopps tests
 ruff check netopps tests
 bandit -q -r netopps
-detect-secrets scan --all-files --exclude-files '(^|/)(\\.git|\\.ruff_cache|htmlcov|dist|build)/'
+detect-secrets scan --all-files --exclude-files '(^|/)(\.git|\.ruff_cache|htmlcov|dist|build)/'
 pip-audit --skip-editable
 coverage run --branch --source=netopps -m unittest discover -s tests -v
 coverage report --fail-under=80
