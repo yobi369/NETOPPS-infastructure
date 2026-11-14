@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="NETOPPS Institutional Pilot Edition: a controlled, evidence-led offline resilience evaluation workflow.">
+<title>Institutional Pilot Edition | NETOPPS</title>
+<style>
+:root{color-scheme:dark;--bg:#07111f;--panel:#102239;--line:#29435e;--ink:#eff6ff;--muted:#a9bad0;--cyan:#70e4ee;--gold:#f2cb82}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#173754,transparent 42%),var(--bg);color:var(--ink);font:16px/1.65 system-ui,sans-serif}.wrap{width:min(1050px,calc(100% - 36px));margin:auto}header{padding:26px 0;border-bottom:1px solid #ffffff20}a{color:var(--cyan)}.brand{font-weight:900;letter-spacing:.16em;text-decoration:none;color:var(--ink)}.eyebrow{color:var(--cyan);font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}.hero{padding:76px 0 48px}.hero h1{font-size:clamp(38px,6vw,64px);line-height:1.05;letter-spacing:-.05em;max-width:850px;margin:14px 0}.lead{font-size:18px;color:var(--muted);max-width:780px}.notice{border-left:3px solid var(--gold);background:#f2cb8210;padding:16px 18px;color:#e8d9bd;margin:26px 0;border-radius:0 8px 8px 0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:30px 0}.card{background:linear-gradient(145deg,#132a42,#0c1a2b);border:1px solid var(--line);border-radius:13px;padding:20px}.card b{color:var(--cyan);font-size:12px;letter-spacing:.1em}.card h2{font-size:18px;margin:8px 0}.card p{color:var(--muted);font-size:14px;margin:0}.section{padding:32px 0}.links{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.link{display:block;padding:18px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:#ffffff06}.link strong{display:block;color:var(--ink)}.link span{display:block;color:var(--muted);font-size:13px;margin-top:5px}.footer{border-top:1px solid #ffffff20;padding:24px 0 40px;color:var(--muted);font-size:12px}@media(max-width:700px){.grid,.links{grid-template-columns:1fr}.hero{padding:52px 0 32px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="/">NETOPPS</a> <span style="color:var(--muted)">/ INSTITUTIONAL PILOT</span></div></header>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">Controlled evaluation workflow</div><h1>From authorised scope to evidence-backed resilience decisions.</h1><p class="lead">The NETOPPS Institutional Pilot Edition provides a structured way for an institution and its technical reviewers to define scope, validate input evidence, run a baseline assessment, compare a proposed design and agree an executive outcome.</p><div class="notice"><strong>Important data boundary:</strong> This is a public information page, not a secure customer portal. Do not enter or upload confidential topology, credentials, personal data or production network information here. The pilot workflow is executed locally using the NETOPPS Python CLI in an institution-approved environment.</div></section>
+<section class="grid" aria-label="Pilot stages">
+<article class="card"><b>01 / AUTHORISE</b><h2>Controlled onboarding</h2><p>Agree sponsor, technical and data owners, written authorization, permitted environment, scope and stop conditions.</p></article>
+<article class="card"><b>02 / INVENTORY</b><h2>Structure the model</h2><p>Prepare versioned assets, sites, links, services and dependency relationships with stable identifiers.</p></article>
+<article class="card"><b>03 / EVIDENCE</b><h2>Validate provenance</h2><p>Record source, owner, date, freshness, reviewer, permitted use and known limitations for each input.</p></article>
+<article class="card"><b>04 / BASELINE</b><h2>Assess current design</h2><p>Run the existing local resilience engine and review modeled impacts, capacity gaps and recovery priorities.</p></article>
+<article class="card"><b>05 / IMPROVE</b><h2>Compare a candidate</h2><p>Create a separate candidate dependency model and compare it against the same baseline scope and assumptions.</p></article>
+<article class="card"><b>06 / DECIDE</b><h2>Executive assessment</h2><p>Present evidence-backed findings, modeled differences, unresolved risks, accepted actions and a documented pilot outcome.</p></article>
+</section>
+<section class="section"><div class="eyebrow">Pilot operating pack</div><h2>Templates and working instructions</h2><p class="lead">Download or copy these templates into the institution's approved document and evidence repository. The repository versions are the authoritative templates.</p><div class="links">
+<a class="link" href="https://github.com/yobi369/NETOPPS-infastructure/blob/main/pilot/README.md"><strong>Operating guide</strong><span>Local workflow, six stages, CLI commands and data boundaries</span></a>
+<a class="link" href="https://github.com/yobi369/NETOPPS-infastructure/blob/main/pilot/PILOT-CHARTER.md"><strong>Pilot charter</strong><span>Authorization, governance, scope, method, deliverables and approvals</span></a>
+<a class="link" href="https://github.com/yobi369/NETOPPS-infastructure/blob/main/pilot/EVIDENCE-REGISTER.csv"><strong>Evidence register</strong><span>Provenance, freshness, validation state and permitted use</span></a>
+<a class="link" href="https://github.com/yobi369/NETOPPS-infastructure/blob/main/pilot/PILOT-ACCEPTANCE-CHECKLIST.md"><strong>Acceptance checklist</strong><span>Six gates from onboarding through closeout</span></a>
+<a class="link" href="https://netopps.vercel.app/analysis/"><strong>Engine report viewer</strong><span>Inspect JSON reports generated by the local NETOPPS engine</span></a>
+<a class="link" href="https://github.com/yobi369/NETOPPS-infastructure/blob/main/docs/COMMERCIAL-VALUE-MEASUREMENT.md"><strong>Value measurement framework</strong><span>Compare equivalent work using agreed measures, evidence and reviewers</span></a>
+</div></section>
+<section class="section"><div class="eyebrow">Method and limitations</div><h2>Evidence first. No unsupported claims.</h2><p class="lead">NETOPPS models operator-supplied topology, service dependencies, declared capacity, failure domains and recovery objectives. Its reports are deterministic planning outputs, not outage probabilities, certified physical diversity, live telemetry, verified failover performance or guarantees of restoration.</p><p class="lead">A candidate improvement is a hypothesis until the institution validates its technical independence, capacity, support coverage and operational behavior. Production testing or changes require separate written authorization and change control.</p></section>
+</main>
+<footer class="wrap footer">NETOPPS · Institutional Pilot Edition · <a href="/">Product overview</a> · <a href="https://github.com/yobi369/NETOPPS-infastructure">Source repository</a></footer>
+</body></html>
