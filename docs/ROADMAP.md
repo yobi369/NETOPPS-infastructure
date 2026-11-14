@@ -111,3 +111,16 @@ Acceptance: no external contribution is treated as commercially relicensable wit
 - [ ] Establish approved pricing, delivery capacity, support process, and customer reference/acceptance workflow.
 
 Acceptance: customer-facing material accurately reflects the current local CLI and simulation-only capabilities; no unsupported hosting, integration, SLA, certification, or live-control claim is made.
+
+
+## Phase 9 — Institutional Pilot Edition
+
+- [x] Define a controlled six-stage pilot lifecycle from onboarding to executive comparison.
+- [x] Add a pilot charter template covering authorization, governance, scope, evidence, method, acceptance and stop conditions.
+- [x] Add an evidence register template for provenance, freshness, ownership, validation state and permitted use.
+- [x] Add an institutional acceptance checklist covering authorization, inputs, baseline, candidate, executive assessment and closeout.
+- [x] Document the local CLI execution path using the existing resilience engine and report viewer.
+- [ ] Add schema-validated pilot manifest generation and repeatable evidence-linked assessment packaging.
+- [ ] Validate the workflow with an authorized institutional partner and reviewer.
+
+Acceptance: pilot records identify approved scope and input versions; evidence and assumptions remain distinguishable; baseline inputs are immutable; candidate comparisons use the same scope; sensitive data remains within the institution-approved environment; no unsupported hosted, live-monitoring or automated-control capability is implied.
