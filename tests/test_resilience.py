@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 import unittest
 
-from netopps.resilience import analyze_resilience
 from netopps.report import render_resilience_html
+from netopps.resilience import analyze_resilience
 from netopps.topology import NetworkTopology, TopologyError
 
 ROOT = __file__.rsplit("/", 2)[0]
