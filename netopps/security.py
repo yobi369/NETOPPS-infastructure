@@ -49,6 +49,10 @@ def rotate_reviewer(registry: Path, old_fingerprint: str, new_public_key: Path,
         raise PilotError("new key fingerprint or reviewer ID is already registered")
     if not new_public_key.resolve().is_relative_to(registry.resolve().parent):
         raise PilotError("new public key must be beneath the trust registry directory")
+    admin_roles = {"Trust Administrator", "Security Administrator"}
+    active_admins = [r for r in doc["reviewers"].values() if r.get("status") == "active" and r.get("role") in admin_roles]
+    if old.get("role") in admin_roles and len(active_admins) == 1 and role not in admin_roles:
+        raise PilotError("rotation must preserve at least one active trust administrator")
     old["status"] = "revoked"
     old["revoked_at"] = datetime.now(UTC).isoformat(timespec="seconds")
     old["revocation_reason"] = "rotated"
@@ -75,6 +79,10 @@ def revoke_reviewer(registry: Path, target_fingerprint: str, reason: str,
     target = doc["reviewers"].get(target_fingerprint)
     if not isinstance(target, dict) or target.get("status") != "active":
         raise PilotError("target reviewer key is not active")
+    admin_roles = {"Trust Administrator", "Security Administrator"}
+    active_admins = [r for r in doc["reviewers"].values() if r.get("status") == "active" and r.get("role") in admin_roles]
+    if target.get("role") in admin_roles and len(active_admins) == 1:
+        raise PilotError("cannot revoke the last active trust administrator")
     target["status"] = "revoked"
     target["revoked_at"] = datetime.now(UTC).isoformat(timespec="seconds")
     target["revocation_reason"] = reason
