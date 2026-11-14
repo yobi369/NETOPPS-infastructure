@@ -19,6 +19,7 @@ def analyze_resilience(topology: NetworkTopology, dependencies: Any) -> dict[str
     services = {item["id"]: item for item in baseline["services"]}
     raw_edges = dependencies.get("dependencies", [])
     scenarios: dict[tuple[str, str], dict[str, Any]] = {}
+    capacity_gaps: list[dict[str, Any]] = []
     for edge in raw_edges:
         kind, target = edge.get("depends_on_type"), edge.get("depends_on_id")
         if kind not in {"node", "link", "site"}:
@@ -33,6 +34,29 @@ def analyze_resilience(topology: NetworkTopology, dependencies: Any) -> dict[str
             failed_sites={target} if kind == "site" else None,
         )
         affected = failed["affected_services"]
+        for service in failed["services"]:
+            for group in service["redundancy"]:
+                required_capacity = group["required_capacity_mbps"]
+                available_capacity = group["remaining_capacity_mbps"]
+                if required_capacity is not None and available_capacity is not None and available_capacity < required_capacity:
+                    capacity_gaps.append({
+                        "scenario": {"type": kind, "id": target},
+                        "service_id": service["id"], "service_name": service["name"],
+                        "redundancy_group": group["group"],
+                        "required_capacity_mbps": required_capacity,
+                        "declared_available_capacity_mbps": available_capacity,
+                        "capacity_gap_mbps": round(required_capacity - available_capacity, 6),
+                    })
+                elif required_capacity is not None and available_capacity is None:
+                    capacity_gaps.append({
+                        "scenario": {"type": kind, "id": target},
+                        "service_id": service["id"], "service_name": service["name"],
+                        "redundancy_group": group["group"],
+                        "required_capacity_mbps": required_capacity,
+                        "declared_available_capacity_mbps": None,
+                        "capacity_gap_mbps": None,
+                        "status": "unknown_incomplete_capacity_inputs",
+                    })
         scenarios[key] = {
             "dependency": {"type": kind, "id": target},
             "affected_services": [item["id"] for item in affected],
@@ -71,28 +95,7 @@ def analyze_resilience(topology: NetworkTopology, dependencies: Any) -> dict[str
             "priority_weight_of_most_critical_affected_service": priority,
         })
 
-    capacity_gaps: list[dict[str, Any]] = []
-    for service in baseline["services"]:
-        for group in service["redundancy"]:
-            required = group["required_capacity_mbps"]
-            available = group["remaining_capacity_mbps"]
-            if required is not None and available is not None and available < required:
-                capacity_gaps.append({
-                    "service_id": service["id"], "service_name": service["name"],
-                    "redundancy_group": group["group"],
-                    "required_capacity_mbps": required,
-                    "declared_available_capacity_mbps": available,
-                    "capacity_gap_mbps": round(required - available, 6),
-                })
-            elif required is not None and available is None:
-                capacity_gaps.append({
-                    "service_id": service["id"], "service_name": service["name"],
-                    "redundancy_group": group["group"],
-                    "required_capacity_mbps": required,
-                    "declared_available_capacity_mbps": None,
-                    "capacity_gap_mbps": None,
-                    "status": "unknown_incomplete_capacity_inputs",
-                })
+
 
     recovery = sorted(baseline["services"], key=lambda item: (
         -item["priority_weight"],
