@@ -1,5 +1,6 @@
 """Ed25519 approvals and evidence governance for local NETOPPS pilot workspaces."""
 from __future__ import annotations
+
 import argparse
 import base64
 import getpass
@@ -145,7 +146,7 @@ def audit_append(root: Path, registry: Path, private_path: Path, password: str, 
     key=load_private(private_path,password); fp=fingerprint(key.public_key()); reviewer,_=trusted(registry,fp)
     path=root/"audit"/"activity.jsonl"; path.parent.mkdir(parents=True,exist_ok=True)
     current=audit_verify(root,registry); seq=current["entries"]+1
-    payload={"sequence":seq,"previous_hash":current["head_hash"],"event_type":event_type,"details":details,"actor":{k:reviewer[k] for k in ("reviewer_id","display_name","organization","role")},"occurred_at":datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    payload={"sequence":seq,"previous_hash":current["head_hash"],"event_type":event_type,"details":details,"actor":{k:reviewer[k] for k in ("reviewer_id","display_name","organization","role")},"occurred_at":datetime.now(UTC).isoformat(timespec="seconds")}
     entry_hash=hashlib.sha256(canonical(payload)).hexdigest()
     with path.open("a",encoding="utf-8") as handle: handle.write(json.dumps(signed({**payload,"entry_hash":entry_hash},key,fp),sort_keys=True)+"\n")
     return entry_hash
