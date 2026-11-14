@@ -4,7 +4,7 @@
 
 The digital twin is a deterministic, simulation-only representation of an operator-supplied network graph. It gives NETOPPS a safe place to reason about topology, path latency, connectivity partitions, and hypothetical failures before any live integration is considered.
 
-This milestone is a graph-analysis foundation, not a live monitoring system, network scanner, traffic emulator, or autonomous controller.
+This is a simulation-only graph-analysis foundation, not a live monitoring system, network scanner, traffic generator, or autonomous controller.
 
 ## Input contract
 
@@ -25,6 +25,10 @@ The model rejects duplicate IDs, unknown endpoints, self-links, invalid metrics,
 - Hypothetical node and link failure simulation.
 - Before/after component comparison and count of newly disconnected surviving node pairs.
 - Explicit non-mutation indicator in simulation results.
+- Deterministic traffic-demand routing over one lowest-latency path per demand.
+- Per-link modeled load, utilization, and capacity-overload estimates.
+
+Traffic demand assumptions and limitations are documented in [Traffic Simulation](TRAFFIC-SIMULATION.md).
 
 ## Example
 
@@ -48,8 +52,7 @@ The model rejects duplicate IDs, unknown endpoints, self-links, invalid metrics,
 
 ## Next research steps
 
-1. Add deterministic traffic-demand models and congestion estimates, clearly separated from measured telemetry.
-2. Add topology-diff and risk scoring with explainable evidence.
-3. Add reproducible scenario packs for link, node, and site failures.
-4. Compare candidate network plans against baseline metrics.
-5. Only after simulator contracts mature, design a read-only adapter interface and authorized lab acceptance protocol.
+1. Add topology-diff and risk scoring with explainable evidence.
+2. Add reproducible scenario packs for link, node, and site failures.
+3. Compare candidate network plans against baseline metrics.
+4. Only after simulator contracts mature, design a read-only adapter interface and authorized lab acceptance protocol.
