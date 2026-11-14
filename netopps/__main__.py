@@ -144,6 +144,7 @@ def main() -> int:
     scenarios_parser.add_argument("topology", type=Path, help="topology JSON file")
     scenarios_parser.add_argument("scenarios", type=Path, help="scenario-pack JSON file")
     scenarios_parser.add_argument("--traffic-file", type=Path, help="optional versioned JSON traffic-demand scenario")
+    scenarios_parser.add_argument("--dependency-file", type=Path, help="optional versioned service dependency graph")
     args = parser.parse_args()
 
     if args.command == "check-connectivity" and not args.allow_network:
@@ -222,8 +223,15 @@ def main() -> int:
                         or not isinstance(traffic_document.get("demands"), list)):
                     raise TopologyError("traffic file must contain schema_version 1 and a demands array")
                 traffic_demands = traffic_document["demands"]
+            service_dependencies = None
+            if args.dependency_file:
+                dependency_document, dependency_status = _read_inventory(args.dependency_file)
+                if dependency_status:
+                    return dependency_status
+                service_dependencies = dependency_document
             print(json.dumps(topology.analyze_scenarios(
-                scenarios_document["scenarios"], traffic_demands=traffic_demands
+                scenarios_document["scenarios"], traffic_demands=traffic_demands,
+                service_dependencies=service_dependencies,
             ), indent=2))
             return 0
         except (TopologyError, ValueError, TypeError) as exc:
