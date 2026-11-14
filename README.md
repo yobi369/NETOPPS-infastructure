@@ -71,6 +71,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 - `docs/NETWORK-DIGITAL-TWIN.md` — simulation model, examples, limitations, and research path.
 - `docs/TRAFFIC-SIMULATION.md` — traffic demand assumptions and congestion estimates.
 - `docs/TOPOLOGY-RISK.md` — topology diff semantics and explainable risk scoring.
+- `docs/TOPOLOGY-RISK.md` — topology diff semantics and explainable risk scoring.
 - `docs/SECURITY.md` — threat model and safe-use rules.
 - `docs/OPERATIONS.md` — repeatable local workflow and incident discipline.
 - `docs/ROADMAP.md` — staged delivery with verifiable acceptance criteria.
