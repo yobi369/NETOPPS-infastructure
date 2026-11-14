@@ -100,7 +100,6 @@ def analyze_resilience(
         })
 
 
-
     recovery = sorted(baseline["services"], key=lambda item: (
         -item["priority_weight"],
         0 if item["criticality"] == "mission_critical" else 1,
