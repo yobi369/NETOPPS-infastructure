@@ -27,6 +27,7 @@ The model rejects duplicate IDs, unknown endpoints, self-links, invalid metrics,
 - Explicit non-mutation indicator in simulation results.
 - Identity-based baseline/candidate topology diffs for nodes and links.
 - Explainable structural-fragility scoring with articulation-node, bridge-link, fragmentation, and isolation evidence.
+- Versioned node, link, and site failure scenario packs with before/after connectivity impact.
 - Deterministic traffic-demand routing over one lowest-latency path per demand.
 - Per-link modeled load, utilization, and capacity-overload estimates.
 
@@ -60,6 +61,6 @@ Use `netopps topology-risk examples/topology.json` to calculate a transparent 0â
 
 ## Next research steps
 
-1. Add reproducible scenario packs for link, node, and site failures.
-2. Compare candidate network plans against baseline metrics and traffic scenarios.
+1. Compare candidate network plans against baseline metrics and traffic scenarios.
+2. Add scenario-specific traffic reachability and service dependency analysis.
 3. Only after simulator contracts mature, design a read-only adapter interface and authorized lab acceptance protocol.
