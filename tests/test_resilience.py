@@ -52,14 +52,7 @@ class ResilienceTests(unittest.TestCase):
 
 
     def test_candidate_dependency_model_compares_before_and_after_capacity(self) -> None:
-        candidate = json.loads(json.dumps(self.dependency_doc))
-        candidate["dependencies"].append({
-            "service_id": "identity-platform",
-            "depends_on_type": "node",
-            "depends_on_id": "branch-router",
-            "redundancy_group": "identity-ha",
-            "capacity_mbps": 250,
-        })
+        candidate = load_fixture("service-dependencies-candidate.json")
         report = analyze_resilience(self.topology, self.dependency_doc, candidate)
         comparison = report["candidate_comparison"]
         self.assertTrue(comparison["candidate_supplied"])
