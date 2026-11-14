@@ -267,7 +267,7 @@ def main() -> int:
             report = analyze_resilience(topology, dependency_document, candidate_document)
             output = render_resilience_html(report) if args.format == "html" else json.dumps(report, indent=2)
             if args.output:
-                args.output.write_text(output + "\\n", encoding="utf-8")
+                args.output.write_text(output + "\n", encoding="utf-8")
             else:
                 print(output)
             return 0
