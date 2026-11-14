@@ -1,8 +1,35 @@
 {
   "schema_version": 1,
   "demands": [
-    {"id": "office-to-app", "source": "distribution-a", "target": "app-server", "demand_mbps": 120},
-    {"id": "backup-to-app", "source": "distribution-b", "target": "app-server", "demand_mbps": 80},
-    {"id": "core-to-backup", "source": "core-router", "target": "backup-server", "demand_mbps": 25}
+    {
+      "id": "office-to-app",
+      "source": "distribution-a",
+      "target": "app-server",
+      "demand_mbps": 120,
+      "service_id": "institutional-app",
+      "service_name": "Institutional Application",
+      "criticality": "mission_critical",
+      "dependency_weight": 2
+    },
+    {
+      "id": "backup-to-app",
+      "source": "distribution-b",
+      "target": "app-server",
+      "demand_mbps": 80,
+      "service_id": "backup-service",
+      "service_name": "Backup Service",
+      "criticality": "high",
+      "dependency_weight": 1.2
+    },
+    {
+      "id": "core-to-backup",
+      "source": "core-router",
+      "target": "backup-server",
+      "demand_mbps": 25,
+      "service_id": "core-maintenance",
+      "service_name": "Core Maintenance",
+      "criticality": "standard",
+      "dependency_weight": 1
+    }
   ]
 }

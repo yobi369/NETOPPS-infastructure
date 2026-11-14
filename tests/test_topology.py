@@ -295,5 +295,61 @@ class NetworkTopologyTests(unittest.TestCase):
         self.assertEqual({"nodes": ["core"], "links": [], "latency_ms": 0.0},
                          self.topology.shortest_path("core", "core"))
 
+    def test_scenario_traffic_weights_critical_services_and_groups_demands(self) -> None:
+        topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [{"id": item} for item in ["a", "b", "c"]],
+            "links": [
+                {"id": "ab", "source": "a", "target": "b", "latency_ms": 1, "capacity_mbps": 100},
+                {"id": "bc", "source": "b", "target": "c", "latency_ms": 1, "capacity_mbps": 100},
+            ],
+        })
+        demands = [
+            {"id": "bank-api", "source": "a", "target": "c", "demand_mbps": 20,
+             "service_id": "banking", "service_name": "Core Banking",
+             "criticality": "mission_critical", "dependency_weight": 2.0},
+            {"id": "bank-events", "source": "a", "target": "c", "demand_mbps": 10,
+             "service_id": "banking", "service_name": "Core Banking",
+             "criticality": "mission_critical", "dependency_weight": 2.0},
+            {"id": "guest-wifi", "source": "a", "target": "c", "demand_mbps": 80,
+             "service_id": "guest", "service_name": "Guest Wi-Fi",
+             "criticality": "low", "dependency_weight": 0.5},
+        ]
+        result = topology.analyze_scenarios(
+            [{"id": "core-loss", "failure_type": "node", "target": "b"}],
+            traffic_demands=demands,
+        )
+        impact = result["scenarios"][0]["traffic_impact"]
+        self.assertEqual(110.0, impact["newly_affected_mbps"])
+        self.assertEqual(280.0, impact["total_weighted_impact_mbps"])
+        self.assertEqual(2, impact["affected_service_count"])
+        self.assertEqual("banking", impact["affected_services"][0]["service_id"])
+        self.assertEqual(2, impact["affected_services"][0]["affected_demand_count"])
+        self.assertEqual(240.0, impact["affected_services"][0]["weighted_impact_mbps"])
+
+    def test_traffic_criticality_and_dependency_weight_are_validated(self) -> None:
+        cases = [
+            ("criticality", "extreme", "criticality must be"),
+            ("dependency_weight", 0, "dependency_weight must be"),
+            ("dependency_weight", True, "dependency_weight must be"),
+            ("service_id", "", "service_id must be"),
+        ]
+        for field, value, message in cases:
+            demand = {"id": "bad", "source": "core", "target": "edge-a", "demand_mbps": 5}
+            demand[field] = value
+            with self.subTest(field=field, value=value):
+                with self.assertRaisesRegex(TopologyError, message):
+                    self.topology.simulate_traffic([demand])
+
+    def test_legacy_traffic_demands_keep_backward_compatible_defaults(self) -> None:
+        result = self.topology.simulate_traffic([
+            {"id": "legacy", "source": "core", "target": "edge-a", "demand_mbps": 5}
+        ])
+        demand = result["demands"][0]
+        self.assertEqual("legacy", demand["service_id"])
+        self.assertEqual("standard", demand["criticality"])
+        self.assertEqual(1.0, demand["dependency_weight"])
+        self.assertEqual(7.5, demand["weighted_impact_mbps"])
+
 if __name__ == "__main__":
     unittest.main()

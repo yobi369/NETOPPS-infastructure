@@ -480,13 +480,41 @@ class NetworkTopology:
             if after_status != "routed":
                 unroutable_after_count += 1
             if before_status == "routed" and after_status != "routed":
+                baseline_demand = baseline_by_id[identifier]
                 affected.append({
                     "id": identifier, "status_after_failure": after_status,
                     "reason": reason, "demand_mbps": float(demand["demand_mbps"]),
+                    "service_id": baseline_demand["service_id"],
+                    "service_name": baseline_demand["service_name"],
+                    "criticality": baseline_demand["criticality"],
+                    "dependency_weight": baseline_demand["dependency_weight"],
+                    "criticality_multiplier": baseline_demand["criticality_multiplier"],
+                    "weighted_impact_mbps": baseline_demand["weighted_impact_mbps"],
                 })
+
+        services: dict[str, dict[str, Any]] = {}
+        for item in affected:
+            service = services.setdefault(item["service_id"], {
+                "service_id": item["service_id"], "service_name": item["service_name"],
+                "criticality": item["criticality"], "dependency_weight": item["dependency_weight"],
+                "affected_demand_count": 0, "affected_mbps": 0.0, "weighted_impact_mbps": 0.0,
+            })
+            service["affected_demand_count"] += 1
+            service["affected_mbps"] += item["demand_mbps"]
+            service["weighted_impact_mbps"] += item["weighted_impact_mbps"]
+        criticality_order = {"low": 1, "standard": 2, "high": 3, "mission_critical": 4}
+        affected_services = sorted(services.values(), key=lambda item: (
+            -item["weighted_impact_mbps"], -criticality_order[item["criticality"]], item["service_id"],
+        ))
+        for service in affected_services:
+            service["affected_mbps"] = round(service["affected_mbps"], 6)
+            service["weighted_impact_mbps"] = round(service["weighted_impact_mbps"], 6)
 
         return {
             "mode": "simulation-only",
+            "impact_model": "NETOPPS-service-impact-v1",
+            "criticality_weights": {"low": 1.0, "standard": 1.5, "high": 2.5, "mission_critical": 4.0},
+            "dependency_weight_range": [0.1, 10.0],
             "demand_count": len(demands),
             "endpoint_unavailable_count": endpoint_unavailable_count,
             "unroutable_after_failure_count": unroutable_after_count,
@@ -495,6 +523,9 @@ class NetworkTopology:
             "remaining_routed_mbps": after["total_routed_mbps"],
             "remaining_congested_link_count": after["congested_link_count"],
             "affected_demands": affected,
+            "affected_services": affected_services,
+            "affected_service_count": len(affected_services),
+            "total_weighted_impact_mbps": round(sum(item["weighted_impact_mbps"] for item in affected), 6),
             "topology_mutated": False,
         }
 

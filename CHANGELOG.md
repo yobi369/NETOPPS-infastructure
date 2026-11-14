@@ -57,3 +57,6 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 - Site failures remove all nodes carrying the exact target site label in the simulated state only.
 - Added optional traffic-demand impact analysis per failure scenario, including failed endpoints, route loss, newly affected Mbps, and residual routed demand.
 - Added CLI integration and regression coverage proving the feature performs no network I/O and does not mutate the baseline topology.
+- Added backward-compatible service identity, criticality classes, and bounded dependency weights to traffic-demand simulation.
+- Failure scenario reports now include weighted impact per affected demand and deterministic affected-service summaries.
+- Documented the formula, defaults, examples, and limits; no business metadata is inferred and no live telemetry is accessed.

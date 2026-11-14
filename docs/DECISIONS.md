@@ -57,3 +57,22 @@ Failure scenarios are declared in a separate versioned JSON pack and reference e
 **Status:** Accepted
 
 Failure scenario packs may consume the existing versioned traffic-demand contract. For each simulated failure, demands whose endpoints fail are marked endpoint-unavailable; surviving endpoint pairs are re-routed over the residual topology. Only baseline-routable demands that become unavailable or unroutable count as newly affected. Reports include affected demand IDs and rates plus remaining modeled routed demand. This is a local estimate, not application monitoring, observed throughput, SLA evidence, or live traffic generation.
+
+## ADR-009: Weight modeled failure impact by declared service criticality
+
+**Status:** Accepted
+
+**Context:** Raw Mbps alone cannot distinguish ordinary traffic from traffic
+supporting an institution’s critical service. Prioritization must not invent
+business facts that are absent from the supplied model.
+
+**Decision:** Extend the existing version-1 traffic-demand contract with optional
+service identity, criticality, and dependency-weight metadata. Defaults preserve
+compatibility. Compute weighted impact using demand Mbps, a documented
+criticality multiplier, and a bounded operator-supplied dependency weight.
+Aggregate affected demands by service ID and rank service summaries deterministically.
+
+**Consequences:** Failure reports distinguish services using declared metadata
+while retaining raw Mbps and demand-level evidence. Weights are model inputs only;
+they do not establish actual business criticality, dependencies, SLA compliance,
+service health, or outage probability.
