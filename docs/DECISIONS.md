@@ -169,3 +169,14 @@ recovery time, or SLA compliance.
 **Decision:** Allow infrastructure dependency edges to declare shared failure_domains labels and optional diversity_evidence metadata. Evaluate each shared label as a correlated failure affecting all tagged nodes, links, and sites. Compare members of each redundancy group for shared failure-domain labels. Allow services to declare positive rto_minutes and non-negative rpo_minutes; expose these objectives and use them as deterministic recovery-priority tie-breakers after criticality and dependency weight.
 
 **Consequences:** Reports distinguish detected shared-domain overlap, missing independent evidence, and operator-recorded independent evidence. NETOPPS does not retrieve or authenticate evidence references, validate physical routes, or certify provider/site independence. Correlated scenarios are only as complete as the supplied labels. RTO/RPO values are planning targets, not observed restoration performance or SLA compliance.
+
+
+## ADR-015: Preserve dual-licensing rights through an explicit contributor grant
+
+**Status:** Proposed pending legal review
+
+**Context:** The project intends to make eligible code available under AGPL-3.0-or-later and separately negotiated commercial terms. A contributor's submission or pull request alone does not grant the project rights to relicense that contribution commercially. Copyright assignment would be unnecessarily broad if contributors can retain ownership while granting the project the required permissions.
+
+**Decision:** Adopt a Contributor License Agreement template under which contributors retain copyright and grant the project rights holder a perpetual, worldwide, non-exclusive, royalty-free, sublicensable copyright licence, together with a scoped patent licence, for the submitted contribution. Require the CLA to be completed and accepted before an external contribution is merged into the dual-licensed codebase. Keep executed agreements and contribution references in restricted-access records, not in the public repository. Contributions without sufficient rights must not be represented as commercially relicensable.
+
+**Consequences:** The project can include properly covered contributions in community and commercial distributions without taking ownership from contributors. This does not establish that the current rights holder owns every existing file, resolve employer/client ownership, or grant rights in third-party material. The template is not to be used as a binding instrument until qualified counsel reviews it and the project confirms its ownership chain.
