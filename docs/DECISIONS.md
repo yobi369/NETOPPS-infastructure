@@ -158,3 +158,14 @@ recovery time, or SLA compliance.
 **Decision:** Add a deterministic read-only assessment that evaluates each declared infrastructure dependency as an individual failure scenario, ranks the resulting service impact, and proposes explicit redundancy design work only as a conditional planning action. Evaluate declared redundancy-group capacity during those scenarios and report numeric shortfalls only when both required and available capacity are supplied. Rank recovery priorities using declared criticality and dependency weights. Expose a machine-readable executive summary through a dedicated CLI command.
 
 **Consequences:** Results are reproducible planning evidence based on operator-supplied inputs. A proposed alternative is not treated as an implemented candidate or a guaranteed benefit. Physical diversity, correlated failures, failover behavior, live capacity, recovery-time objectives, and service-level agreements require independent evidence and validation.
+
+
+## ADR-014: Model correlated failure domains, diversity evidence, and recovery objectives
+
+**Status:** Accepted
+
+**Context:** Single-asset failure simulations can overstate resilience when nominally separate alternatives share power, carrier, site, route, or other common-cause dependencies. Recovery planning also needs institution-defined RTO/RPO targets, while evidence supporting physical-diversity claims must remain traceable.
+
+**Decision:** Allow infrastructure dependency edges to declare shared failure_domains labels and optional diversity_evidence metadata. Evaluate each shared label as a correlated failure affecting all tagged nodes, links, and sites. Compare members of each redundancy group for shared failure-domain labels. Allow services to declare positive rto_minutes and non-negative rpo_minutes; expose these objectives and use them as deterministic recovery-priority tie-breakers after criticality and dependency weight.
+
+**Consequences:** Reports distinguish detected shared-domain overlap, missing independent evidence, and operator-recorded independent evidence. NETOPPS does not retrieve or authenticate evidence references, validate physical routes, or certify provider/site independence. Correlated scenarios are only as complete as the supplied labels. RTO/RPO values are planning targets, not observed restoration performance or SLA compliance.

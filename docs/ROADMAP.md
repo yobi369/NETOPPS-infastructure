@@ -77,5 +77,8 @@ Acceptance: no write operation runs without an explicit approved apply action; f
 - [x] Assess declared failover capacity under modeled single-dependency failures and rank recovery priorities.
 - [x] Produce machine-readable executive resilience assessments through the CLI.
 - [x] Compare baseline and proposed dependency models with before/after service impact and capacity-gap deltas.
+- [x] Simulate correlated failures across operator-declared shared power, carrier, site, route, and other failure-domain labels.
+- [x] Record diversity evidence metadata and flag shared failure domains across redundancy-group members without claiming independent authentication.
+- [x] Capture service-defined RTO/RPO targets and use them in recovery-priority tie-breaking.
 
 Acceptance: simulations are deterministic, non-mutating, have no network I/O, and distinguish declared scenario inputs from observed telemetry.

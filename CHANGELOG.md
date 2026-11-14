@@ -5,6 +5,11 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 ## Unreleased
 
 ### Added
+- Correlated multi-asset failure scenarios driven by shared operator-declared failure-domain labels.
+- Redundancy-group physical-diversity assessments with traceable evidence references and explicit non-authentication semantics.
+- Optional service-level RTO/RPO targets surfaced in recovery plans and used for deterministic recovery-priority tie-breaking.
+
+### Added
 - Local JSON inventory validation with deterministic findings and explicit exit codes.
 - Duplicate device/network identifiers, duplicate hostnames and management IP checks.
 - IPv4/IPv6 CIDR validation and bounded overlap reporting.
@@ -19,7 +24,7 @@ All notable changes to NETOPPS are documented here. This project currently uses 
 ### Limitations
 - No live device adapters, active discovery, monitoring service, authentication service, persistent storage, or configuration write operations.
 - No production deployment or external network lab validation has been completed.
-- No license has been selected.
+- RTO/RPO targets, failure-domain labels, and diversity evidence are operator-supplied; they are not measured or independently authenticated by NETOPPS.
 
 
 ## Unreleased — Network digital twin foundation

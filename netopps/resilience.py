@@ -70,6 +70,78 @@ def analyze_resilience(
             "institution_ids": sorted({item["institution_id"] for item in affected if item["institution_id"]}),
         }
 
+    domain_assets: dict[str, dict[str, set[str]]] = {}
+    diversity_groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for edge in raw_edges:
+        kind, target = edge.get("depends_on_type"), edge.get("depends_on_id")
+        for domain in edge.get("failure_domains", []):
+            assets = domain_assets.setdefault(domain, {"node": set(), "link": set(), "site": set()})
+            if kind in assets:
+                assets[kind].add(target)
+        group = edge.get("redundancy_group")
+        if group is not None:
+            diversity_groups.setdefault((edge["service_id"], group), []).append(edge)
+
+    correlated_scenarios: list[dict[str, Any]] = []
+    for domain, assets in sorted(domain_assets.items()):
+        failed = analyze_service_dependencies(
+            topology, dependencies,
+            failed_nodes=assets["node"], failed_links=assets["link"], failed_sites=assets["site"],
+        )
+        affected = failed["affected_services"]
+        correlated_scenarios.append({
+            "failure_domain": domain,
+            "failed_assets": {
+                "nodes": sorted(assets["node"]),
+                "links": sorted(assets["link"]),
+                "sites": sorted(assets["site"]),
+            },
+            "affected_services": [item["id"] for item in affected],
+            "unavailable_services": [item["id"] for item in affected if item["status"] == "unavailable"],
+            "degraded_services": [item["id"] for item in affected if item["status"] == "degraded"],
+            "weighted_impact": round(sum(item["priority_weight"] for item in affected), 6),
+            "institution_ids": sorted({item["institution_id"] for item in affected if item["institution_id"]}),
+        })
+    correlated_scenarios.sort(key=lambda item: (
+        -item["weighted_impact"], -len(item["unavailable_services"]), item["failure_domain"],
+    ))
+
+    physical_diversity = []
+    for (service_id, group_name), members in sorted(diversity_groups.items()):
+        member_domains = [set(edge.get("failure_domains", [])) for edge in members]
+        shared_domains: set[str] = set()
+        for index, domains in enumerate(member_domains):
+            for other in member_domains[index + 1:]:
+                shared_domains.update(domains & other)
+        evidence = [edge.get("diversity_evidence") for edge in members]
+        evidence_recorded = all(
+            isinstance(item, dict) and item.get("verification_status") == "independently_verified"
+            for item in evidence
+        )
+        physical_diversity.append({
+            "service_id": service_id,
+            "redundancy_group": group_name,
+            "member_count": len(members),
+            "members": [
+                {
+                    "depends_on_type": edge["depends_on_type"],
+                    "depends_on_id": edge["depends_on_id"],
+                    "failure_domains": sorted(edge.get("failure_domains", [])),
+                    "diversity_evidence": edge.get("diversity_evidence"),
+                }
+                for edge in sorted(members, key=lambda item: (item["depends_on_type"], item["depends_on_id"]))
+            ],
+            "shared_failure_domains": sorted(shared_domains),
+            "diversity_status": (
+                "shared_failure_domain_detected" if shared_domains
+                else "operator_recorded_independent_evidence" if evidence_recorded
+                else "independence_not_established"
+            ),
+            "interpretation": (
+                "NETOPPS reports declared failure-domain overlap and evidence metadata; it does not independently authenticate evidence or prove physical separation."
+            ),
+        })
+
     weaknesses = sorted(scenarios.values(), key=lambda item: (
         -item["weighted_impact"], -len(item["unavailable_services"]),
         item["dependency"]["type"], item["dependency"]["id"],
@@ -103,6 +175,8 @@ def analyze_resilience(
     recovery = sorted(baseline["services"], key=lambda item: (
         -item["priority_weight"],
         0 if item["criticality"] == "mission_critical" else 1,
+        item["rto_minutes"] if item["rto_minutes"] is not None else float("inf"),
+        item["rpo_minutes"] if item["rpo_minutes"] is not None else float("inf"),
         0 if item["status"] == "unavailable" else 1 if item["status"] == "degraded" else 2,
         item["id"],
     ))
@@ -115,6 +189,11 @@ def analyze_resilience(
         "criticality": item["criticality"],
         "priority_weight": item["priority_weight"],
         "baseline_status": item["status"],
+        "recovery_objectives": {
+            "rto_minutes": item["rto_minutes"],
+            "rpo_minutes": item["rpo_minutes"],
+            "status": "defined" if item["rto_minutes"] is not None or item["rpo_minutes"] is not None else "not_defined",
+        },
         "recovery_reason": (
             "Highest declared criticality/dependency weight"
             if item["criticality"] == "mission_critical"
@@ -139,6 +218,9 @@ def analyze_resilience(
         "capacity_gap_count": sum(gap.get("capacity_gap_mbps") is not None for gap in capacity_gaps),
         "unknown_capacity_count": sum(gap.get("capacity_gap_mbps") is None for gap in capacity_gaps),
         "first_recovery_priority": recovery_priorities[0] if recovery_priorities else None,
+        "correlated_failure_domain_count": len(correlated_scenarios),
+        "physical_diversity_groups_with_shared_domains": sum(item["diversity_status"] == "shared_failure_domain_detected" for item in physical_diversity),
+        "physical_diversity_groups_without_evidence": sum(item["diversity_status"] == "independence_not_established" for item in physical_diversity),
     }
     report = {
         "mode": "simulation-only",
@@ -149,6 +231,8 @@ def analyze_resilience(
         "weakest_dependencies": weaknesses,
         "redundancy_recommendations": recommendations,
         "capacity_assessment": capacity_gaps,
+        "correlated_failure_scenarios": correlated_scenarios,
+        "physical_diversity_assessment": physical_diversity,
         "recovery_priorities": recovery_priorities,
         "scenario_comparison": {
             "baseline_affected_service_count": baseline_affected,
@@ -162,9 +246,10 @@ def analyze_resilience(
         },
         "limitations": [
             "Inputs are operator-declared and are not live telemetry.",
-            "Single-failure scenarios do not model correlated or simultaneous failures.",
+            "Correlated failure scenarios are only as complete as operator-declared failure_domains labels; untagged common causes are invisible.",
             "Redundancy benefit is conditional on physical independence, successful failover, and sufficient capacity.",
-            "No recovery-time objective, restoration duration, or SLA is inferred.",
+            "RTO/RPO values are operator-defined objectives, not measured recovery performance or SLA evidence.",
+            "Diversity evidence references and verification labels are operator-supplied metadata; NETOPPS does not authenticate evidence or prove physical independence.",
             "Unknown capacity remains unknown; the planner does not invent values.",
         ],
         "topology_mutated": False,

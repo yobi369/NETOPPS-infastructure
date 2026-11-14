@@ -8,7 +8,9 @@
       "institution_name": "Example Bank",
       "criticality": "mission_critical",
       "dependency_weight": 1.5,
-      "required_capacity_mbps": 300
+      "required_capacity_mbps": 300,
+      "rto_minutes": 45,
+      "rpo_minutes": 10
     },
     {
       "id": "core-banking",
@@ -16,7 +18,9 @@
       "institution_id": "example-bank",
       "institution_name": "Example Bank",
       "criticality": "mission_critical",
-      "dependency_weight": 2
+      "dependency_weight": 2,
+      "rto_minutes": 30,
+      "rpo_minutes": 5
     },
     {
       "id": "branch-operations",
@@ -24,7 +28,9 @@
       "institution_id": "example-bank",
       "institution_name": "Example Bank",
       "criticality": "high",
-      "dependency_weight": 1.3
+      "dependency_weight": 1.3,
+      "rto_minutes": 240,
+      "rpo_minutes": 60
     },
     {
       "id": "guest-wifi",
@@ -47,14 +53,32 @@
       "depends_on_type": "node",
       "depends_on_id": "backup-server",
       "redundancy_group": "identity-ha",
-      "capacity_mbps": 250
+      "capacity_mbps": 250,
+      "failure_domains": [
+        "power:backup-facility",
+        "carrier:carrier-west"
+      ],
+      "diversity_evidence": {
+        "evidence_ref": "example-only:backup-server-diversity",
+        "evidence_type": "site_survey",
+        "verification_status": "documented"
+      }
     },
     {
       "service_id": "identity-platform",
       "depends_on_type": "node",
       "depends_on_id": "hq-core",
       "redundancy_group": "identity-ha",
-      "capacity_mbps": 250
+      "capacity_mbps": 250,
+      "failure_domains": [
+        "power:headquarters",
+        "carrier:carrier-east"
+      ],
+      "diversity_evidence": {
+        "evidence_ref": "example-only:hq-core-diversity",
+        "evidence_type": "route_trace",
+        "verification_status": "documented"
+      }
     },
     {
       "service_id": "core-banking",
@@ -64,31 +88,50 @@
     {
       "service_id": "core-banking",
       "depends_on_type": "node",
-      "depends_on_id": "app-server"
+      "depends_on_id": "app-server",
+      "failure_domains": [
+        "power:application-site"
+      ]
     },
     {
       "service_id": "branch-operations",
       "depends_on_type": "site",
-      "depends_on_id": "branch-west"
+      "depends_on_id": "branch-west",
+      "failure_domains": [
+        "power:branch-west",
+        "carrier:carrier-west"
+      ]
     },
     {
       "service_id": "guest-wifi",
       "depends_on_type": "node",
       "depends_on_id": "branch-router",
-      "required": false
+      "required": false,
+      "failure_domains": [
+        "power:branch-west",
+        "carrier:carrier-west"
+      ]
     },
     {
       "service_id": "backup-platform",
       "depends_on_type": "link",
       "depends_on_id": "branch-to-backup",
-      "required": false
+      "required": false,
+      "failure_domains": [
+        "power:branch-west",
+        "carrier:carrier-west"
+      ]
     },
     {
       "service_id": "identity-platform",
       "depends_on_type": "node",
       "depends_on_id": "branch-router",
       "redundancy_group": "identity-ha",
-      "capacity_mbps": 250
+      "capacity_mbps": 250,
+      "failure_domains": [
+        "power:branch-west",
+        "carrier:carrier-west"
+      ]
     }
   ]
 }

@@ -19,7 +19,9 @@ The command emits JSON with:
 - **Weakest dependencies:** one-at-a-time node, link, and site failure scenarios, ranked by affected service priority weight and unavailable-service count.
 - **Redundancy recommendations:** proposed design work to add an explicitly modeled alternative. The avoided impact is conditional on independence, support coverage, successful failover, and sufficient capacity.
 - **Capacity assessment:** capacity shortfalls observed in modeled failure states, computed from declared redundancy member capacities and the service's declared required capacity. Missing inputs remain unknown.
-- **Recovery priorities:** deterministic ordering by service criticality and dependency weight, with service state as a tie-breaker.
+- **Correlated failure scenarios:** each declared `failure_domains` label is failed as a shared cause across all tagged nodes, links, and sites.
+- **Physical diversity assessment:** redundancy members are compared for shared failure-domain labels and linked to operator-supplied evidence records.
+- **Recovery priorities:** deterministic ordering by service criticality and dependency weight, then tighter declared RTO/RPO objectives; missing objectives remain unset.
 
 ## Interpretation
 
@@ -29,13 +31,19 @@ A redundancy recommendation is not a generated network design or an assertion th
 
 Capacity gaps are meaningful only when both `required_capacity_mbps` and every relevant redundancy member's `capacity_mbps` are supplied. Unknown capacity is not treated as zero and is not estimated from link bandwidth.
 
-Recovery priorities express a suggested order for restoration planning from declared criticality and dependency weight. They do not encode RTO/RPO, staffing, spare-part availability, restoration duration, legal obligations, or business continuity plans.
+Services may optionally declare `rto_minutes` (positive) and `rpo_minutes` (non-negative). These are institution-defined recovery targets, not measured recovery performance. They are surfaced in recovery priorities and used as tie-breakers after declared service priority. NETOPPS never invents missing objectives.
+
+Infrastructure dependency edges may declare `failure_domains`, a list of shared-cause labels such as `power:shared-grid` or `carrier:carrier-a`. Every asset tagged with the same label is failed together in a correlated scenario. These labels are operator declarations; incomplete labels hide real common causes. A redundancy group is flagged when members share any declared failure domain.
+
+A `diversity_evidence` record can include `evidence_ref`, `evidence_type`, `verification_status`, and (for `independently_verified`) `verified_at` and `verified_by`. The report distinguishes shared-domain overlap, missing independent evidence, and operator-recorded independent evidence. Evidence references and verification labels are not fetched, checked, or authenticated by NETOPPS. A status of `operator_recorded_independent_evidence` is not a NETOPPS certification of physical separation.
+
+Recovery priorities express a suggested order for restoration planning from declared criticality, dependency weight, RTO, and RPO. They do not encode staffing, spare-part availability, restoration duration, legal obligations, or business continuity plans.
 
 ## Safety and model limits
 
 - No network I/O, discovery, telemetry ingestion, configuration change, or live failover is performed.
-- The current assessment evaluates individual declared infrastructure failures, not correlated or simultaneous failures.
-- Declared site labels do not prove geographic or power-domain independence.
+- Correlated scenarios fail all assets carrying the same declared failure-domain label; other simultaneous or unknown common-cause failures remain outside the model.
+- Declared site labels and diversity evidence do not prove geographic, power, conduit, provider-ownership, or control-plane independence.
 - Declared provider alternatives do not prove separate ownership, conduits, upstream carriers, DNS, identity, or control planes.
 - No SLA compliance, outage probability, restoration time, or operational readiness is asserted.
 
