@@ -83,9 +83,10 @@ def register_reviewer(registry_path: Path, public_path: Path, reviewer_id: str, 
     registry_path.write_text(json.dumps(registry,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     return fp
 
-def trusted(registry_path: Path, fp: str) -> tuple[dict[str, Any], Ed25519PublicKey]:
+def trusted(registry_path: Path, fp: str, allow_revoked: bool = False) -> tuple[dict[str, Any], Ed25519PublicKey]:
     registry=load_registry(registry_path); record=registry["reviewers"].get(fp)
-    if not isinstance(record,dict) or record.get("status")!="active": raise PilotError("signing key is not active in trust registry")
+    allowed_statuses = {"active", "revoked"} if allow_revoked else {"active"}
+    if not isinstance(record,dict) or record.get("status") not in allowed_statuses: raise PilotError("signing key is not active in trust registry")
     if record.get("algorithm")!=ALG or record.get("fingerprint_sha256")!=fp: raise PilotError("trust record fingerprint or algorithm mismatch")
     base=registry_path.resolve().parent; key_path=(base/record.get("public_key","")).resolve()
     if not key_path.is_relative_to(base): raise PilotError("registered public key escapes trust directory")
@@ -100,7 +101,7 @@ def verify_signed(doc: dict[str,Any], registry: Path) -> dict[str,Any]:
     try:
         payload=doc["payload"]; sig=doc["signature"]; fp=sig["key_fingerprint_sha256"]
         if sig["algorithm"]!=ALG or not isinstance(payload,dict): raise PilotError("unsupported signature envelope")
-        record,key=trusted(registry,fp); key.verify(base64.b64decode(sig["value_base64"],validate=True),canonical(payload))
+        record,key=trusted(registry,fp,allow_revoked=True); key.verify(base64.b64decode(sig["value_base64"],validate=True),canonical(payload))
     except (KeyError,TypeError,ValueError,InvalidSignature) as exc: raise PilotError(f"signature verification failed: {exc}") from exc
     return record
 
