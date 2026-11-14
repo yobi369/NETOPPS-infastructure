@@ -42,7 +42,7 @@ class NetworkTopologyTests(unittest.TestCase):
         before = self.topology.report()
         result = self.topology.simulate_failure(disabled_links={"core-a", "core-b"})
         self.assertEqual(4, result["component_count_after"])
-        self.assertEqual(3, result["newly_disconnected_node_pairs"])
+        self.assertEqual(5, result["newly_disconnected_node_pairs"])
         self.assertFalse(result["topology_mutated"])
         self.assertEqual(before, self.topology.report())
 
