@@ -2,20 +2,19 @@ from __future__ import annotations
 
 import copy
 import json
-import pathlib
 import unittest
 
 from netopps.resilience import analyze_resilience
 from netopps.topology import NetworkTopology
 
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+ROOT = __file__.rsplit("/", 2)[0]
 
 
 class ResilienceTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.topology_doc = json.loads((ROOT / "examples/multi-site-topology.json").read_text())
-        self.dependency_doc = json.loads((ROOT / "examples/service-dependencies.json").read_text())
+        self.topology_doc = json.loads(open(f"{ROOT}/examples/multi-site-topology.json", encoding="utf-8").read())
+        self.dependency_doc = json.loads(open(f"{ROOT}/examples/service-dependencies.json", encoding="utf-8").read())
         self.topology = NetworkTopology.from_dict(self.topology_doc)
 
     def test_report_ranks_dependencies_and_recovery_deterministically(self) -> None:
