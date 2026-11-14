@@ -271,7 +271,7 @@ def main() -> int:
             else:
                 print(output)
             return 0
-        except (TopologyError, ValueError, TypeError) as exc:
+        except (OSError, TopologyError, ValueError, TypeError) as exc:
             print(json.dumps({"mode": "simulation-only", "valid": False, "error": str(exc)}, indent=2))
             return 2
 
