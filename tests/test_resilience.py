@@ -3,10 +3,9 @@ from __future__ import annotations
 import copy
 import json
 import unittest
-from pathlib import Path
-
 from netopps.resilience import analyze_resilience
 from netopps.topology import NetworkTopology
+from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
