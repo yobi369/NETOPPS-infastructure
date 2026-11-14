@@ -50,6 +50,25 @@ class ResilienceTests(unittest.TestCase):
         self.assertEqual(topology_before, self.topology_doc)
         self.assertEqual(dependencies_before, self.dependency_doc)
 
+
+    def test_candidate_dependency_model_compares_before_and_after_capacity(self) -> None:
+        candidate = json.loads(json.dumps(self.dependency_doc))
+        candidate["dependencies"].append({
+            "service_id": "identity-platform",
+            "depends_on_type": "node",
+            "depends_on_id": "branch-router",
+            "redundancy_group": "identity-ha",
+            "capacity_mbps": 250,
+        })
+        report = analyze_resilience(self.topology, self.dependency_doc, candidate)
+        comparison = report["candidate_comparison"]
+        self.assertTrue(comparison["candidate_supplied"])
+        self.assertLess(
+            comparison["candidate"]["modeled_capacity_gap_count"],
+            comparison["baseline"]["modeled_capacity_gap_count"],
+        )
+        self.assertLess(comparison["change"]["modeled_capacity_gaps"], 0)
+
     def test_recommendations_are_conditional_not_claimed_as_verified(self) -> None:
         report = analyze_resilience(self.topology, self.dependency_doc)
         for item in report["redundancy_recommendations"]:
