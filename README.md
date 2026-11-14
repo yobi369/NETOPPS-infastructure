@@ -53,6 +53,8 @@ netopps topology-risk examples/topology.json
 netopps topology-diff examples/topology.json examples/topology-candidate.json
 netopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json\nnetopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json --dependency-file examples/service-dependencies.json
 netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json
+# Compare a proposed dependency design against the baseline
+netopps resilience-report examples/multi-site-topology.json examples/service-dependencies.json --candidate-dependencies proposed-service-dependencies.json
 ```
 
 Exit codes: `0` means the requested checks passed; `1` means inventory findings, an incomplete subnet plan, an unreachable endpoint, or a truncated connectivity scope; `2` means input/arguments could not be safely processed.
