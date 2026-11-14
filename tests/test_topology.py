@@ -423,5 +423,56 @@ class NetworkTopologyTests(unittest.TestCase):
         self.assertEqual(["banking", "identity"],
                          [item["id"] for item in impact["affected_services"]])
 
+
+    def test_service_link_dependency_fails_when_endpoint_node_fails(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [{"id": "core", "site": "hq"}, {"id": "edge", "site": "branch"}],
+            "links": [{"id": "uplink", "source": "core", "target": "edge",
+                       "latency_ms": 1, "capacity_mbps": 100}],
+        })
+        graph = {
+            "schema_version": 1,
+            "services": [{"id": "branch-banking", "name": "Branch Banking",
+                          "criticality": "mission_critical"}],
+            "dependencies": [{"service_id": "branch-banking", "depends_on_type": "link",
+                              "depends_on_id": "uplink"}],
+        }
+
+        node_failure = analyze_service_dependencies(topology, graph, failed_nodes={"edge"})
+        service = node_failure["affected_services"][0]
+        self.assertEqual("unavailable", service["status"])
+        self.assertEqual("link_endpoint_failed", service["failed_dependencies"][0]["reason"])
+
+        site_failure = analyze_service_dependencies(
+            topology, graph, failed_nodes={"edge"}, failed_sites={"branch"}
+        )
+        self.assertEqual("unavailable", site_failure["affected_services"][0]["status"])
+        self.assertFalse(node_failure["topology_mutated"])
+        self.assertFalse(site_failure["topology_mutated"])
+        self.assertEqual(["core", "edge"], list(topology.node_ids))
+
+    def test_service_link_dependency_respects_disabled_baseline_link(self) -> None:
+        from netopps.services import analyze_service_dependencies
+
+        topology = NetworkTopology.from_dict({
+            "schema_version": 1,
+            "nodes": [{"id": "a"}, {"id": "b"}],
+            "links": [{"id": "ab", "source": "a", "target": "b",
+                       "latency_ms": 1, "capacity_mbps": 10, "enabled": False}],
+        })
+        graph = {
+            "schema_version": 1,
+            "services": [{"id": "svc", "name": "Service"}],
+            "dependencies": [{"service_id": "svc", "depends_on_type": "link",
+                              "depends_on_id": "ab"}],
+        }
+        result = analyze_service_dependencies(topology, graph)
+        self.assertEqual("unavailable", result["affected_services"][0]["status"])
+        self.assertEqual("link_failed", result["affected_services"][0]["failed_dependencies"][0]["reason"])
+
+
 if __name__ == "__main__":
     unittest.main()
