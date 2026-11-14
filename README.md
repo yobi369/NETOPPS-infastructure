@@ -94,6 +94,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 - `CONTRIBUTOR-LICENSE-AGREEMENT.md` — draft contributor rights agreement.
 - `docs/COMMERCIAL-LICENSE-AGREEMENT-TEMPLATE.md` — draft institutional commercial agreement.
 - `docs/COMMERCIAL-READINESS-CHECKLIST.md` — ownership, release, and customer-contract readiness gates.
+- `sales/` — institutional product overview, licensing options, proposal template, and discovery/pilot guide.
 
 ## Network digital twin (simulation-only)
 
