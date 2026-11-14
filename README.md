@@ -51,6 +51,7 @@ netopps topology-report examples/topology.json --disable-link core-to-a
 netopps topology-report examples/topology.json --traffic-file examples/traffic-demands.json
 netopps topology-risk examples/topology.json
 netopps topology-diff examples/topology.json examples/topology-candidate.json
+netopps topology-scenarios examples/multi-site-topology.json examples/failure-scenarios.json
 ```
 
 Exit codes: `0` means the requested checks passed; `1` means inventory findings, an incomplete subnet plan, an unreachable endpoint, or a truncated connectivity scope; `2` means input/arguments could not be safely processed.
@@ -71,6 +72,7 @@ The versioned interchange schema is in [schemas/inventory.schema.json](schemas/i
 - `docs/NETWORK-DIGITAL-TWIN.md` — simulation model, examples, limitations, and research path.
 - `docs/TRAFFIC-SIMULATION.md` — traffic demand assumptions and congestion estimates.
 - `docs/TOPOLOGY-RISK.md` — topology diff semantics and explainable risk scoring.
+- `docs/SCENARIO-PACKS.md` — repeatable node, link, and site outage scenarios.
 - `docs/SECURITY.md` — threat model and safe-use rules.
 - `docs/OPERATIONS.md` — repeatable local workflow and incident discipline.
 - `docs/ROADMAP.md` — staged delivery with verifiable acceptance criteria.
