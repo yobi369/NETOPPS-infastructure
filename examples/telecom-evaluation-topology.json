@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "nodes": [
+    {"id": "mobile-core-east", "role": "mobile-core", "site": "east-data-centre"},
+    {"id": "mobile-core-west", "role": "mobile-core", "site": "west-data-centre"},
+    {"id": "packet-gateway-east", "role": "packet-gateway", "site": "east-data-centre"},
+    {"id": "packet-gateway-west", "role": "packet-gateway", "site": "west-data-centre"},
+    {"id": "transport-east", "role": "transport-edge", "site": "east-data-centre"},
+    {"id": "transport-west", "role": "transport-edge", "site": "west-data-centre"},
+    {"id": "api-edge-east", "role": "service-edge", "site": "east-data-centre"},
+    {"id": "api-edge-west", "role": "service-edge", "site": "west-data-centre"},
+    {"id": "mobile-money-api", "role": "application", "site": "east-data-centre"},
+    {"id": "subscriber-data", "role": "data-service", "site": "west-data-centre"}
+  ],
+  "links": [
+    {"id": "east-core-to-gateway", "source": "mobile-core-east", "target": "packet-gateway-east", "latency_ms": 2, "capacity_mbps": 20000},
+    {"id": "west-core-to-gateway", "source": "mobile-core-west", "target": "packet-gateway-west", "latency_ms": 2, "capacity_mbps": 20000},
+    {"id": "east-gateway-to-transport", "source": "packet-gateway-east", "target": "transport-east", "latency_ms": 3, "capacity_mbps": 18000},
+    {"id": "west-gateway-to-transport", "source": "packet-gateway-west", "target": "transport-west", "latency_ms": 3, "capacity_mbps": 18000},
+    {"id": "east-transport-to-api", "source": "transport-east", "target": "api-edge-east", "latency_ms": 4, "capacity_mbps": 12000},
+    {"id": "west-transport-to-api", "source": "transport-west", "target": "api-edge-west", "latency_ms": 4, "capacity_mbps": 12000},
+    {"id": "api-to-mobile-money", "source": "api-edge-east", "target": "mobile-money-api", "latency_ms": 2, "capacity_mbps": 8000},
+    {"id": "core-to-subscriber-data", "source": "mobile-core-west", "target": "subscriber-data", "latency_ms": 2, "capacity_mbps": 10000},
+    {"id": "east-west-backbone", "source": "transport-east", "target": "transport-west", "latency_ms": 12, "capacity_mbps": 10000}
+  ]
+}
